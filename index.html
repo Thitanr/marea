@@ -44,6 +44,43 @@
     <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body class="theme-deep-sea mode-right-hand">
+    <!-- Onboarding Wizard Overlay -->
+    <div id="onboarding-overlay" class="onboarding-overlay" role="dialog" aria-modal="true" aria-label="Guía de bienvenida">
+        <div class="onboarding-glass">
+            <div class="onboarding-steps-dots">
+                <span class="onb-dot active" data-onb-step="0"></span>
+                <span class="onb-dot" data-onb-step="1"></span>
+                <span class="onb-dot" data-onb-step="2"></span>
+            </div>
+            <div class="onboarding-card" id="onb-step-0">
+                <div class="onb-icon-large">🌊</div>
+                <h2 class="onb-title" data-i18n="onboarding.welcome">Bienvenida</h2>
+                <h3 class="onb-subtitle" data-i18n="onboarding.step1_title">Estás en Marea</h3>
+                <p class="onb-text" data-i18n="onboarding.step1_text">Marea es una herramienta de regulación sensorial y validación radical...</p>
+                <div class="onb-buttons">
+                    <button class="onb-btn onb-btn-next" data-i18n="common.next">Siguiente</button>
+                </div>
+            </div>
+            <div class="onboarding-card hidden" id="onb-step-1">
+                <div class="onb-icon-large">🧭</div>
+                <h2 class="onb-title" data-i18n="onboarding.step2_title">Cómo navegar</h2>
+                <p class="onb-text onb-text-nav" data-i18n="onboarding.step2_text">🗣️ Hablar — Tablero CAA...</p>
+                <div class="onb-buttons">
+                    <button class="onb-btn onb-btn-prev" data-i18n="common.prev">Atrás</button>
+                    <button class="onb-btn onb-btn-next" data-i18n="common.next">Siguiente</button>
+                </div>
+            </div>
+            <div class="onboarding-card hidden" id="onb-step-2">
+                <div class="onb-icon-large">🔒</div>
+                <h2 class="onb-title" data-i18n="onboarding.step3_title">Privacidad y sin conexión</h2>
+                <p class="onb-text" data-i18n="onboarding.step3_text">Marea funciona 100% sin internet...</p>
+                <div class="onb-buttons">
+                    <button class="onb-btn onb-btn-prev" data-i18n="common.prev">Atrás</button>
+                    <button class="onb-btn onb-btn-start" data-i18n="common.start">Comenzar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="app-container lana-matrix-grid">
         
         <!-- LANA Powered By -->
@@ -449,6 +486,13 @@
                         </div>
 
                         <!-- Borrar Datos -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.restart_onboarding">Reiniciar guía</strong>
+                                <span data-i18n="settings.restart_onboarding_desc">Volver a mostrar la guía de bienvenida</span>
+                            </div>
+                            <button id="restart-onboarding-btn" class="btn-secondary" data-i18n="settings.restart_onboarding">Reiniciar guía</button>
+                        </div>
                         <div class="settings-item warning-zone">
                             <div class="setting-desc">
                                 <strong data-i18n="settings.reset_title">Limpieza de Datos</strong>
@@ -590,7 +634,7 @@
 
         <!-- Bottom Tab Navigation Bar -->
         <nav class="app-navbar" role="navigation" aria-label="Menú principal">
-            <button class="nav-item active" id="nav-voz" data-tab="voz" aria-label="Voz de Marea (Hablar)" aria-current="page">
+            <button class="nav-item active" id="nav-voz" data-tab="voz" data-i18n-aria="nav.voz" aria-label="Hablar" aria-current="page">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -599,7 +643,7 @@
                 </svg>
                 <span class="nav-label" data-i18n="nav.voz">Voz</span>
             </button>
-            <button class="nav-item" id="nav-ancla" data-tab="ancla" aria-label="El Ancla (Grounding)">
+            <button class="nav-item" id="nav-ancla" data-tab="ancla" data-i18n-aria="nav.ancla" aria-label="Calmar">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="16"></line>
@@ -607,33 +651,33 @@
                 </svg>
                 <span class="nav-label" data-i18n="nav.ancla">Ancla</span>
             </button>
-            <button class="nav-item" id="nav-seguridad" data-tab="seguridad" aria-label="Anclajes de seguridad">
+            <button class="nav-item" id="nav-seguridad" data-tab="seguridad" data-i18n-aria="nav.seguridad" aria-label="Plan Crisis">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
                 <span class="nav-label" data-i18n="nav.seguridad">Anclajes</span>
             </button>
-            <button class="nav-item" id="nav-diario" data-tab="diario" aria-label="Diario perceptivo">
+            <button class="nav-item" id="nav-diario" data-tab="diario" data-i18n-aria="nav.diario" aria-label="Diario Sens.">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 20h9"></path>
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                 </svg>
                 <span class="nav-label" data-i18n="nav.diario">Diario</span>
             </button>
-            <button class="nav-item" id="nav-sintonia" data-tab="sintonia" aria-label="Sintonía — espacio autista">
+            <button class="nav-item" id="nav-sintonia" data-tab="sintonia" data-i18n-aria="nav.sintonia" aria-label="Autismo">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 2C12 2 4 9 4 14a8 8 0 0 0 16 0c0-5-8-12-8-12z"/>
                     <path d="M8 14 C10 11 11 16 12 14 C13 12 14 16 16 14" stroke-width="1.5" opacity="0.7"/>
                 </svg>
                 <span class="nav-label" data-i18n="nav.sintonia">Sintonía</span>
             </button>
-            <button class="nav-item" id="nav-refugio" data-tab="refugio" aria-label="El Refugio (Chat)">
+            <button class="nav-item" id="nav-refugio" data-tab="refugio" data-i18n-aria="nav.refugio" aria-label="Chat Apoyo">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
                 <span class="nav-label" data-i18n="nav.refugio">Refugio</span>
             </button>
-            <button class="nav-item" id="nav-settings" data-tab="settings" aria-label="Configuración">
+            <button class="nav-item" id="nav-settings" data-tab="settings" data-i18n-aria="nav.settings" aria-label="Ajustes">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>

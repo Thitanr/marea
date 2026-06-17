@@ -77,7 +77,15 @@ function boot() {
         selectTheme: document.getElementById("setting-theme"),
         toggleSensoryMode: document.getElementById("setting-sensory-mode"),
         btnSyncSupabase: document.getElementById("btn-sync-supabase"),
-        btnResetData: document.getElementById("btn-reset-data")
+        btnResetData: document.getElementById("btn-reset-data"),
+
+        // Onboarding
+        onboardingOverlay: document.getElementById("onboarding-overlay"),
+        onbStep0: document.getElementById("onb-step-0"),
+        onbStep1: document.getElementById("onb-step-1"),
+        onbStep2: document.getElementById("onb-step-2"),
+        onbDots: document.querySelectorAll(".onb-dot"),
+        restartOnboardingBtn: document.getElementById("restart-onboarding-btn")
     };
 
     // 3. i18n Translation Engine
@@ -691,6 +699,16 @@ function boot() {
                 window.location.reload();
             }
         });
+
+        // Restart onboarding guide
+        if (elements.restartOnboardingBtn) {
+            elements.restartOnboardingBtn.addEventListener("click", () => {
+                if (window.restartOnboarding) {
+                    window.restartOnboarding();
+                    showToast(t("onboarding.welcome"));
+                }
+            });
+        }
     }
 
     function applyHandMode() {
@@ -1003,9 +1021,103 @@ function boot() {
         });
     }
 
+    // 13b. Onboarding Wizard — first-visit welcome guide
+    function initOnboarding() {
+        if (!elements.onboardingOverlay) return;
+
+        const ONBOARDING_KEY = 'marea_onboarded';
+
+        // Check if already onboarded
+        if (localStorage.getItem(ONBOARDING_KEY) === '1') {
+            elements.onboardingOverlay.classList.add('hidden');
+            return;
+        }
+
+        // Show overlay & translate its content
+        elements.onboardingOverlay.classList.remove('hidden');
+        translateDOM(); // translate onboarding i18n
+        showOnboardingStep(0);
+
+        // --- Step navigation ---
+        function showOnboardingStep(stepIndex) {
+            const cards = [elements.onbStep0, elements.onbStep1, elements.onbStep2];
+            cards.forEach((card, i) => {
+                if (i === stepIndex) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Update dots
+            elements.onbDots.forEach((dot, i) => {
+                dot.classList.remove('active', 'done');
+                if (i === stepIndex) dot.classList.add('active');
+                else if (i < stepIndex) dot.classList.add('done');
+            });
+        }
+
+        // --- Wire buttons ---
+        // Step 0: "Siguiente" → step 1
+        const btnNext0 = elements.onbStep0.querySelector('.onb-btn-next');
+        if (btnNext0) {
+            btnNext0.addEventListener('click', () => showOnboardingStep(1));
+        }
+
+        // Step 1: "Anterior" + "Siguiente"
+        const btnPrev1 = elements.onbStep1.querySelector('.onb-btn-prev');
+        const btnNext1 = elements.onbStep1.querySelector('.onb-btn-next');
+        if (btnPrev1) {
+            btnPrev1.addEventListener('click', () => showOnboardingStep(0));
+        }
+        if (btnNext1) {
+            btnNext1.addEventListener('click', () => showOnboardingStep(2));
+        }
+
+        // Step 2: "Anterior" + "Comenzar"
+        const btnPrev2 = elements.onbStep2.querySelector('.onb-btn-prev');
+        const btnStart = elements.onbStep2.querySelector('.onb-btn-start');
+        if (btnPrev2) {
+            btnPrev2.addEventListener('click', () => showOnboardingStep(1));
+        }
+        if (btnStart) {
+            btnStart.addEventListener('click', () => {
+                localStorage.setItem(ONBOARDING_KEY, '1');
+                elements.onboardingOverlay.classList.add('fade-out');
+                // Remove overlay after animation
+                setTimeout(() => {
+                    elements.onboardingOverlay.classList.add('hidden');
+                    elements.onboardingOverlay.classList.remove('fade-out');
+                }, 380);
+            });
+        }
+    }
+
+    // 13c. Restart onboarding (called from Settings button)
+    function restartOnboarding() {
+        localStorage.removeItem('marea_onboarded');
+        if (elements.onboardingOverlay) {
+            elements.onboardingOverlay.classList.remove('hidden', 'fade-out');
+            translateDOM(); // re-translate in case lang changed
+            // Reset to step 0
+            const cards = [elements.onbStep0, elements.onbStep1, elements.onbStep2];
+            cards.forEach((card, i) => {
+                if (i === 0) card.classList.remove('hidden');
+                else card.classList.add('hidden');
+            });
+            elements.onbDots.forEach((dot, i) => {
+                dot.classList.remove('active', 'done');
+                if (i === 0) dot.classList.add('active');
+            });
+        }
+    }
+    // Expose restartOnboarding globally for the Settings button onclick
+    window.restartOnboarding = restartOnboarding;
+
     // 14. Initialize App Lifecycle
     translateApp();
     setupEventListeners();
+    initOnboarding();
     initSettings();
     initChat();
     loadSafetyPlan();
