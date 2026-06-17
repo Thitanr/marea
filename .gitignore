@@ -30,3 +30,6 @@ playwright-report/
 .env
 .env.local
 .env.*.local
+
+# Wrangler
+.wrangler/
