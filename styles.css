@@ -1,0 +1,1035 @@
+/* ==========================================================================
+   MAREA - CSS STYLESHEET
+   Premium, Responsive, Glassmorphic & Accessible UI
+   ========================================================================== */
+
+/* 1. Global Setup & Design System Tokens */
+:root {
+    --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-quick: all 0.2s ease;
+    
+    /* Default: Deep Sea (Dark Mode) */
+    --bg-app: #03050c;
+    --bg-card: rgba(12, 17, 34, 0.65);
+    --bg-card-hover: rgba(18, 25, 50, 0.85);
+    --border-glow: rgba(0, 242, 254, 0.15);
+    --border-glow-focus: rgba(0, 242, 254, 0.5);
+    
+    --text-primary: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dark: #0f172a;
+    
+    --accent-glow: #00f2fe;
+    --accent-primary: #00f2fe;
+    --accent-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    --accent-secondary: #c084fc;
+    
+    --danger: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.2);
+    
+    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --blur-glass: blur(16px);
+}
+
+/* Theme: Warm Sand (Calming Light Mode) */
+.theme-warm-sand {
+    --bg-app: #faf8f5;
+    --bg-card: rgba(255, 255, 255, 0.75);
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    --border-glow: rgba(120, 110, 90, 0.15);
+    --border-glow-focus: rgba(120, 110, 90, 0.5);
+    
+    --text-primary: #2d2a26;
+    --text-muted: #6f6b64;
+    --text-dark: #faf8f5;
+    
+    --accent-glow: #d97706;
+    --accent-primary: #d97706;
+    --accent-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    --accent-secondary: #8b5cf6;
+    
+    --shadow-premium: 0 8px 32px 0 rgba(120, 110, 90, 0.15);
+    --blur-glass: blur(12px);
+}
+
+/* Theme: High Contrast */
+.theme-high-contrast {
+    --bg-app: #000000;
+    --bg-card: #000000;
+    --bg-card-hover: #111111;
+    --border-glow: #ffffff;
+    --border-glow-focus: #ffff00;
+    
+    --text-primary: #ffffff;
+    --text-muted: #dddddd;
+    --text-dark: #000000;
+    
+    --accent-glow: #ffff00;
+    --accent-primary: #ffff00;
+    --accent-gradient: none;
+    --accent-secondary: #00ffff;
+    
+    --shadow-premium: none;
+    --blur-glass: none;
+}
+
+/* Theme: Monochrome (Zero Color Stimulation) */
+.theme-monochrome {
+    --bg-app: #090909;
+    --bg-card: rgba(20, 20, 20, 0.8);
+    --bg-card-hover: rgba(30, 30, 30, 0.9);
+    --border-glow: rgba(255, 255, 255, 0.1);
+    --border-glow-focus: rgba(255, 255, 255, 0.4);
+    
+    --text-primary: #f5f5f5;
+    --text-muted: #888888;
+    --text-dark: #000000;
+    
+    --accent-glow: #ffffff;
+    --accent-primary: #ffffff;
+    --accent-gradient: none;
+    --accent-secondary: #cccccc;
+    
+    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --blur-glass: blur(16px);
+}
+
+/* 2. Global Reset & Layout */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* PWA App Container */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100dvh; /* Dynamic Viewport Height for mobile browsers */
+    max-width: 500px; /* Looks beautiful on desktop as a phone simulator */
+    background-color: var(--bg-app);
+    border-left: 1px solid var(--border-glow);
+    border-right: 1px solid var(--border-glow);
+    position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+}
+
+@media (min-width: 501px) {
+    .app-container {
+        border-radius: 24px;
+        height: 90vh;
+        max-height: 850px;
+    }
+}
+
+/* 3. Header & Header Elements */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-glow);
+    background: rgba(var(--bg-app), 0.5);
+    backdrop-filter: var(--blur-glass);
+    z-index: 10;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    box-shadow: 0 0 10px var(--accent-glow);
+    display: inline-block;
+}
+
+.header-logo h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: var(--text-primary);
+    -webkit-background-clip: text;
+}
+
+.quick-exit-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--danger-glow);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.quick-exit-btn:hover {
+    background: var(--danger);
+    color: var(--text-dark);
+}
+
+/* 4. Navigation Bar */
+.app-navbar {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-glow);
+    background: rgba(var(--bg-app), 0.85);
+    backdrop-filter: var(--blur-glass);
+    z-index: 10;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    cursor: pointer;
+    flex: 1;
+    transition: var(--transition-quick);
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.2px;
+    transition: transform 0.2s ease;
+}
+
+.nav-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.nav-item.active {
+    color: var(--accent-primary);
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.15);
+}
+
+/* 5. Main Tab & Panel Routing */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    padding: 16px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-panel {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.tab-panel.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 6. Refugio (Empathetic Dialog Chat) */
+.chat-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 16px;
+}
+
+.chat-msg {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    animation: scaleIn 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.chat-msg.system {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-msg.user {
+    background: var(--accent-gradient);
+    color: var(--text-dark);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    font-weight: 500;
+}
+
+.chat-typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    align-self: flex-start;
+}
+
+.dots-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--accent-primary);
+    position: relative;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.7); }
+    70% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 10px rgba(0, 242, 254, 0); }
+    100% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(0, 242, 254, 0); }
+}
+
+.chat-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(var(--bg-app), 0.9);
+    padding-top: 10px;
+}
+
+.chat-quick-responses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.quick-response-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    color: var(--text-primary);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.quick-response-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-primary);
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 8px;
+}
+
+#chat-text-input {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    color: var(--text-primary);
+    padding: 12px 16px;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+}
+
+#chat-text-input:focus {
+    outline: none;
+    border-color: var(--border-glow-focus);
+}
+
+/* 7. Buttons & Generic Inputs */
+.btn-primary {
+    background: var(--accent-gradient);
+    color: var(--text-dark);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: var(--transition-quick);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    color: var(--text-primary);
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: var(--transition-quick);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-glow-focus);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: var(--text-dark);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.round-icon-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    padding: 0;
+}
+
+/* 8. Ancla Hub (Breathe, Grounding, TIPP) */
+.anchor-hub {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.anchor-selector {
+    display: flex;
+    border: 1px solid var(--border-glow);
+    border-radius: 16px;
+    padding: 4px;
+    margin-bottom: 20px;
+    background: var(--bg-card);
+}
+
+.anchor-subtab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 10px 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    font-family: var(--font-sans);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.anchor-subtab-btn.active {
+    background: var(--accent-gradient);
+    color: var(--text-dark);
+}
+
+.anchor-content {
+    flex: 1;
+    position: relative;
+}
+
+.anchor-subpanel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    animation: fadeIn 0.3s ease;
+}
+
+.anchor-subpanel.active {
+    display: flex;
+}
+
+/* Box Breathing elements */
+.breathing-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
+}
+
+.breathing-instruction {
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text-primary);
+    min-height: 2.4rem;
+}
+
+.breathing-ring-wrapper {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.breathing-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,242,254,0.15) 0%, rgba(79,172,254,0.05) 70%);
+    border: 2px dashed var(--accent-primary);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+    transform: scale(0.6);
+    transition: transform 4s linear, box-shadow 4s linear, background-color 4s linear;
+}
+
+.breathing-ring-text {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    z-index: 2;
+}
+
+/* 5-4-3-2-1 Grounding Wizard */
+.grounding-wizard {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+.grounding-step-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    padding: 24px;
+    border-radius: 20px;
+    width: 100%;
+    text-align: center;
+    backdrop-filter: var(--blur-glass);
+}
+
+.grounding-num {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.grounding-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.grounding-prompt {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.grounding-nav {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+}
+
+/* TIPP Cold Water Timer */
+.tipp-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    padding: 24px;
+    border-radius: 20px;
+    width: 100%;
+    text-align: center;
+    backdrop-filter: var(--blur-glass);
+}
+
+.tipp-container p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 14px 0 24px 0;
+}
+
+.timer-display {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    font-variant-numeric: tabular-nums;
+}
+
+.tipp-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* 9. Voz de Marea (CAA / AAC Board) */
+.aac-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 16px;
+}
+
+.aac-output-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    border-radius: 20px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.aac-speech-text {
+    width: 100%;
+    height: 70px;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    resize: none;
+}
+
+.aac-speech-text:focus {
+    outline: none;
+}
+
+.aac-output-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.aac-board-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.aac-categories {
+    display: flex;
+    gap: 6px;
+}
+
+.aac-cat-btn {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    color: var(--text-muted);
+    padding: 8px 0;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.aac-cat-btn.active {
+    background: rgba(var(--accent-primary), 0.1);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.aac-grid-container {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding-bottom: 10px;
+}
+
+.aac-card-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    border-radius: 16px;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition-quick);
+    text-align: center;
+}
+
+.aac-card-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.aac-card-icon {
+    font-size: 1.6rem;
+}
+
+.aac-card-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* 10. Safety Plan */
+.safety-plan-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.safety-header h2 {
+    font-size: 1.4rem;
+}
+
+.safety-header p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.safety-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.safety-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: var(--blur-glass);
+}
+
+.safety-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 16px;
+    color: var(--accent-primary);
+}
+
+.anchor-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.anchor-field label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.safe-input {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border-glow);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+}
+
+.safe-input:focus {
+    outline: none;
+    border-color: var(--border-glow-focus);
+}
+
+textarea.safe-input {
+    height: 70px;
+    resize: none;
+}
+
+.card-helplines p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.helpline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.helpline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.1);
+    border: 1px solid var(--border-glow);
+    padding: 10px 14px;
+    border-radius: 12px;
+}
+
+.helpline-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.helpline-info strong {
+    font-size: 0.9rem;
+}
+
+.helpline-info span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.call-btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+}
+
+/* 11. Perceptive Journal */
+.journal-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.journal-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.slider-val {
+    color: var(--accent-primary);
+}
+
+.journal-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-glow);
+    outline: none;
+}
+
+.journal-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.canvas-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.dynamic-canvas-container {
+    width: 220px;
+    height: 220px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid var(--border-glow);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#sensor-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.canvas-caption {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* 12. Settings Panel */
+.settings-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.settings-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setting-desc {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.setting-desc strong {
+    font-size: 0.92rem;
+}
+
+.setting-desc span {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.settings-select {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border-glow);
+    color: var(--text-primary);
+    padding: 10px;
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+}
+
+.settings-select:focus {
+    outline: none;
+    border-color: var(--border-glow-focus);
+}
+
+.warning-zone {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* 13. One-Handed Layout Modes */
+
+/* Left-handed Mode */
+.mode-left-hand .chat-controls,
+.mode-left-hand .aac-layout,
+.mode-left-hand .anchor-hub {
+    /* Shifting interactive control focus left-ward */
+}
+
+.mode-left-hand .aac-grid-container {
+    direction: rtl; /* Puts primary items on the left side of columns */
+}
+.mode-left-hand .aac-grid-container > * {
+    direction: ltr;
+}
+
+/* Right-handed Mode */
+.mode-right-hand .aac-grid-container {
+    direction: ltr;
+}
+
+/* Center Mode (Regular Grid) */
+.mode-center .aac-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 380px) {
+    .aac-grid-container {
+        /* On small phones, fit items better */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

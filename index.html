@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Marea - Herramienta de Dignidad y Sostén</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Marea">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#060913">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- App Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-deep-sea mode-right-hand">
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <span class="logo-circle" aria-hidden="true"></span>
+                <h1>Marea</h1>
+            </div>
+            <button id="quick-exit-btn" class="quick-exit-btn" aria-label="Salida rápida / Cerrar app">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                </svg>
+                <span data-i18n="header.exit">Salir</span>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="main-content">
+            
+            <!-- 1. EL REFUGIO (CHAT) -->
+            <section id="tab-refugio" class="tab-panel active" role="tabpanel" aria-labelledby="nav-refugio">
+                <div class="chat-wrapper">
+                    <div id="chat-messages" class="chat-messages" aria-live="polite">
+                        <!-- Dynamic conversation entries will go here -->
+                    </div>
+                    <div id="chat-typing-indicator" class="chat-typing-indicator hidden" aria-hidden="true">
+                        <div class="dots-pulse"></div>
+                        <span data-i18n="refugio.still_here">Sigo aquí. No tienes que decir nada...</span>
+                    </div>
+                    <div class="chat-controls">
+                        <div class="chat-quick-responses" id="chat-quick-responses">
+                            <!-- Populated dynamically by app.js -->
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-text-input" placeholder="Escribe aquí si lo deseas..." aria-label="Mensaje para el refugio" data-i18n-placeholder="refugio.input_placeholder">
+                            <button id="chat-send-btn" class="btn-primary round-icon-btn" aria-label="Enviar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. EL ANCLA (GROUNDING) -->
+            <section id="tab-ancla" class="tab-panel" role="tabpanel" aria-labelledby="nav-ancla">
+                <div class="anchor-hub">
+                    <div class="anchor-selector">
+                        <button class="anchor-subtab-btn active" id="btn-subtab-breathe" data-i18n="anchor.breathe_tab">Respirar</button>
+                        <button class="anchor-subtab-btn" id="btn-subtab-grounding" data-i18n="anchor.grounding_tab">Grounding (54321)</button>
+                        <button class="anchor-subtab-btn" id="btn-subtab-tipp" data-i18n="anchor.tipp_tab">Agua Fría (TIPP)</button>
+                    </div>
+
+                    <div class="anchor-content">
+                        <!-- Box Breathing -->
+                        <div id="subtab-breathe" class="anchor-subpanel active">
+                            <div class="breathing-container">
+                                <h3 id="breathing-instruction" class="breathing-instruction" data-i18n="anchor.breath_ready">Pulsa para iniciar respiración de caja</h3>
+                                <div class="breathing-ring-wrapper">
+                                    <div id="breathing-ring" class="breathing-ring"></div>
+                                    <div id="breathing-ring-text" class="breathing-ring-text">4s</div>
+                                </div>
+                                <div class="breathing-audio-controls">
+                                    <button id="toggle-ocean-sound" class="btn-secondary">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
+                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                        </svg>
+                                        <span data-i18n="anchor.sound_btn">Sonido de Mar</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5-4-3-2-1 Grounding -->
+                        <div id="subtab-grounding" class="anchor-subpanel">
+                            <div class="grounding-wizard">
+                                <div id="grounding-step-container">
+                                    <!-- Dynamic content -->
+                                </div>
+                                <div class="grounding-nav">
+                                    <button id="grounding-prev-btn" class="btn-secondary hidden" data-i18n="common.prev">Atrás</button>
+                                    <button id="grounding-next-btn" class="btn-primary" data-i18n="common.start">Comenzar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TIPP Cold Water -->
+                        <div id="subtab-tipp" class="anchor-subpanel">
+                            <div class="tipp-container">
+                                <h3 data-i18n="tipp.title">Reinicio de Emergencia (Vago)</h3>
+                                <p data-i18n="tipp.description">Llenar un recipiente con agua muy fría o mojar un paño. Inclínate hacia adelante y pon tu cara en el agua (especialmente el área de los ojos) sosteniendo la respiración durante 30 segundos. Esto baja tu ritmo cardíaco drásticamente de forma física.</p>
+                                <div class="timer-display" id="tipp-timer">05:00</div>
+                                <div class="tipp-controls">
+                                    <button id="btn-tipp-start" class="btn-primary" data-i18n="tipp.start">Iniciar 5 min</button>
+                                    <button id="btn-tipp-reset" class="btn-secondary hidden" data-i18n="tipp.reset">Reiniciar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. VOZ DE MAREA (CAA / AAC) -->
+            <section id="tab-voz" class="tab-panel" role="tabpanel" aria-labelledby="nav-voz">
+                <div class="aac-layout">
+                    <!-- Text Pad for output -->
+                    <div class="aac-output-container">
+                        <textarea id="aac-speech-text" class="aac-speech-text" placeholder="Toca los botones para hablar o escribe aquí..." aria-label="Texto a decir en voz alta" data-i18n-placeholder="aac.output_placeholder"></textarea>
+                        <div class="aac-output-controls">
+                            <button id="btn-aac-clear" class="btn-secondary" aria-label="Borrar texto" data-i18n="aac.clear_btn">Borrar</button>
+                            <button id="btn-aac-speak" class="btn-primary" aria-label="Hablar en voz alta">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                </svg>
+                                <span data-i18n="aac.speak_btn">Decir</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AAC Interactive Board -->
+                    <div class="aac-board-wrapper">
+                        <!-- Quick category selector -->
+                        <div class="aac-categories" role="tablist">
+                            <button class="aac-cat-btn active" data-category="needs" role="tab" aria-selected="true" data-i18n="aac.cat_needs">Necesidades</button>
+                            <button class="aac-cat-btn" data-category="social" role="tab" aria-selected="false" data-i18n="aac.cat_social">Social</button>
+                            <button class="aac-cat-btn" data-category="emotions" role="tab" aria-selected="false" data-i18n="aac.cat_emotions">Sentir</button>
+                        </div>
+
+                        <!-- Grid content -->
+                        <div class="aac-grid-container" id="aac-grid">
+                            <!-- Populated dynamically based on category -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. PLAN DE SEGURIDAD -->
+            <section id="tab-seguridad" class="tab-panel" role="tabpanel" aria-labelledby="nav-seguridad">
+                <div class="safety-plan-wrapper">
+                    <div class="safety-header">
+                        <h2 data-i18n="safety.title">Mis Anclajes de Seguridad</h2>
+                        <p data-i18n="safety.subtitle">Configura estos recursos en momentos de calma para tenerlos listos en momentos de tormenta.</p>
+                    </div>
+
+                    <div class="safety-grid">
+                        <!-- Anchors Input / Viewer -->
+                        <div class="safety-card card-anchors">
+                            <h3 data-i18n="safety.anchors_title">Qué me sujeta al mundo</h3>
+                            <div class="anchor-field">
+                                <label for="input-anchor-person" data-i18n="safety.person_label">Persona segura (que no me juzga):</label>
+                                <input type="text" id="input-anchor-person" class="safe-input" placeholder="Nombre y contacto...">
+                            </div>
+                            <div class="anchor-field">
+                                <label for="input-anchor-song" data-i18n="safety.song_label">Canción que me estabiliza:</label>
+                                <input type="text" id="input-anchor-song" class="safe-input" placeholder="Título y artista...">
+                            </div>
+                            <div class="anchor-field">
+                                <label for="input-anchor-memory" data-i18n="safety.memory_label">Un recuerdo o lugar que me transmite paz:</label>
+                                <textarea id="input-anchor-memory" class="safe-input" placeholder="Describe brevemente..."></textarea>
+                            </div>
+                            <button id="btn-save-safety" class="btn-primary" data-i18n="safety.save_btn">Guardar Anclajes</button>
+                        </div>
+
+                        <!-- Helplines Directory -->
+                        <div class="safety-card card-helplines">
+                            <h3 data-i18n="safety.helplines_title">Líneas de Ayuda Directa</h3>
+                            <p data-i18n="safety.helplines_note">Apoyo profesional, gratuito y 100% confidencial.</p>
+                            <div class="helpline-list">
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>España: 024</strong>
+                                        <span data-i18n="safety.helpline_es">Atención a la conducta suicida</span>
+                                    </div>
+                                    <a href="tel:024" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>España: 717 003 717</strong>
+                                        <span data-i18n="safety.helpline_hope">Teléfono de la Esperanza</span>
+                                    </div>
+                                    <a href="tel:717003717" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>USA & LATAM: 988</strong>
+                                        <span data-i18n="safety.helpline_988">Línea de Crisis (Suicide & Crisis Lifeline)</span>
+                                    </div>
+                                    <a href="tel:988" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>México: 800 911 2000</strong>
+                                        <span data-i18n="safety.helpline_mx">Línea de la Vida</span>
+                                    </div>
+                                    <a href="tel:8009112000" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. DIARIO PERCEPTIVO -->
+            <section id="tab-diario" class="tab-panel" role="tabpanel" aria-labelledby="nav-diario">
+                <div class="journal-wrapper">
+                    <div class="journal-left">
+                        <h2 data-i18n="journal.title">Lienzo Perceptivo Diario</h2>
+                        <p data-i18n="journal.subtitle">No necesitas narrar qué pasó. Expresa cómo sientes el mundo físicamente.</p>
+                        
+                        <div class="journal-sliders">
+                            <div class="slider-group">
+                                <div class="slider-labels">
+                                    <span data-i18n="journal.light">Sensibilidad a la Luz</span>
+                                    <span id="label-val-light" class="slider-val">Normal</span>
+                                </div>
+                                <input type="range" id="slider-light" min="1" max="5" value="3" class="journal-slider">
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-labels">
+                                    <span data-i18n="journal.sound">Sensibilidad al Sonido</span>
+                                    <span id="label-val-sound" class="slider-val">Normal</span>
+                                </div>
+                                <input type="range" id="slider-sound" min="1" max="5" value="3" class="journal-slider">
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-labels">
+                                    <span data-i18n="journal.pressure">Presión Interna (Ansiedad)</span>
+                                    <span id="label-val-pressure" class="slider-val">Media</span>
+                                </div>
+                                <input type="range" id="slider-pressure" min="1" max="5" value="3" class="journal-slider">
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-labels">
+                                    <span data-i18n="journal.pain">Molestia o Dolor Físico</span>
+                                    <span id="label-val-pain" class="slider-val">Ninguno</span>
+                                </div>
+                                <input type="range" id="slider-pain" min="1" max="5" value="1" class="journal-slider">
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-labels">
+                                    <span data-i18n="journal.rumination">Bucle de Rumiación ("Y si")</span>
+                                    <span id="label-val-rumination" class="slider-val">Controlado</span>
+                                </div>
+                                <input type="range" id="slider-rumination" min="1" max="5" value="2" class="journal-slider">
+                            </div>
+                        </div>
+
+                        <button id="btn-save-journal" class="btn-primary" data-i18n="journal.save_btn">Guardar Lienzo de Hoy</button>
+                    </div>
+
+                    <div class="journal-right">
+                        <div class="canvas-card">
+                            <h3 data-i18n="journal.canvas_title">Tu Huella Sensorial</h3>
+                            <div class="dynamic-canvas-container">
+                                <canvas id="sensor-canvas" width="300" height="300" aria-label="Visualización de tu estado sensorial"></canvas>
+                            </div>
+                            <p class="canvas-caption" data-i18n="journal.canvas_caption">Este patrón abstracto es tu estado actual. Guardado en tu dispositivo.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. CONFIGURACIÓN -->
+            <section id="tab-settings" class="tab-panel" role="tabpanel" aria-labelledby="nav-settings">
+                <div class="settings-wrapper">
+                    <h2 data-i18n="settings.title">Configuración y Accesibilidad</h2>
+                    
+                    <div class="settings-list">
+                        <!-- Idioma -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.lang_title">Idioma (Language)</strong>
+                                <span data-i18n="settings.lang_desc">Configura la app en tu lengua de preferencia.</span>
+                            </div>
+                            <select id="setting-language" class="settings-select">
+                                <option value="es">Español</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+
+                        <!-- Orientación una mano -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.hand_title">Distribución Unilateral (Móviles)</strong>
+                                <span data-i18n="settings.hand_desc">Ajusta los controles para alcanzarlos fácilmente con un solo pulgar.</span>
+                            </div>
+                            <select id="setting-hand-mode" class="settings-select">
+                                <option value="right" data-i18n="settings.hand_right">Mano Derecha (Predeterminado)</option>
+                                <option value="left" data-i18n="settings.hand_left">Mano Izquierda</option>
+                                <option value="center" data-i18n="settings.hand_center">Centrado (Pantalla Completa)</option>
+                            </select>
+                        </div>
+
+                        <!-- Tema Visual -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.theme_title">Filtro y Contraste Visual</strong>
+                                <span data-i18n="settings.theme_desc">Ajusta los colores para evitar hipersensibilidad o mejorar la visibilidad.</span>
+                            </div>
+                            <select id="setting-theme" class="settings-select">
+                                <option value="deep-sea" data-i18n="settings.theme_dark">Marea Oscura (Bioluminiscente)</option>
+                                <option value="warm-sand" data-i18n="settings.theme_light">Marea Clara (Arena Suave)</option>
+                                <option value="high-contrast" data-i18n="settings.theme_contrast">Alto Contraste</option>
+                                <option value="monochrome" data-i18n="settings.theme_mono">Monocromo (Silencio de Color)</option>
+                            </select>
+                        </div>
+
+                        <!-- Backup con Supabase -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.sync_title">Copia de Seguridad en la Nube (Opcional)</strong>
+                                <span data-i18n="settings.sync_desc">Crea una cuenta en Supabase para sincronizar tus diarios y anclajes. Sin datos, esta app seguirá siendo 100% local.</span>
+                            </div>
+                            <button id="btn-sync-supabase" class="btn-secondary" data-i18n="settings.sync_btn">Conectar Cuenta</button>
+                        </div>
+
+                        <!-- Borrar Datos -->
+                        <div class="settings-item warning-zone">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.reset_title">Limpieza de Datos</strong>
+                                <span data-i18n="settings.reset_desc">Elimina de forma irreversible toda la información guardada localmente.</span>
+                            </div>
+                            <button id="btn-reset-data" class="btn-danger" data-i18n="settings.reset_btn">Borrar Todo</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Tab Navigation Bar -->
+        <nav class="app-navbar" role="navigation" aria-label="Menú principal">
+            <button class="nav-item active" id="nav-refugio" data-tab="refugio" aria-label="El Refugio (Chat)" aria-current="page">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span class="nav-label" data-i18n="nav.refugio">Refugio</span>
+            </button>
+            <button class="nav-item" id="nav-ancla" data-tab="ancla" aria-label="El Ancla (Grounding)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span class="nav-label" data-i18n="nav.ancla">Ancla</span>
+            </button>
+            <button class="nav-item" id="nav-voz" data-tab="voz" aria-label="Voz de Marea (Hablar)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+                <span class="nav-label" data-i18n="nav.voz">Voz</span>
+            </button>
+            <button class="nav-item" id="nav-seguridad" data-tab="seguridad" aria-label="Anclajes de seguridad">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span class="nav-label" data-i18n="nav.seguridad">Anclajes</span>
+            </button>
+            <button class="nav-item" id="nav-diario" data-tab="diario" aria-label="Diario perceptivo">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span class="nav-label" data-i18n="nav.diario">Diario</span>
+            </button>
+            <button class="nav-item" id="nav-settings" data-tab="settings" aria-label="Configuración">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span class="nav-label" data-i18n="nav.settings">Ajustes</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Application Script Files -->
+    <script src="i18n.js"></script>
+    <script src="sound.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

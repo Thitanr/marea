@@ -1,0 +1,22 @@
+{
+  "name": "Marea - Sostén y Dignidad",
+  "short_name": "Marea",
+  "description": "Una herramienta local y offline de dignidad y regulación sensorial en momentos de crisis.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#03050c",
+  "theme_color": "#060913",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
