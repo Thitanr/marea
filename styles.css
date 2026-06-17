@@ -6,30 +6,33 @@
 /* 1. Global Setup & Design System Tokens */
 :root {
     --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
     --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     --transition-quick: all 0.2s ease;
     
-    /* Default: Deep Sea (Dark Mode) */
-    --bg-app: #03050c;
-    --bg-card: rgba(12, 17, 34, 0.65);
-    --bg-card-hover: rgba(18, 25, 50, 0.85);
-    --border-glow: rgba(0, 242, 254, 0.15);
-    --border-glow-focus: rgba(0, 242, 254, 0.5);
+    /* Default: Deep Sea (LANA Sovereign Theme - Dark Emerald) */
+    --bg-app: #030c08;
+    --bg-card: rgba(10, 24, 21, 0.70);
+    --bg-card-hover: rgba(16, 36, 32, 0.85);
+    --border-glow: rgba(77, 184, 150, 0.15);
+    --border-glow-focus: rgba(77, 184, 150, 0.5);
     
     --text-primary: #e2e8f0;
-    --text-muted: #94a3b8;
-    --text-dark: #0f172a;
+    --text-muted: #8fa39a;
+    --text-dark: #030c08;
     
-    --accent-glow: #00f2fe;
-    --accent-primary: #00f2fe;
-    --accent-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-    --accent-secondary: #c084fc;
+    --accent-glow: #4db896;
+    --accent-primary: #4db896;
+    --accent-gradient: linear-gradient(135deg, #4db896 0%, #1a513e 100%);
+    --accent-secondary: #a7f3d0;
     
     --danger: #ef4444;
     --danger-glow: rgba(239, 68, 68, 0.2);
     
-    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
     --blur-glass: blur(16px);
+    
+    --lana-hairline: rgba(77, 184, 150, 0.12);
 }
 
 /* Theme: Warm Sand (Calming Light Mode) */
@@ -1033,3 +1036,87 @@ textarea.safe-input {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ==========================================================================
+   LANA TECHNOLOGIES BRAND INTEGRATION
+   ========================================================================== */
+
+.lana-ecosystem-rail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 16px;
+    background: rgba(12, 17, 23, 0.95);
+    border-bottom: 1px solid var(--lana-hairline);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    width: 100%;
+}
+
+.lana-ecosystem-rail .lana-rail-label {
+    color: var(--text-muted);
+    margin-right: 8px;
+    font-weight: 700;
+}
+
+.lana-ecosystem-rail a {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+}
+
+.lana-ecosystem-rail a:hover {
+    color: var(--accent-primary);
+    border-color: var(--lana-hairline);
+    background: rgba(77, 184, 150, 0.08);
+}
+
+.lana-ecosystem-rail a[data-active="true"] {
+    color: var(--accent-primary);
+    border-color: rgba(77, 184, 150, 0.35);
+    background: rgba(77, 184, 150, 0.15);
+    font-weight: bold;
+}
+
+.lana-matrix-grid {
+    background-image:
+        linear-gradient(rgba(77, 184, 150, 0.008) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(77, 184, 150, 0.008) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+.lana-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-primary);
+    border: 1px solid rgba(77, 184, 150, 0.35);
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+    background: rgba(77, 184, 150, 0.05);
+}
+
+.lana-fade-in {
+    animation: lana-fade-in 0.55s ease-out both;
+}
+
+@keyframes lana-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

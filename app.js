@@ -528,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("label-val-rumination").textContent = t(`journal.val.${r}`);
 
         // Clear canvas
-        ctx.fillStyle = "#03050c";
+        ctx.fillStyle = "#030c08";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Draw dynamic bioluminescent concentric shapes representing sensory status
