@@ -9,7 +9,7 @@ import { oceanSynth } from './sound.js';
 import { svgIcons } from './data/svg-icons.js';
 import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode } from './state.js';
 import { showToast } from './core/toast.js';
-import { t, translateDOM } from './core/i18n.js';
+import { t, translateDOM, tLang } from './core/i18n.js';
 
 /* ----- Module-compatible init (Phase 1a) ----- */
 function boot() {
@@ -261,7 +261,7 @@ function boot() {
             elements.chatQuickResponses.classList.remove("hidden");
             
             // Resolve reply using the target detected language
-            const reply = (i18n[replyLang] && i18n[replyLang][`refugio.reply.${matchedKey}`]) || t(`refugio.reply.${matchedKey}`);
+            const reply = tLang(replyLang, `refugio.reply.${matchedKey}`);
             addChatBubble(reply, "system");
             resetStillHereTimer();
         }, 1500);
@@ -450,7 +450,7 @@ function boot() {
         categoryData.forEach(item => {
             const card = document.createElement("button");
             card.className = "aac-card-btn";
-            card.setAttribute("aria-label", `${item.text}. Toca para decir en voz alta.`);
+            card.setAttribute("aria-label", `${item.text}. ${t('aac.tap_to_speak')}`);
             
             card.innerHTML = `
                 <span class="aac-card-icon" aria-hidden="true">${getAacSvgIcon(item.icon)}</span>
@@ -654,6 +654,11 @@ function boot() {
             applySensoryMode();
         });
 
+        // Sync (coming soon)
+        elements.btnSyncSupabase.addEventListener("click", () => {
+            showToast(t("settings.sync_coming"));
+        });
+
         // Wipe Data
         elements.btnResetData.addEventListener("click", () => {
             if (confirm(t("settings.reset_confirm"))) {
@@ -759,16 +764,7 @@ function boot() {
             if (playing) {
                 elements.toggleOceanSoundBtn.classList.add("active");
                 if (labelSpan) {
-                    const stopText = {
-                        "es": "Detener Olas",
-                        "it": "Ferma Onde",
-                        "fr": "Arrêter les Vagues",
-                        "de": "Wellen stoppen",
-                        "zh": "停止海浪",
-                        "pt": "Parar Ondas",
-                        "ja": "波音を止める"
-                    };
-                    labelSpan.textContent = stopText[state.lang] || "Stop Waves";
+                    labelSpan.textContent = t("anchor.sound_stop");
                 }
             } else {
                 elements.toggleOceanSoundBtn.classList.remove("active");
@@ -943,6 +939,35 @@ function boot() {
         });
     }
 
+    // 13d. PWA Install prompt
+    function initPwaInstall() {
+        let deferredPrompt = null;
+        const pwaItem = document.getElementById('pwa-install-item');
+        const btnInstall = document.getElementById('btn-install-pwa');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (pwaItem) pwaItem.style.display = '';
+        });
+
+        if (btnInstall) {
+            btnInstall.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                if (pwaItem) pwaItem.style.display = 'none';
+                if (outcome === 'accepted') showToast(t('settings.pwa_installed'));
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            if (pwaItem) pwaItem.style.display = 'none';
+        });
+    }
+
     // 14. Initialize App Lifecycle
     translateApp();
     setupEventListeners();
@@ -951,6 +976,7 @@ function boot() {
     loadSafetyPlan();
     initSintonia();
     initSpeechRecognition();
+    initPwaInstall();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {

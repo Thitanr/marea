@@ -5,6 +5,10 @@ export function t(key: string): string {
   return i18n[state.lang]?.[key] ?? i18n.es?.[key] ?? key;
 }
 
+export function tLang(lang: string, key: string): string {
+  return (i18n as Record<string, Record<string, string>>)[lang]?.[key] ?? i18n.es?.[key] ?? key;
+}
+
 export function translateDOM(): void {
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n')!;
