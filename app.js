@@ -4,6 +4,22 @@
    AAC speech, interactive canvas drawing, and local storage state persistence.
    ========================================================================== */
 
+// Toast notification system (non-blocking, accessibility-friendly)
+function showToast(message) {
+    const toast = document.createElement("div");
+    toast.className = "toast-notification";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    // Trigger animation
+    requestAnimationFrame(() => toast.classList.add("toast-visible"));
+    setTimeout(() => {
+        toast.classList.remove("toast-visible");
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // 1. App State
     const state = {
@@ -469,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 elements.tippTimerText.textContent = "00:00";
                 
                 // Play a gentle offline audio beep or visual flash
-                alert(t("tipp.timer_done"));
+                showToast(t("tipp.timer_done"));
                 resetTippTimer();
             }
         }, 1000);
@@ -602,7 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("marea_safety_person", elements.inputSafetyPerson.value);
         localStorage.setItem("marea_safety_song", elements.inputSafetySong.value);
         localStorage.setItem("marea_safety_memory", elements.inputSafetyMemory.value);
-        alert(t("safety.saved_toast"));
+        showToast(t("safety.saved_toast"));
     }
 
     // 11. Diario Perceptivo & Dynamic Canvas
@@ -725,7 +741,7 @@ document.addEventListener("DOMContentLoaded", () => {
         elements.btnResetData.addEventListener("click", () => {
             if (confirm(t("settings.reset_confirm"))) {
                 localStorage.clear();
-                alert(t("settings.reset_toast"));
+                showToast(t("settings.reset_toast"));
                 window.location.reload();
             }
         });
@@ -873,7 +889,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             dailyLogs.push(entry);
             localStorage.setItem("marea_journal_logs", JSON.stringify(dailyLogs));
-            alert(t("journal.saved_toast"));
+            showToast(t("journal.saved_toast"));
         });
     }
 

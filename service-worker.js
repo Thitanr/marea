@@ -3,7 +3,7 @@
    Enables offline load of the application assets.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v1';
+const CACHE_NAME = 'marea-cache-v2';
 const ASSETS = [
     './',
     './index.html',
@@ -11,7 +11,12 @@ const ASSETS = [
     './app.js',
     './i18n.js',
     './sound.js',
-    './manifest.json'
+    './manifest.json',
+    './icon-192.png',
+    './icon-512.png',
+    './icon-192-maskable.png',
+    './icon-512-maskable.png',
+    './favicon.svg'
 ];
 
 // Install Event - cache core assets
