@@ -20,6 +20,7 @@ export interface ChatMessage {
 
 // ===== Breathing =====
 export type BreathingPhase = 0 | 1 | 2 | 3 | 4;
+export type BreathingState = BreathingPhase; // alias: legacy name used in app.js
 
 // ===== Grounding =====
 export interface GroundingStep {
@@ -62,7 +63,7 @@ export interface AppState {
 
   // Breathing
   breathingInterval: ReturnType<typeof setInterval> | null;
-  breathingPhase: BreathingPhase;
+  breathingState: BreathingPhase;
   breathingCycles: number;
 
   // Grounding

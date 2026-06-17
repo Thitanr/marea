@@ -4,56 +4,15 @@
    AAC speech, interactive canvas drawing, and local storage state persistence.
    ========================================================================== */
 
-import { i18n, aacBoardData } from './i18n.js';
+import { aacBoardData } from './data/aac-board.js';
 import { oceanSynth } from './sound.js';
 import { svgIcons } from './data/svg-icons.js';
-
-// Toast notification system (non-blocking, accessibility-friendly)
-function showToast(message) {
-    const toast = document.createElement("div");
-    toast.className = "toast-notification";
-    toast.setAttribute("role", "status");
-    toast.setAttribute("aria-live", "polite");
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    // Trigger animation
-    requestAnimationFrame(() => toast.classList.add("toast-visible"));
-    setTimeout(() => {
-        toast.classList.remove("toast-visible");
-        setTimeout(() => toast.remove(), 400);
-    }, 3000);
-}
+import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode } from './state.js';
+import { showToast } from './core/toast.js';
+import { t, translateDOM } from './core/i18n.js';
 
 /* ----- Module-compatible init (Phase 1a) ----- */
 function boot() {
-    const state = {
-        lang: localStorage.getItem("marea_lang") || "es",
-        theme: localStorage.getItem("marea_theme") || "deep-sea",
-        handMode: localStorage.getItem("marea_hand") || "right",
-        sensoryMode: localStorage.getItem("marea_sensory") === "true",
-        activeTab: "refugio",
-        activeAnchorSubtab: "breathe",
-        
-        // Chat
-        chatTimer: null,
-        chatMessages: [],
-        lastDefaultIndex: 0,
-        
-        // Breathing
-        breathingInterval: null,
-        breathingState: 0, // 0: Idle, 1: Inhale, 2: Hold, 3: Exhale, 4: Hold Empty
-        breathingCycles: 0,
-        
-        // Grounding Wizard
-        groundingStep: 0,
-        
-        // TIPP Timer
-        tippTimerInterval: null,
-        tippTimeRemaining: 300, // 5 minutes in seconds
-        
-        // AAC
-        aacActiveCategory: "needs"
-    };
 
     // 2. DOM Elements
     const elements = {
@@ -123,41 +82,10 @@ function boot() {
 
     // 3. i18n Translation Engine
     function translateApp() {
-        // Translate text contents
-        document.querySelectorAll("[data-i18n]").forEach(el => {
-            const key = el.getAttribute("data-i18n");
-            if (i18n[state.lang] && i18n[state.lang][key]) {
-                // If it contains SVG children, preserve them
-                const svg = el.querySelector("svg");
-                if (svg) {
-                    el.innerHTML = "";
-                    el.appendChild(svg);
-                    el.appendChild(document.createTextNode(" " + i18n[state.lang][key]));
-                } else {
-                    el.textContent = i18n[state.lang][key];
-                }
-            }
-        });
-
-        // Translate placeholders
-        document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
-            const key = el.getAttribute("data-i18n-placeholder");
-            if (i18n[state.lang] && i18n[state.lang][key]) {
-                el.setAttribute("placeholder", i18n[state.lang][key]);
-            }
-        });
-
-        // Update document lang
-        document.documentElement.lang = state.lang;
-        
-        // Reload dynamic components
+        translateDOM();
         renderAACBoard();
         loadQuickResponses();
         drawSensoryCanvas();
-    }
-
-    function t(key) {
-        return (i18n[state.lang] && i18n[state.lang][key]) || key;
     }
 
     // 4. Tab Routing Management
@@ -694,7 +622,7 @@ function boot() {
         elements.selectLanguage.value = state.lang;
         elements.selectLanguage.addEventListener("change", (e) => {
             state.lang = e.target.value;
-            localStorage.setItem("marea_lang", state.lang);
+            persistLang(state.lang);
             translateApp();
             initChat();
         });
@@ -704,7 +632,7 @@ function boot() {
         applyHandMode();
         elements.selectHandMode.addEventListener("change", (e) => {
             state.handMode = e.target.value;
-            localStorage.setItem("marea_hand", state.handMode);
+            persistHandMode(state.handMode);
             applyHandMode();
         });
 
@@ -713,7 +641,7 @@ function boot() {
         applyTheme();
         elements.selectTheme.addEventListener("change", (e) => {
             state.theme = e.target.value;
-            localStorage.setItem("marea_theme", state.theme);
+            persistTheme(state.theme);
             applyTheme();
         });
 
@@ -722,7 +650,7 @@ function boot() {
         applySensoryMode();
         elements.toggleSensoryMode.addEventListener("change", (e) => {
             state.sensoryMode = e.target.checked;
-            localStorage.setItem("marea_sensory", state.sensoryMode);
+            persistSensoryMode(state.sensoryMode);
             applySensoryMode();
         });
 
@@ -900,12 +828,129 @@ function boot() {
         });
     }
 
+    // 13b. Sintonía — interactive state & regulation cards
+    function initSintonia() {
+        const stateDetail = document.getElementById('sintonia-state-detail');
+        const regDetail = document.getElementById('sintonia-reg-detail');
+
+        document.querySelectorAll('.state-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const key = card.getAttribute('data-state');
+                const isOpen = card.getAttribute('aria-expanded') === 'true';
+
+                document.querySelectorAll('.state-card').forEach(c => c.setAttribute('aria-expanded', 'false'));
+
+                if (isOpen) {
+                    stateDetail.classList.add('hidden');
+                    stateDetail.innerHTML = '';
+                } else {
+                    card.setAttribute('aria-expanded', 'true');
+                    stateDetail.classList.remove('hidden');
+                    stateDetail.innerHTML = `
+                        <p class="state-detail-what">${t('sintonia.state.' + key + '_detail')}</p>
+                        <p class="state-detail-help">${t('sintonia.state.' + key + '_help')}</p>
+                    `;
+                    stateDetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+
+        document.querySelectorAll('.reg-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const key = card.getAttribute('data-reg');
+                const isActive = card.classList.contains('active');
+
+                document.querySelectorAll('.reg-card').forEach(c => c.classList.remove('active'));
+
+                if (isActive) {
+                    regDetail.classList.add('hidden');
+                    regDetail.innerHTML = '';
+                } else {
+                    card.classList.add('active');
+                    regDetail.classList.remove('hidden');
+                    regDetail.innerHTML = `<p class="state-detail-what">${t('sintonia.reg.' + key + '_detail')}</p>`;
+                    regDetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+    }
+
+    // 13c. Speech-to-Text — native device microphone, no AI
+    function initSpeechRecognition() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const micBtn = document.getElementById('chat-mic-btn');
+        if (!micBtn) return;
+        if (!SR) { micBtn.style.display = 'none'; return; }
+
+        const LANG_MAP = { es: 'es-ES', en: 'en-US', it: 'it-IT', fr: 'fr-FR', de: 'de-DE', zh: 'zh-CN', pt: 'pt-BR', ja: 'ja-JP' };
+        let recognition = null;
+        let listening = false;
+
+        function startListening() {
+            recognition = new SR();
+            recognition.lang = LANG_MAP[state.lang] || 'es-ES';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                listening = true;
+                micBtn.classList.add('listening');
+                micBtn.setAttribute('aria-label', t('refugio.mic_stop'));
+            };
+            recognition.onresult = (e) => {
+                const text = e.results[0][0].transcript;
+                const input = elements.chatInput;
+                input.value = (input.value + ' ' + text).trim();
+                input.focus();
+            };
+            recognition.onend = () => {
+                listening = false;
+                micBtn.classList.remove('listening');
+                micBtn.setAttribute('aria-label', t('refugio.mic_start'));
+            };
+            recognition.onerror = () => {
+                listening = false;
+                micBtn.classList.remove('listening');
+            };
+            recognition.start();
+        }
+
+        function showNotice() {
+            const overlay = document.createElement('div');
+            overlay.className = 'stt-overlay';
+            overlay.innerHTML = `
+                <div class="stt-notice" role="dialog" aria-modal="true">
+                    <p class="stt-notice-text">${t('stt.notice_text')}</p>
+                    <div class="stt-notice-actions">
+                        <button class="btn-secondary" id="stt-cancel">${t('stt.notice_cancel')}</button>
+                        <button class="btn-primary" id="stt-accept">${t('stt.notice_accept')}</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            document.getElementById('stt-accept').addEventListener('click', () => {
+                localStorage.setItem('marea_stt_ok', '1');
+                overlay.remove();
+                startListening();
+            });
+            document.getElementById('stt-cancel').addEventListener('click', () => overlay.remove());
+        }
+
+        micBtn.addEventListener('click', () => {
+            if (listening) { recognition && recognition.stop(); return; }
+            if (!localStorage.getItem('marea_stt_ok')) { showNotice(); return; }
+            startListening();
+        });
+    }
+
     // 14. Initialize App Lifecycle
     translateApp();
     setupEventListeners();
     initSettings();
     initChat();
     loadSafetyPlan();
+    initSintonia();
+    initSpeechRecognition();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {
