@@ -1731,10 +1731,60 @@ textarea.safe-input {
     text-wrap: pretty;
 }
 
-.onb-text-nav {
+/* Nav list — per-tab icon + label (Step 2) */
+.onb-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 360px;
+}
+
+.onb-nav-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    transition: var(--transition-quick);
+}
+
+.onb-nav-list li:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border-glow);
+}
+
+.onb-nav-svg {
+    flex-shrink: 0;
+    color: var(--accent-primary);
+    opacity: 0.85;
+}
+
+.onb-nav-list li span {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.5;
     text-align: left;
-    line-height: 2;
-    padding: 0 0.2rem;
+}
+
+/* SVG glow effect for step header icons */
+.onb-svg-glow {
+    filter: drop-shadow(0 0 15px var(--accent-glow));
+    color: var(--accent-primary);
+    transition: filter 0.5s ease;
+}
+
+.onboarding-card .onb-icon-large {
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
 }
 
 /* Buttons */

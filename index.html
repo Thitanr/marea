@@ -53,7 +53,20 @@
                 <span class="onb-dot" data-onb-step="2"></span>
             </div>
             <div class="onboarding-card" id="onb-step-0">
-                <div class="onb-icon-large">🌊</div>
+                <div class="onb-icon-large">
+                    <svg class="onb-svg-glow" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48">
+                        <circle cx="14" cy="14" r="12" stroke-width="1.4"/>
+                        <line x1="14" y1="14" x2="14" y2="4" stroke-width="1.8"/><line x1="11.5" y1="4" x2="16.5" y2="4" stroke-width="1.8"/>
+                        <line x1="14" y1="14" x2="14" y2="24" stroke-width="1.8"/><line x1="12" y1="21.5" x2="16" y2="21.5" stroke-width="1.4"/><line x1="12" y1="24" x2="16" y2="24" stroke-width="1.4"/>
+                        <line x1="14" y1="14" x2="24" y2="14" stroke-width="1.8"/><line x1="24" y1="11.5" x2="24" y2="16.5" stroke-width="1.4"/>
+                        <line x1="14" y1="14" x2="4" y2="14" stroke-width="1.8"/><line x1="6" y1="12" x2="4" y2="14" stroke-width="1.8"/><line x1="6" y1="16" x2="4" y2="14" stroke-width="1.8"/>
+                        <line x1="14" y1="14" x2="21.5" y2="6.5" stroke-width="1.6"/><line x1="20" y1="5" x2="23" y2="8" stroke-width="1.4"/>
+                        <line x1="14" y1="14" x2="6.5" y2="21.5" stroke-width="1.6"/><line x1="5" y1="20" x2="8" y2="23" stroke-width="1.3"/>
+                        <line x1="14" y1="14" x2="6.5" y2="6.5" stroke-width="1.6"/><line x1="5" y1="8" x2="8" y2="5" stroke-width="1.3"/>
+                        <line x1="14" y1="14" x2="21.5" y2="21.5" stroke-width="1.6"/><line x1="23" y1="20" x2="20" y2="23" stroke-width="1.3"/>
+                        <circle cx="14" cy="14" r="2" fill="currentColor" stroke="none"/>
+                    </svg>
+                </div>
                 <h2 class="onb-title" data-i18n="onboarding.welcome">Bienvenida</h2>
                 <h3 class="onb-subtitle" data-i18n="onboarding.step1_title">Estás en Marea</h3>
                 <p class="onb-text" data-i18n="onboarding.step1_text">Marea es una herramienta de regulación sensorial y validación radical...</p>
@@ -62,16 +75,85 @@
                 </div>
             </div>
             <div class="onboarding-card hidden" id="onb-step-1">
-                <div class="onb-icon-large">🧭</div>
+                <div class="onb-icon-large">
+                    <svg class="onb-svg-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polygon points="16 8 13 11 8 16 11 13 16 8"/>
+                        <line x1="12" y1="2" x2="12" y2="6"/>
+                        <line x1="12" y1="18" x2="12" y2="22"/>
+                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+                        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+                        <line x1="2" y1="12" x2="6" y2="12"/>
+                        <line x1="18" y1="12" x2="22" y2="12"/>
+                    </svg>
+                </div>
                 <h2 class="onb-title" data-i18n="onboarding.step2_title">Cómo navegar</h2>
-                <p class="onb-text onb-text-nav" data-i18n="onboarding.step2_text">🗣️ Hablar — Tablero CAA...</p>
+                <p class="onb-text" data-i18n="onboarding.step2_intro">Estas son las 7 secciones de Marea:</p>
+                <ul class="onb-nav-list">
+                    <li>
+                        <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                        <span data-i18n="onboarding.tip_voz">Hablar — Tablero CAA para comunicarte</span>
+                    </li>
+                    <li>
+                        <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        <span data-i18n="onboarding.tip_ancla">Calmar — Ejercicios para regular el cuerpo</span>
+                    </li>
+                    <li>
+                        <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span data-i18n="onboarding.tip_seguridad">Plan Crisis — Tus anclajes de seguridad</span>
+                    </li>
+                    <li>
+                        <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        <span data-i18n="onboarding.tip_diario">Diario Sens. — Registro sensorial diario</span>
+                    </li>
+                    <li>
+                        <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                            <path d="M12 2C12 2 4 9 4 14a8 8 0 0 0 16 0c0-5-8-12-8-12z"/>
+                            <path d="M8 14 C10 11 11 16 12 14 C13 12 14 16 16 14" stroke-width="1.5" opacity="0.7"/>
+                        </svg>
+                        <span data-i18n="onboarding.tip_sintonia">Autismo — Espacio para entender tu neurotipo</span>
+                    </li>
+                    <li>
+                        <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span data-i18n="onboarding.tip_refugio">Chat Apoyo — Conversación sin juicios</span>
+                    </li>
+                    <li>
+                        <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span data-i18n="onboarding.tip_settings">Ajustes — Personaliza tu experiencia</span>
+                    </li>
+                </ul>
                 <div class="onb-buttons">
                     <button class="onb-btn onb-btn-prev" data-i18n="common.prev">Atrás</button>
                     <button class="onb-btn onb-btn-next" data-i18n="common.next">Siguiente</button>
                 </div>
             </div>
             <div class="onboarding-card hidden" id="onb-step-2">
-                <div class="onb-icon-large">🔒</div>
+                <div class="onb-icon-large">
+                    <svg class="onb-svg-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48">
+                        <rect x="5" y="11" width="14" height="10" rx="2" ry="2"/>
+                        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                        <circle cx="12" cy="16" r="1.2"/>
+                    </svg>
+                </div>
                 <h2 class="onb-title" data-i18n="onboarding.step3_title">Privacidad y sin conexión</h2>
                 <p class="onb-text" data-i18n="onboarding.step3_text">Marea funciona 100% sin internet...</p>
                 <div class="onb-buttons">
