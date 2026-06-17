@@ -1017,7 +1017,22 @@ function boot() {
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./service-worker.js')
-                .then(reg => console.log('[Service Worker] Registered successfully:', reg.scope))
+                .then(reg => {
+                    console.log('[Service Worker] Registered successfully:', reg.scope);
+
+                    // Detect when a new SW is waiting and reload to apply it
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (!newWorker) return;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New SW installed and waiting — activate it now
+                                console.log('[Service Worker] New version detected — reloading to activate');
+                                window.location.reload();
+                            }
+                        });
+                    });
+                })
                 .catch(err => console.error('[Service Worker] Registration failed:', err));
         });
     }
