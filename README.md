@@ -1,60 +1,65 @@
-# 🌊 Marea - Herramienta de Sostén y Dignidad
+# 🌊 Marea - Sostén & Dignidad (Holding & Dignity)
 
-Marea es una aplicación web progresiva (PWA) de código abierto, diseñada para funcionar 100% sin conexión (offline-first) y con total privacidad. Su objetivo es servir como un **ancla sensorial, refugio conversacional y canal de comunicación aumentativa** para personas neurodivergentes, con discapacidad (por ejemplo, afasia motora post-ictus) o neurotípicas en situaciones de sobrecarga.
+Marea is an offline-first Progressive Web App (PWA) designed to function 100% without an internet connection. It serves as a **sensory anchor, conversational haven, and augmentative communication channel** for neurodivergent, disabled (such as stroke survivors with motor hemiplegia and aphasia), and neurotypical individuals in times of sensory overload or crisis.
 
-Creado como un regalo para la comunidad por **Lana Technologies**.
-
----
-
-## 🎨 Filosofía del Proyecto
-
-1.  **Privacidad Absoluta**: No existe recopilación de datos, no hay rastreadores, ni registro obligatorio. El 100% de la información (diarios sensoriales, planes de seguridad) se almacena localmente en la memoria de tu dispositivo (`localStorage`).
-2.  **Cero Fricción**: Marea funciona directamente desde el navegador web. Al ser una PWA, se puede "Añadir a la pantalla de inicio" en iOS y Android para instalarse como una app nativa en segundos, ocupando menos de 1 MB.
-3.  **Accesibilidad sin Excepciones**: Diseñado bajo pautas WCAG 2.1 AA para garantizar que personas ciegas, con dificultades motoras, parálisis unilaterales (hemiplejia) o hipersensibilidad sensorial puedan utilizarla con autonomía.
+Created as a gift to the community by **Lana Technologies**.
 
 ---
 
-## 🛠️ Características Principales
+## 🎨 Project Philosophy
 
-### 💬 1. El Refugio (Validación Conversacional)
-Un espacio de diálogo guiado que practica la **validación incondicional**. No ofrece positividad tóxica ni consejos simplistas. Cuenta con un sistema de presencia ininterrumpida: si dejas de escribir, la app no se desconecta; un pulso de luz y la frase *«Sigo aquí. No tienes que decir nada si no quieres»* te acompañan.
-
-### ⚓ 2. El Ancla (Regulación Sensorial)
-*   **Respiración de Caja (4-4-4-4)**: Un anillo bioluminiscente interactivo que guía la inhalación, retención y exhalación, sincronizado opcionalmente con un rumor de olas de mar sintetizado en tiempo real (proceduralmente por Web Audio API, sin descargas).
-*   **Grounding 5-4-3-2-1**: Un asistente paso a paso para reconectarte con tus sentidos (vista, tacto, oído, olfato, gusto) y desactivar la rumiación ("el y si").
-*   **Reinicio TIPP (Agua Fría)**: Un temporizador mecánico de 5 minutos que guía al usuario para aplicar agua fría en los ojos/rostro, estimulando el nervio vago y reduciendo físicamente las pulsaciones cardíacas.
-
-### 🗣️ 3. Voz de Marea (CAA - Comunicación Aumentativa)
-Diseñada especialmente para supervivientes de **ictus con afasia** (que conservan su capacidad cognitiva pero no pueden hablar o les cuesta expresarse) y parálisis de un brazo:
-*   **Distribución Unilateral (Mano Izquierda / Derecha)**: Desplaza y agrupa los botones principales a la esquina de la pantalla que el usuario elija para que alcancen todo con un solo pulgar.
-*   **Tablero de Voz**: Tarjetas grandes con necesidades básicas, comunicación social (*"Mi cerebro funciona bien, pero me cuesta hablar. Ten paciencia"*), y emociones. Al pulsarlas, la app pronuncia la frase en voz alta usando el motor nativo del dispositivo (TTS).
-
-### 📝 4. Anclajes de Seguridad
-Un plan de crisis basado en el modelo Stanley-Brown. Te permite registrar en tus días tranquilos tu persona segura, tu canción ancla y un recuerdo de paz, permitiendo extraerlos rápidamente cuando "el agua suba".
-
-### 🎨 5. Diario Perceptivo
-Registra tu sensibilidad a la luz, ruido, dolor físico y nivel de rumiación. En lugar de escribir un diario de texto, Marea procesa estos niveles en un **lienzo abstracto dinámico**, convirtiendo tu estado sensorial en una obra de arte digital única.
+1.  **Absolute Privacy**: No data collection, no trackers, and no mandatory registration. 100% of user data (perceptive journals, safety anchors) remains securely stored on the local storage of the user's device (`localStorage`).
+2.  **Zero Friction**: Marea operates directly in any modern mobile or tablet web browser. As a PWA, users can "Add to Home Screen" to install it as a standalone app in seconds, with a footprint under 1 MB.
+3.  **Uncompromising Accessibility**: Built strictly under WCAG 2.1 AA guidelines to ensure blind users, individuals with motor difficulties, unilateral paralysis (hemiplegia), or severe sensory hypersensitivity can navigate the app with complete autonomy.
 
 ---
 
-## ⚙️ Estructura del Código
+## 🛠️ Key Features
 
-Marea está construida con la mínima infraestructura posible para asegurar su portabilidad y velocidad:
-*   `index.html` - Maquetación semántica y de accesibilidad.
-*   `styles.css` - Estilos de glassmorphism y layouts unilaterales.
-*   `app.js` - Control de navegación, chat, sintetizador de voz y almacenamiento.
-*   `sound.js` - Generador procedural del oleaje oceánico.
-*   `i18n.js` - Diccionario de idiomas (Español / Inglés) integrado.
-*   `manifest.json` & `service-worker.js` - Configuración PWA.
+### 💬 1. The Haven (Conversational Validation)
+An active-listening chat module that practices **radical validation**. It avoids toxic positivity and unsolicited advice. It features a continuous presence system: if the user stops typing, the app remains open, softly pulsing a bioluminescent light accompanied by the message: *“I'm still here. No need to speak if you do not want to.”*
+
+### ⚓ 2. The Anchor (Sensory Regulators)
+*   **Box Breathing (4-4-4-4)**: An interactive bioluminescent ring guiding inhalation, retention, and exhalation, synchronized with real-time procedural ocean wave sounds (synthesised offline via Web Audio API).
+*   **Sensory Grounding (5-4-3-2-1)**: A step-by-step wizard to help users reconnect with their immediate surroundings (sight, touch, hearing, smell, taste) to break cognitive rumiation loops ("what ifs").
+*   **TIPP Reset (Cold Water)**: A mechanical 5-minute timer guiding the user to submerge their face/eyes in cold water to stimulate the vagus nerve and physically lower their heart rate during panic.
+
+### 🗣️ 3. Marea Voice (AAC - Augmentative and Alternative Communication)
+Specifically designed for **stroke (ictus) survivors** with speech difficulties (aphasia/dysarthria) and unilateral motor limitations:
+*   **One-Handed Sweep Layout**: Positions and clusters all main buttons on the lower-left or lower-right of the screen (selectable in settings) so everything sits within the natural sweep of a single thumb.
+*   **Speech Soundboards**: Large, high-contrast cards representing basic needs, social interaction (*“My brain works perfectly, but I struggle to speak. Please have patience with me”*), and emotional states. Tapping a card reads it aloud using the native offline text-to-speech engine (TTS).
+
+### 📝 4. Safety Anchors
+A personalized crisis plan based on the Stanley-Brown safety model. Users can register their safe person, stabilizing song, and peaceful memory during calm periods, allowing quick retrieval when "the water rises".
+
+### 🎨 5. Perceptive Journal
+Log sensory inputs (sensitivity to light, sound, anxiety, physical pain, and rumination). Rather than writing a text log, Marea processes these sliders to draw a **dynamic abstract canvas**, visualising your sensory footprint as a unique piece of digital art.
 
 ---
 
-## 🔒 Descargo de Responsabilidad (Disclaimer)
+## ⚙️ Codebase Structure
 
-Marea es un espacio de sostén emocional y regulación sensorial de baja intensidad. **No es un dispositivo médico ni reemplaza a un profesional de la salud mental o a los servicios de emergencia.** Si tú o alguien que conoces se encuentra en peligro inmediato, por favor ponte en contacto con los números de emergencia de tu país (ej. 024 en España, 988 en USA/LATAM).
+Marea is built using minimal, lightweight technologies for maximum portability and speed:
+*   `index.html` - Semantic layout with full ARIA accessibility roles.
+*   `styles.css` - Custom styling with dynamic themes (Deep Sea, Warm Sand, High Contrast, Monochrome) and unilateral layouts.
+*   `app.js` - Client-side state machine, navigation, local storage hooks, and SpeechSynthesis player.
+*   `sound.js` - Real-time Web Audio API procedural wave synth.
+*   `i18n.js` - Integrated dictionaries for dynamic Spanish and English translation.
+*   `manifest.json` & `service-worker.js` - PWA assets.
 
 ---
 
-## 📄 Licencia
+## 🔒 Legal Disclaimer
 
-Este proyecto está bajo la Licencia MIT. Eres libre de modificarlo, distribuirlo y utilizarlo de forma no comercial.
+Marea is a low-intensity sensory holding space. **It is not a medical device and does not replace professional therapy, clinical treatment, or emergency services.** If you or someone you know is in immediate danger, please contact your local emergency services (e.g. 112/999 in the UK/Europe, 988 in the US/Canada, 024 in Spain).
+
+---
+
+## 📄 License & Integrity Protection
+
+**All rights reserved.**
+
+To guarantee the security, privacy, and absolute integrity of Marea for its users:
+*   **No Unauthorised Redistribution or Modification**: You may not copy, modify, redistribute, publish, or package this software under other names.
+*   **Security Auditing Allowed**: The codebase is source-available solely for transparency, academic auditing, and privacy verification.
+*   **Official Releases Only**: Only Lana Technologies (Thitanr) is authorised to publish official versions, updates, and compile native builds of Marea. This is strictly enforced to prevent third parties from injecting spyware, trackers, advertisements, or data-collection mechanisms into the application.
