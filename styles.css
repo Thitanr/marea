@@ -10,21 +10,21 @@
     --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     --transition-quick: all 0.2s ease;
     
-    /* Default: Deep Sea (LANA Sovereign Theme - Dark Emerald) */
-    --bg-app: #030c08;
-    --bg-card: rgba(10, 24, 21, 0.70);
-    --bg-card-hover: rgba(16, 36, 32, 0.85);
-    --border-glow: rgba(77, 184, 150, 0.15);
-    --border-glow-focus: rgba(77, 184, 150, 0.5);
+    /* Default: Bragi Obsidian (LANA Sovereign Theme - Obsidian & Mint) */
+    --bg-app: #0B1120;
+    --bg-card: rgba(17, 24, 39, 0.70);
+    --bg-card-hover: rgba(26, 35, 50, 0.85);
+    --border-glow: rgba(150, 232, 214, 0.15);
+    --border-glow-focus: rgba(150, 232, 214, 0.5);
     
-    --text-primary: #e2e8f0;
-    --text-muted: #8fa39a;
-    --text-dark: #030c08;
+    --text-primary: #e8eaed;
+    --text-muted: #6b7280;
+    --text-dark: #0B1120;
     
-    --accent-glow: #4db896;
-    --accent-primary: #4db896;
-    --accent-gradient: linear-gradient(135deg, #4db896 0%, #1a513e 100%);
-    --accent-secondary: #a7f3d0;
+    --accent-glow: #96E8D6;
+    --accent-primary: #96E8D6;
+    --accent-gradient: linear-gradient(135deg, #96E8D6 0%, #3a8a72 100%) ;
+    --accent-secondary: #96E8D6;
     
     --danger: #ef4444;
     --danger-glow: rgba(239, 68, 68, 0.2);
@@ -32,7 +32,7 @@
     --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
     --blur-glass: blur(16px);
     
-    --lana-hairline: rgba(77, 184, 150, 0.12);
+    --lana-hairline: rgba(150, 232, 214, 0.12);
 }
 
 /* Theme: Warm Sand (Calming Light Mode) */
@@ -162,13 +162,15 @@ body {
     gap: 10px;
 }
 
-.logo-circle {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--accent-gradient);
-    box-shadow: 0 0 10px var(--accent-glow);
-    display: inline-block;
+.marea-symbol-svg {
+    color: var(--accent-primary);
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+}
+
+.marea-symbol-svg:hover {
+    transform: rotate(10deg) scale(1.1);
 }
 
 .header-logo h1 {
@@ -738,6 +740,22 @@ body {
     background: var(--bg-card-hover);
     border-color: var(--accent-primary);
     transform: translateY(-2px);
+    color: var(--accent-primary);
+}
+
+.aac-icon {
+    width: 28px;
+    height: 28px;
+    stroke: var(--accent-primary);
+    fill: none;
+    stroke-width: 2.2px;
+    transition: var(--transition-quick);
+}
+
+.aac-card-btn:hover .aac-icon {
+    transform: scale(1.1);
+    stroke: var(--accent-primary);
+}
 }
 
 .aac-card-icon {

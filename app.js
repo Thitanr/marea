@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Chat
         chatTimer: null,
         chatMessages: [],
+        lastDefaultIndex: 0,
         
         // Breathing
         breathingInterval: null,
@@ -251,12 +252,66 @@ document.addEventListener("DOMContentLoaded", () => {
         elements.chatTypingIndicator.classList.remove("hidden");
         elements.chatMessagesContainer.scrollTop = elements.chatMessagesContainer.scrollHeight;
         
+        // Match user intent if key is default
+        let matchedKey = key;
+        let replyLang = state.lang;
+        
+        if (key === "default") {
+            const cleanText = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // strip accents
+            
+            // Language auto-detection
+            const frenchWords = /\b(bonjour|salut|comment|faire|affronter|anxiete|panique|peur|parler|ecrire|aphasie|aide)\b/;
+            const germanWords = /\b(hallo|wie|bewaltigen|angst|panik|sprechen|schreiben|aphasie|hilfe)\b/;
+            const portugueseWords = /\b(ola|como|enfrentar|lidar|ansiedade|panico|medo|falar|escrever|afasia|ajuda)\b/;
+            const italianWords = /\b(ciao|come|affrontarlo|affrontare|ansia|paura|spaventato|parlare|colpo|scrivere|afasia|aiuto)\b/;
+            const spanishWords = /\b(hola|como|hago|hacer|enfrento|afronto|sobrevivo|sobrevivir|ansiedad|panico|miedo|ayuda|hablar|hablo|escribir|escribo|afasia)\b/;
+            const englishWords = /\b(hello|hi|how|cope|handle|face|survive|anxiety|panic|fear|scared|afraid|speak|aphasia|stroke|talk|writing|type|help)\b/;
+            
+            if (italianWords.test(cleanText)) {
+                replyLang = "it";
+            } else if (frenchWords.test(cleanText)) {
+                replyLang = "fr";
+            } else if (germanWords.test(cleanText)) {
+                replyLang = "de";
+            } else if (portugueseWords.test(cleanText)) {
+                replyLang = "pt";
+            } else if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) { // Japanese Hiragana/Katakana
+                replyLang = "ja";
+            } else if (/[\u4e00-\u9fa5]/.test(text)) { // Chinese / Japanese Kanji (default to Chinese)
+                replyLang = "zh";
+            } else if (englishWords.test(cleanText)) {
+                replyLang = "en";
+            } else if (spanishWords.test(cleanText)) {
+                replyLang = "es";
+            }
+            
+            // Intent classification (multi-language regex matching)
+            // 1. Intent: How / Afrontar
+            if (/\b(como|hago|hacer|enfrento|afronto|sobrevivo|sobrevivir|solucion|afrontarlo|how|cope|handle|face|survive|affrontarlo|affrontare|comment|faire|affronter|wie|bewaltigen|lidar|enfrentar|どう|対処|克服)\b/.test(cleanText) || /[\u5982\u4f55\u600e\u4e48\u529e]/.test(text)) {
+                matchedKey = "how";
+            }
+            // 2. Intent: Anxiety / Panic
+            else if (/\b(ansiedad|panico|miedo|asustado|asustada|temblor|palpitaciones|anxiety|panic|fear|scared|afraid|racing|ansia|paura|spaventato|anxiete|panique|peur|angst|panik|medo|不安|パニック|恐怖)\b/.test(cleanText) || /[\u7126\u8651\u6050\u614c\u5bb3\u6015]/.test(text)) {
+                matchedKey = "anxiety";
+            }
+            // 3. Intent: Speech / Afasia / Dysarthria
+            else if (/\b(hablar|afasia|ictus|hablo|escribir|escribo|speak|aphasia|stroke|talk|writing|type|parlare|colpo|scrivere|ecrire|aphasie|catastro|ictus|parler|sprechen|schreiben|falar|escrever|話|話す|喋|言葉)\b/.test(cleanText) || /[\u8bf4\u8bdd\u5199\u5b57\u5931\u8bed]/.test(text)) {
+                matchedKey = "speech";
+            }
+            // General conversation -> cycle default replies
+            else {
+                matchedKey = `default_${state.lastDefaultIndex}`;
+                state.lastDefaultIndex = (state.lastDefaultIndex + 1) % 5;
+            }
+        }
+
         // Simulate thoughtful reflection time
         setTimeout(() => {
             elements.chatTypingIndicator.classList.add("hidden");
             elements.chatQuickResponses.classList.remove("hidden");
             
-            const reply = t(`refugio.reply.${key}`);
+            // Resolve reply using the target detected language
+            const reply = (i18n[replyLang] && i18n[replyLang][`refugio.reply.${matchedKey}`]) || t(`refugio.reply.${matchedKey}`);
             addChatBubble(reply, "system");
             resetStillHereTimer();
         }, 1500);
@@ -430,6 +485,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 9. Voz de Marea - AAC Sound Board
+    function getAacSvgIcon(iconKey) {
+        const svgHeader = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aac-icon" width="28" height="28">';
+        const icons = {
+            help: '<circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path>',
+            water: '<path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z"></path>',
+            food: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v4M21 15V2a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3zM18 22V15M9 22V11"></path>',
+            pain: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>',
+            rest: '<path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"></path>',
+            move: '<path d="m16 3 4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"></path>',
+            bathroom: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>',
+            temp: '<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>',
+            brain: '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"></path><path d="M12 5v14M12 9h4M12 14h6M12 9H8M12 14H6"></path>',
+            yes: '<circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path>',
+            no: '<circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6M9 9l6 6"></path>',
+            thanks: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>',
+            wait: '<path d="M5 2h14M5 22h14M19 2v6a7 7 0 0 1-2.24 5.21v0A7 7 0 0 1 19 16v6M5 2v6a7 7 0 0 0 2.24 5.21v0A7 7 0 0 0 5 16v6"></path>',
+            confused: '<circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"></path>',
+            mute: '<line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23M12 19v4M8 23h8"></path>',
+            home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10"></path>',
+            underwater: '<path d="M2 6c.6.5 1.2 1 2.5 1C5.8 7 7 6 7 6s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1M2 12c.6.5 1.2 1 2.5 1 1.3 0 2.5-1 2.5-1s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1M2 18c.6.5 1.2 1 2.5 1 1.3 0 2.5-1 2.5-1s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1"></path>',
+            overload: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>',
+            sad: '<circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01"></path>',
+            frustrated: '<polygon points="12 2 2 22 22 22 12 2"></polygon><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.01"></line>',
+            trapped: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>',
+            hug: '<path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2M12 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 14a2 2 0 0 1 2-2h3M22 14a2 2 0 0 0-2-2h-3"></path>',
+            love: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>',
+            alone: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 11h-6"></path>'
+        };
+        const path = icons[iconKey] || '<circle cx="12" cy="12" r="10"></circle>';
+        return svgHeader + path + '</svg>';
+    }
+
     function renderAACBoard() {
         elements.aacGrid.innerHTML = "";
         
@@ -442,7 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
             card.setAttribute("aria-label", `${item.text}. Toca para decir en voz alta.`);
             
             card.innerHTML = `
-                <span class="aac-card-icon" aria-hidden="true">${item.icon}</span>
+                <span class="aac-card-icon" aria-hidden="true">${getAacSvgIcon(item.icon)}</span>
                 <span class="aac-card-label">${item.text}</span>
             `;
             
@@ -479,7 +566,17 @@ document.addEventListener("DOMContentLoaded", () => {
             window.speechSynthesis.cancel();
             
             const utterance = new SpeechSynthesisUtterance(phrase);
-            utterance.lang = state.lang === "es" ? "es-ES" : "en-US";
+            const langMap = {
+                "es": "es-ES",
+                "en": "en-GB", // Standardised to British English
+                "it": "it-IT",
+                "fr": "fr-FR",
+                "de": "de-DE",
+                "zh": "zh-CN",
+                "pt": "pt-PT",
+                "ja": "ja-JP"
+            };
+            utterance.lang = langMap[state.lang] || "en-GB";
             
             // Try to find a nice local voice matching language
             const voices = window.speechSynthesis.getVoices();
@@ -528,7 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("label-val-rumination").textContent = t(`journal.val.${r}`);
 
         // Clear canvas
-        ctx.fillStyle = "#030c08";
+        ctx.fillStyle = "#0B1120";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Draw dynamic bioluminescent concentric shapes representing sensory status
@@ -647,7 +744,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
             const colors = {
-                "deep-sea": "#060913",
+                "deep-sea": "#0B1120",
                 "warm-sand": "#faf8f5",
                 "high-contrast": "#000000",
                 "monochrome": "#090909"
@@ -710,7 +807,18 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (playing) {
                 elements.toggleOceanSoundBtn.classList.add("active");
-                if (labelSpan) labelSpan.textContent = state.lang === "es" ? "Detener Olas" : "Stop Waves";
+                if (labelSpan) {
+                    const stopText = {
+                        "es": "Detener Olas",
+                        "it": "Ferma Onde",
+                        "fr": "Arrêter les Vagues",
+                        "de": "Wellen stoppen",
+                        "zh": "停止海浪",
+                        "pt": "Parar Ondas",
+                        "ja": "波音を止める"
+                    };
+                    labelSpan.textContent = stopText[state.lang] || "Stop Waves";
+                }
             } else {
                 elements.toggleOceanSoundBtn.classList.remove("active");
                 if (labelSpan) labelSpan.textContent = t("anchor.sound_btn");
