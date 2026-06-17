@@ -1,0 +1,16 @@
+# MAREA — Cloudflare Pages configuration
+# Project: marea-tide
+# Account ID: 5df89a67326725077c0c1e7a6d7c9328
+
+name = "marea-tide"
+compatibility_date = "2025-06-17"
+pages_build_output_dir = "dist"
+
+# Security headers are managed via public/_headers (Cloudflare Pages _headers file)
+# No workers or functions needed — Marea is 100% static PWA
+
+[env.production]
+# Production environment — deployed from main branch via GitHub Actions
+
+[env.preview]
+# Preview deployments — automatically created by Cloudflare Pages for PRs
