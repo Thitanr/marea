@@ -328,18 +328,22 @@
                             </select>
                         </div>
 
-                        <!-- Orientación una mano -->
+                        <!-- Orientación una mano + Motor (CIL/KAI inspired) -->
                         <div class="settings-item">
                             <div class="setting-desc">
-                                <strong data-i18n="settings.hand_title">Distribución Unilateral (Móviles)</strong>
-                                <span data-i18n="settings.hand_desc">Ajusta los controles para alcanzarlos fácilmente con un solo pulgar.</span>
+                                <strong data-i18n="settings.hand_title">Distribución Unilateral + Motor (CIL/KAI)</strong>
+                                <span data-i18n="settings.hand_desc">Ajusta los controles para una sola mano con botones más grandes. Inspirado en el perfil motor de CIL/KAI para stroke y movilidad reducida.</span>
                             </div>
                             <select id="setting-hand-mode" class="settings-select">
-                                <option value="right" data-i18n="settings.hand_right">Mano Derecha (Predeterminado)</option>
-                                <option value="left" data-i18n="settings.hand_left">Mano Izquierda</option>
-                                <option value="center" data-i18n="settings.hand_center">Centrado (Pantalla Completa)</option>
+                                <option value="right">Mano Derecha</option>
+                                <option value="left">Mano Izquierda</option>
+                                <option value="center">Centrado</option>
+                                <option value="motor-right">Motor Derecha (Botones Grandes)</option>
+                                <option value="motor-left">Motor Izquierda (Botones Grandes)</option>
                             </select>
                         </div>
+
+                        <!-- Tema Visual -->
 
                         <!-- Tema Visual -->
                         <div class="settings-item">
@@ -353,6 +357,19 @@
                                 <option value="high-contrast" data-i18n="settings.theme_contrast">Alto Contraste</option>
                                 <option value="monochrome" data-i18n="settings.theme_mono">Monocromo (Silencio de Color)</option>
                             </select>
+                        </div>
+
+                        <!-- Perfil Sensorial (CIL/KAI inspired) -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.sensory_title">Modo Sensorial (Baja Estimulación)</strong>
+                                <span data-i18n="settings.sensory_desc">Suaviza colores, reduce animaciones y atenúa brillos. Ideal para autismo, HSP o momentos de saturación sensorial.</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" id="setting-sensory-mode">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label" data-i18n="settings.sensory_toggle">Activar modo sensorial</span>
+                            </label>
                         </div>
 
                         <!-- Backup con Supabase -->
@@ -373,6 +390,29 @@
                             <button id="btn-reset-data" class="btn-danger" data-i18n="settings.reset_btn">Borrar Todo</button>
                         </div>
                     </div>
+
+                    <!-- Marea Manifesto — inspired by CIL/KAI Treaty of Rights -->
+                    <details class="manifesto-card">
+                        <summary class="manifesto-summary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                <path d="M2 17l10 5 10-5"></path>
+                                <path d="M2 12l10 5 10-5"></path>
+                            </svg>
+                            <span data-i18n="manifesto.title">Manifiesto Marea — Cognitive Handshake</span>
+                        </summary>
+                        <div class="manifesto-body">
+                            <p class="manifesto-epigraph" data-i18n="manifesto.epigraph">"Ninguna inteligencia es completa. Ningún apoyo es neutral. La interacción legítima nace del reconocimiento mutuo de estas limitaciones."</p>
+                            <ol class="manifesto-principles">
+                                <li><strong data-i18n="manifesto.p1_title">Declaración de Modelo.</strong> <span data-i18n="manifesto.p1_desc">Marea declara que opera desde un modelo de regulación sensorial y validación radical. No diagnostica, no prescribe, no reemplaza intervención profesional.</span></li>
+                                <li><strong data-i18n="manifesto.p2_title">Declaración de Riesgo.</strong> <span data-i18n="manifesto.p2_desc">Esta herramienta puede evocar sensaciones intensas. Si en algún momento necesitas detenerte, el botón de salida rápida está siempre visible.</span></li>
+                                <li><strong data-i18n="manifesto.p3_title">Intento de Traducción.</strong> <span data-i18n="manifesto.p3_desc">Marea busca traducir entre tu estado interno y el lenguaje del cuerpo: respiración, sonido, tacto, palabra. Cuando la traducción falla, Marea guarda silencio.</span></li>
+                                <li><strong data-i18n="manifesto.p4_title">Auto-Limitación.</strong> <span data-i18n="manifesto.p4_desc">Si un ejercicio no resuena, tienes derecho a saltarlo. Marea nunca fuerza una interacción. La inhabilidad de traducir no autoriza la acción.</span></li>
+                                <li><strong data-i18n="manifesto.p5_title">Principio de Incompletitud.</strong> <span data-i18n="manifesto.p5_desc">Reconocemos formalmente que ninguna herramienta es completa ni neutral. Marea es un punto de apoyo, no una solución total. Tu soberanía es el ancla.</span></li>
+                            </ol>
+                            <p class="manifesto-signature">🌊 LANA Technologies — Madrid, 2026</p>
+                        </div>
+                    </details>
                 </div>
             </section>
 

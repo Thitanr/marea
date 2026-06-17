@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lang: localStorage.getItem("marea_lang") || "es",
         theme: localStorage.getItem("marea_theme") || "deep-sea",
         handMode: localStorage.getItem("marea_hand") || "right",
+        sensoryMode: localStorage.getItem("marea_sensory") === "true",
         activeTab: "refugio",
         activeAnchorSubtab: "breathe",
         
@@ -111,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectLanguage: document.getElementById("setting-language"),
         selectHandMode: document.getElementById("setting-hand-mode"),
         selectTheme: document.getElementById("setting-theme"),
+        toggleSensoryMode: document.getElementById("setting-sensory-mode"),
         btnSyncSupabase: document.getElementById("btn-sync-supabase"),
         btnResetData: document.getElementById("btn-reset-data")
     };
@@ -737,6 +739,15 @@ document.addEventListener("DOMContentLoaded", () => {
             applyTheme();
         });
 
+        // Sensory Mode (CIL/KAI inspired)
+        elements.toggleSensoryMode.checked = state.sensoryMode;
+        applySensoryMode();
+        elements.toggleSensoryMode.addEventListener("change", (e) => {
+            state.sensoryMode = e.target.checked;
+            localStorage.setItem("marea_sensory", state.sensoryMode);
+            applySensoryMode();
+        });
+
         // Wipe Data
         elements.btnResetData.addEventListener("click", () => {
             if (confirm(t("settings.reset_confirm"))) {
@@ -748,8 +759,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyHandMode() {
-        elements.body.classList.remove("mode-right-hand", "mode-left-hand", "mode-center");
-        elements.body.classList.add(`mode-${state.handMode}`);
+        elements.body.classList.remove(
+            "mode-right-hand", "mode-left-hand", "mode-center",
+            "mode-motor"
+        );
+        if (state.handMode.startsWith("motor-")) {
+            const base = state.handMode.replace("motor-", "");
+            elements.body.classList.add(`mode-${base}-hand`, "mode-motor");
+        } else if (state.handMode === "center") {
+            elements.body.classList.add("mode-center");
+        } else {
+            elements.body.classList.add(`mode-${state.handMode}-hand`);
+        }
+    }
+
+    function applySensoryMode() {
+        if (state.sensoryMode) {
+            elements.body.classList.add("mode-sensory");
+        } else {
+            elements.body.classList.remove("mode-sensory");
+        }
     }
 
     function applyTheme() {
@@ -760,12 +789,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
             const colors = {
-                "deep-sea": "#0B1120",
+                "deep-sea": "#0a0f0d",
                 "warm-sand": "#faf8f5",
                 "high-contrast": "#000000",
                 "monochrome": "#090909"
             };
-            metaThemeColor.setAttribute("content", colors[state.theme] || "#060913");
+            metaThemeColor.setAttribute("content", colors[state.theme] || "#0a0f0d");
         }
     }
 

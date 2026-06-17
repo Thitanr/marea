@@ -98,6 +98,58 @@
     --blur-glass: blur(16px);
 }
 
+/* --- Accessibility Profile: Sensory Mode (Autism / HSP) --- */
+.mode-sensory {
+    --accent-glow: rgba(77, 184, 150, 0.35);
+    --accent-primary: rgba(77, 184, 150, 0.75);
+    --accent-secondary: rgba(77, 184, 150, 0.65);
+    --border-glow: rgba(77, 184, 150, 0.06);
+    --border-glow-focus: rgba(77, 184, 150, 0.2);
+    --transition-smooth: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-quick: all 0.35s ease;
+}
+
+.mode-sensory .main-content { gap: 18px; }
+.mode-sensory .breathing-ring::after {
+    animation-duration: 0s !important;
+    box-shadow: 0 0 8px rgba(77, 184, 150, 0.05) !important;
+}
+.mode-sensory .chat-bubble {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+.mode-sensory .app-container {
+    backdrop-filter: blur(6px);
+}
+
+/* --- Accessibility Profile: Motor-Friendly Mode --- */
+.mode-motor .nav-item {
+    min-height: 56px;
+    padding: 10px 14px;
+}
+.mode-motor .btn-primary,
+.mode-motor .btn-secondary,
+.mode-motor .btn-danger {
+    min-height: 52px;
+    padding: 14px 24px;
+    font-size: 1rem;
+}
+.mode-motor button,
+.mode-motor select,
+.mode-motor .aac-card-btn,
+.mode-motor .nav-item,
+.mode-motor .quick-exit-btn {
+    touch-action: manipulation;
+}
+.mode-motor .aac-card-btn { min-height: 56px; }
+.mode-motor .settings-select { min-height: 48px; font-size: 1rem; }
+.mode-motor .chat-input { min-height: 52px; font-size: 1rem; }
+.mode-motor button:active {
+    pointer-events: none;
+    transition: pointer-events 0s 0.4s;
+}
+
 /* 2. Global Reset & Layout */
 * {
     box-sizing: border-box;
@@ -1176,5 +1228,115 @@ textarea.safe-input {
 .toast-notification.toast-visible {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   17. Manifesto Card
+   ========================================================================== */
+.manifesto-card {
+    margin-top: 4px;
+    border: 1px solid var(--lana-hairline);
+    border-radius: 12px;
+    background: var(--bg-card);
+    backdrop-filter: var(--blur-glass);
+    overflow: hidden;
+}
+
+.manifesto-summary {
+    padding: 14px 16px;
+    font-weight: 600;
+    color: var(--accent-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+    transition: var(--transition-quick);
+}
+.manifesto-summary:hover {
+    background: rgba(77, 184, 150, 0.06);
+}
+
+.manifesto-body {
+    padding: 0 16px 18px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.manifesto-epigraph {
+    font-style: italic;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 14px;
+    padding: 0 8px;
+    font-size: 0.88rem;
+}
+
+.manifesto-principles {
+    list-style: decimal;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.manifesto-principles li strong {
+    color: var(--accent-primary);
+}
+
+.manifesto-signature {
+    text-align: right;
+    margin-top: 14px;
+    font-size: 0.8rem;
+    color: var(--accent-primary);
+    opacity: 0.7;
+}
+
+/* ==========================================================================
+   18. Toggle Switch (for sensory mode)
+   ========================================================================== */
+.settings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.settings-toggle input {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    transition: var(--transition-quick);
+    flex-shrink: 0;
+}
+.toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: var(--transition-quick);
+}
+.settings-toggle input:checked + .toggle-slider {
+    background: var(--accent-primary);
+}
+.settings-toggle input:checked + .toggle-slider::after {
+    left: 22px;
+    background: var(--text-dark);
+}
+
+.toggle-label {
+    font-size: 0.85rem;
+    color: var(--text-primary);
 }
 
