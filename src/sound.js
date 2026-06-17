@@ -136,3 +136,5 @@ class OceanSynth {
 
 // Global instance
 const oceanSynth = new OceanSynth();
+
+export { oceanSynth, OceanSynth };

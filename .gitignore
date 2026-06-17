@@ -14,3 +14,19 @@ Desktop.ini
 *.njsproj
 *.sln
 *.sw?
+
+# Dependencies
+node_modules/
+
+# Vite build output
+dist/
+.vite/
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# Environment
+.env
+.env.local
+.env.*.local

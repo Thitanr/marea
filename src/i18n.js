@@ -1346,3 +1346,5 @@ const aacBoardData = {
         ]
     }
 };
+
+export { i18n, aacBoardData };

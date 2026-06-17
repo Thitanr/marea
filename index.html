@@ -21,7 +21,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- App Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body class="theme-deep-sea mode-right-hand">
     <div class="app-container lana-matrix-grid">
@@ -459,9 +459,7 @@
         </nav>
     </div>
 
-    <!-- Application Script Files -->
-    <script src="i18n.js"></script>
-    <script src="sound.js"></script>
-    <script src="app.js"></script>
+    <!-- Application Entry (Vite ESM) -->
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

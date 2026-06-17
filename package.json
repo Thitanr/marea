@@ -1,0 +1,22 @@
+{
+  "name": "marea",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Marea — Sostén & Dignidad. World-class PWA for sensory regulation and radical validation.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:a11y": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.52.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.3.0",
+    "vitest": "^3.1.0"
+  }
+}

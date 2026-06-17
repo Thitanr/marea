@@ -1,8 +1,11 @@
 /* ==========================================================================
    MAREA - CORE APPLICATION LOGIC
-   Handles routing, i18n rendering, chat state machine, sensory grounding, 
+   Handles routing, i18n rendering, chat state machine, sensory grounding,
    AAC speech, interactive canvas drawing, and local storage state persistence.
    ========================================================================== */
+
+import { i18n, aacBoardData } from './i18n.js';
+import { oceanSynth } from './sound.js';
 
 // Toast notification system (non-blocking, accessibility-friendly)
 function showToast(message) {
@@ -20,8 +23,8 @@ function showToast(message) {
     }, 3000);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. App State
+/* ----- Module-compatible init (Phase 1a) ----- */
+function boot() {
     const state = {
         lang: localStorage.getItem("marea_lang") || "es",
         theme: localStorage.getItem("marea_theme") || "deep-sea",
@@ -937,4 +940,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .catch(err => console.error('[Service Worker] Registration failed:', err));
         });
     }
-});
+}
+
+/* ----- Exported for main.ts (Phase 1a) ----- */
+export { boot };
