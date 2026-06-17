@@ -1,0 +1,7 @@
+# MAREA — Sostén & Dignidad
+# https://marea.lanatech.tech
+
+User-agent: *
+Allow: /
+
+Sitemap: https://marea.lanatech.tech/sitemap.xml
