@@ -1110,12 +1110,11 @@ textarea.safe-input {
    LANA TECHNOLOGIES BRAND INTEGRATION
    ========================================================================== */
 
-.lana-ecosystem-rail {
+.lana-powered-by {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    padding: 8px 16px;
+    padding: 6px 16px;
     background: rgba(12, 17, 23, 0.95);
     border-bottom: 1px solid var(--lana-hairline);
     font-family: var(--font-mono);
@@ -1123,34 +1122,8 @@ textarea.safe-input {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     width: 100%;
-}
-
-.lana-ecosystem-rail .lana-rail-label {
     color: var(--text-muted);
-    margin-right: 8px;
-    font-weight: 700;
-}
-
-.lana-ecosystem-rail a {
-    color: var(--text-muted);
-    text-decoration: none;
-    padding: 3px 8px;
-    border-radius: 4px;
-    border: 1px solid transparent;
-    transition: all 0.15s ease;
-}
-
-.lana-ecosystem-rail a:hover {
-    color: var(--accent-primary);
-    border-color: var(--lana-hairline);
-    background: rgba(77, 184, 150, 0.08);
-}
-
-.lana-ecosystem-rail a[data-active="true"] {
-    color: var(--accent-primary);
-    border-color: rgba(77, 184, 150, 0.35);
-    background: rgba(77, 184, 150, 0.15);
-    font-weight: bold;
+    opacity: 0.7;
 }
 
 .lana-matrix-grid {
