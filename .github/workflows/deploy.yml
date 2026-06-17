@@ -3,24 +3,18 @@ name: MAREA CI/CD — Deploy to Cloudflare Pages
 on:
   push:
     branches: [main]
-
-env:
-  NODE_VERSION: "20"
+  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Deploy to Cloudflare Pages
+    name: Deploy Marea to Cloudflare Pages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name marea-tide --branch main
+          accountId: 5df89a67326725077c0c1e7a6d7c9328
+          command: pages deploy . --project-name=marea-tide --commit-dirty=true
