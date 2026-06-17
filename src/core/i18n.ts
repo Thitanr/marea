@@ -28,5 +28,10 @@ export function translateDOM(): void {
     el.setAttribute('placeholder', t(key));
   });
 
+  document.querySelectorAll<HTMLElement>('[data-i18n-aria]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria')!;
+    el.setAttribute('aria-label', t(key));
+  });
+
   document.documentElement.lang = state.lang;
 }
