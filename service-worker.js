@@ -1,65 +1,59 @@
 /* ==========================================================================
    MAREA - SERVICE WORKER
-   Enables offline load of the application assets.
+   Network-first with cache fallback. Always serves freshest content.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v2';
-const ASSETS = [
-    './',
-    './index.html',
-    './styles.css',
-    './app.js',
-    './i18n.js',
-    './sound.js',
-    './manifest.json',
-    './icon-192.png',
-    './icon-512.png',
-    './icon-192-maskable.png',
-    './icon-512-maskable.png',
-    './favicon.svg'
-];
+const CACHE_NAME = 'marea-cache-v3';
 
-// Install Event - cache core assets
-self.addEventListener('install', (e) => {
-    e.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            console.log('[Service Worker] Caching files...');
-            return cache.addAll(ASSETS);
-        })
-    );
+// Install Event — skip waiting so the new SW activates immediately
+self.addEventListener('install', () => {
+    self.skipWaiting();
 });
 
-// Activate Event - clean old caches
+// Activate Event — clean old caches and claim clients
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
-                keys.map((key) => {
-                    if (key !== CACHE_NAME) {
-                        console.log('[Service Worker] Removing old cache:', key);
+                keys.filter((key) => key !== CACHE_NAME)
+                    .map((key) => {
+                        console.log('[SW] Removing old cache:', key);
                         return caches.delete(key);
-                    }
-                })
+                    })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
-// Fetch Event - network fallback to cache offline
+// Fetch Event — network-first, fallback to cache, update cache on success
 self.addEventListener('fetch', (e) => {
+    // Only handle GET navigation and same-origin requests
+    if (e.request.method !== 'GET') return;
+
     e.respondWith(
-        caches.match(e.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            
-            // Try fetching from network, if fails, throw error (or serve offline page)
-            return fetch(e.request).catch(() => {
-                // If offline and request is for page, return cached index
+        (async () => {
+            try {
+                // Try network first
+                const networkResponse = await fetch(e.request);
+
+                // Cache the fresh response for next time (clone because body can only be consumed once)
+                const cache = await caches.open(CACHE_NAME);
+                cache.put(e.request, networkResponse.clone());
+
+                return networkResponse;
+            } catch (_err) {
+                // Offline — serve from cache
+                const cachedResponse = await caches.match(e.request);
+                if (cachedResponse) return cachedResponse;
+
+                // If navigating and no cache match, try the root
                 if (e.request.mode === 'navigate') {
                     return caches.match('./index.html');
                 }
-            });
-        })
+
+                // Nothing we can do
+                return new Response('Offline', { status: 503 });
+            }
+        })()
     );
 });
