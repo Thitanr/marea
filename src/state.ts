@@ -4,15 +4,17 @@
    Persisted fields hydrate from localStorage on import.
    ========================================================================== */
 
-import type { AppState, Lang, Theme, HandMode, AacCategory } from './types.js';
+import type { AppState, Lang, Theme, HandMode, FontSize, AacCategory } from './types.js';
 
 // ---- Persisted settings ----
-function loadPersisted(): Pick<AppState, 'lang' | 'theme' | 'handMode' | 'sensoryMode'> {
+function loadPersisted(): Pick<AppState, 'lang' | 'theme' | 'handMode' | 'sensoryMode' | 'fontSize' | 'reduceMotion'> {
   return {
     lang: (localStorage.getItem('marea_lang') as Lang) || 'es',
     theme: (localStorage.getItem('marea_theme') as Theme) || 'deep-sea',
     handMode: (localStorage.getItem('marea_hand') as HandMode) || 'right',
     sensoryMode: localStorage.getItem('marea_sensory') === 'true',
+    fontSize: (localStorage.getItem('marea_fontsize') as FontSize) || 'normal',
+    reduceMotion: localStorage.getItem('marea_reduce_motion') === 'true',
   };
 }
 
@@ -61,6 +63,14 @@ export function persistHandMode(mode: HandMode): void {
 
 export function persistSensoryMode(enabled: boolean): void {
   localStorage.setItem('marea_sensory', String(enabled));
+}
+
+export function persistFontSize(size: FontSize): void {
+  localStorage.setItem('marea_fontsize', size);
+}
+
+export function persistReduceMotion(enabled: boolean): void {
+  localStorage.setItem('marea_reduce_motion', String(enabled));
 }
 
 export { state };

@@ -7,6 +7,7 @@
 export type Lang = 'es' | 'en' | 'it' | 'fr' | 'de' | 'zh' | 'pt' | 'ja';
 export type Theme = 'deep-sea' | 'warm-sand' | 'high-contrast' | 'monochrome';
 export type HandMode = 'right' | 'left' | 'center' | 'motor-right' | 'motor-left' | 'motor-center';
+export type FontSize = 'normal' | 'large' | 'xlarge';
 
 // ===== Chat =====
 export type ChatSender = 'system' | 'user';
@@ -53,6 +54,8 @@ export interface AppState {
   theme: Theme;
   handMode: HandMode;
   sensoryMode: boolean;
+  fontSize: FontSize;
+  reduceMotion: boolean;
   activeTab: string;
   activeAnchorSubtab: string;
 

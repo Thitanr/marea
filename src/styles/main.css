@@ -131,6 +131,22 @@
     backdrop-filter: blur(6px);
 }
 
+/* --- Accessibility Profile: Font Size Scaling --- */
+.font-large  { font-size: 1.18rem; }
+.font-xlarge { font-size: 1.38rem; }
+.font-large  .nav-label { font-size: 0.7rem; }
+.font-xlarge .nav-label { font-size: 0.72rem; }
+
+/* --- Accessibility Profile: Reduce Motion --- */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+}
+
 /* --- Accessibility Profile: Motor-Friendly Mode --- */
 .mode-motor .nav-item {
     min-height: 56px;

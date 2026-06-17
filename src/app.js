@@ -7,7 +7,7 @@
 import { aacBoardData } from './data/aac-board.js';
 import { oceanSynth } from './sound.js';
 import { svgIcons } from './data/svg-icons.js';
-import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode } from './state.js';
+import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode, persistFontSize, persistReduceMotion } from './state.js';
 import { showToast } from './core/toast.js';
 import { t, translateDOM, tLang } from './core/i18n.js';
 
@@ -654,6 +654,30 @@ function boot() {
             applySensoryMode();
         });
 
+        // Font size
+        const selectFontSize = document.getElementById("setting-font-size");
+        if (selectFontSize) {
+            selectFontSize.value = state.fontSize;
+            applyFontSize();
+            selectFontSize.addEventListener("change", (e) => {
+                state.fontSize = e.target.value;
+                persistFontSize(state.fontSize);
+                applyFontSize();
+            });
+        }
+
+        // Reduce motion
+        const toggleReduceMotion = document.getElementById("setting-reduce-motion");
+        if (toggleReduceMotion) {
+            toggleReduceMotion.checked = state.reduceMotion;
+            applyReduceMotion();
+            toggleReduceMotion.addEventListener("change", (e) => {
+                state.reduceMotion = e.target.checked;
+                persistReduceMotion(state.reduceMotion);
+                applyReduceMotion();
+            });
+        }
+
         // Sync (coming soon)
         elements.btnSyncSupabase.addEventListener("click", () => {
             showToast(t("settings.sync_coming"));
@@ -690,6 +714,17 @@ function boot() {
         } else {
             elements.body.classList.remove("mode-sensory");
         }
+    }
+
+    function applyFontSize() {
+        elements.body.classList.remove("font-large", "font-xlarge");
+        if (state.fontSize === "large") elements.body.classList.add("font-large");
+        else if (state.fontSize === "xlarge") elements.body.classList.add("font-xlarge");
+    }
+
+    function applyReduceMotion() {
+        if (state.reduceMotion) elements.body.classList.add("reduce-motion");
+        else elements.body.classList.remove("reduce-motion");
     }
 
     function applyTheme() {
