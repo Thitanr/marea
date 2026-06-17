@@ -59,7 +59,7 @@
         <main id="main-content" class="main-content">
             
             <!-- 1. EL REFUGIO (CHAT) -->
-            <section id="tab-refugio" class="tab-panel active" role="tabpanel" aria-labelledby="nav-refugio">
+            <section id="tab-refugio" class="tab-panel" role="tabpanel" aria-labelledby="nav-refugio">
                 <div class="chat-wrapper">
                     <div id="chat-messages" class="chat-messages" aria-live="polite">
                         <!-- Dynamic conversation entries will go here -->
@@ -153,7 +153,7 @@
             </section>
 
             <!-- 3. VOZ DE MAREA (CAA / AAC) -->
-            <section id="tab-voz" class="tab-panel" role="tabpanel" aria-labelledby="nav-voz">
+            <section id="tab-voz" class="tab-panel active" role="tabpanel" aria-labelledby="nav-voz">
                 <div class="aac-layout">
                     <!-- Text Pad for output -->
                     <div class="aac-output-container">
@@ -567,11 +567,14 @@
 
         <!-- Bottom Tab Navigation Bar -->
         <nav class="app-navbar" role="navigation" aria-label="Menú principal">
-            <button class="nav-item active" id="nav-refugio" data-tab="refugio" aria-label="El Refugio (Chat)" aria-current="page">
+            <button class="nav-item active" id="nav-voz" data-tab="voz" aria-label="Voz de Marea (Hablar)" aria-current="page">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
                 </svg>
-                <span class="nav-label" data-i18n="nav.refugio">Refugio</span>
+                <span class="nav-label" data-i18n="nav.voz">Voz</span>
             </button>
             <button class="nav-item" id="nav-ancla" data-tab="ancla" aria-label="El Ancla (Grounding)">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -580,15 +583,6 @@
                     <line x1="8" y1="12" x2="16" y2="12"></line>
                 </svg>
                 <span class="nav-label" data-i18n="nav.ancla">Ancla</span>
-            </button>
-            <button class="nav-item" id="nav-voz" data-tab="voz" aria-label="Voz de Marea (Hablar)">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-                <span class="nav-label" data-i18n="nav.voz">Voz</span>
             </button>
             <button class="nav-item" id="nav-seguridad" data-tab="seguridad" aria-label="Anclajes de seguridad">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -609,6 +603,12 @@
                     <path d="M8 14 C10 11 11 16 12 14 C13 12 14 16 16 14" stroke-width="1.5" opacity="0.7"/>
                 </svg>
                 <span class="nav-label" data-i18n="nav.sintonia">Sintonía</span>
+            </button>
+            <button class="nav-item" id="nav-refugio" data-tab="refugio" aria-label="El Refugio (Chat)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span class="nav-label" data-i18n="nav.refugio">Refugio</span>
             </button>
             <button class="nav-item" id="nav-settings" data-tab="settings" aria-label="Configuración">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -24,7 +24,7 @@ const persisted = loadPersisted();
 const state: AppState = {
   ...persisted,
 
-  activeTab: 'refugio',
+  activeTab: 'voz',
   activeAnchorSubtab: 'breathe',
 
   // Chat
