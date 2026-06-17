@@ -15,10 +15,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#060913">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- System fonts — no external requests, full offline privacy -->
 
     <!-- App Stylesheet -->
     <link rel="stylesheet" href="/src/styles/main.css">
@@ -34,7 +31,18 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-logo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="marea-symbol-svg" width="28" height="28"><path d="M2 10c3 0 3-4 6-4s3 4 6 4 3-4 6-4 3 4 6 4M2 17c3 0 3-4 6-4s3 4 6 4 3-4 6-4 3 4 6 4"></path><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+                <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="marea-symbol-svg" width="28" height="28" aria-hidden="true">
+                  <circle cx="14" cy="14" r="12" stroke-width="1.4"/>
+                  <line x1="14" y1="14" x2="14" y2="4" stroke-width="1.8"/><line x1="11.5" y1="4" x2="16.5" y2="4" stroke-width="1.8"/>
+                  <line x1="14" y1="14" x2="14" y2="24" stroke-width="1.8"/><line x1="12" y1="21.5" x2="16" y2="21.5" stroke-width="1.4"/><line x1="12" y1="24" x2="16" y2="24" stroke-width="1.4"/>
+                  <line x1="14" y1="14" x2="24" y2="14" stroke-width="1.8"/><line x1="24" y1="11.5" x2="24" y2="16.5" stroke-width="1.4"/>
+                  <line x1="14" y1="14" x2="4" y2="14" stroke-width="1.8"/><line x1="6" y1="12" x2="4" y2="14" stroke-width="1.8"/><line x1="6" y1="16" x2="4" y2="14" stroke-width="1.8"/>
+                  <line x1="14" y1="14" x2="21.5" y2="6.5" stroke-width="1.6"/><line x1="20" y1="5" x2="23" y2="8" stroke-width="1.4"/>
+                  <line x1="14" y1="14" x2="6.5" y2="21.5" stroke-width="1.6"/><line x1="5" y1="20" x2="8" y2="23" stroke-width="1.3"/>
+                  <line x1="14" y1="14" x2="6.5" y2="6.5" stroke-width="1.6"/><line x1="5" y1="8" x2="8" y2="5" stroke-width="1.3"/>
+                  <line x1="14" y1="14" x2="21.5" y2="21.5" stroke-width="1.6"/><line x1="23" y1="20" x2="20" y2="23" stroke-width="1.3"/>
+                  <circle cx="14" cy="14" r="2" fill="currentColor" stroke="none"/>
+                </svg>
                 <h1>Marea</h1>
             </div>
             <button id="quick-exit-btn" class="quick-exit-btn" aria-label="Salida rápida / Cerrar app">
@@ -65,6 +73,14 @@
                             <!-- Populated dynamically by app.js -->
                         </div>
                         <div class="chat-input-area">
+                            <button id="chat-mic-btn" class="btn-secondary round-icon-btn mic-btn" aria-label="Hablar" data-i18n-aria="refugio.mic_start">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </button>
                             <input type="text" id="chat-text-input" placeholder="Escribe aquí si lo deseas..." aria-label="Mensaje para el refugio" data-i18n-placeholder="refugio.input_placeholder">
                             <button id="chat-send-btn" class="btn-primary round-icon-btn" aria-label="Enviar">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
@@ -409,6 +425,109 @@
                 </div>
             </section>
 
+            <!-- 7. SINTONÍA (AUTISMO) -->
+            <section id="tab-sintonia" class="tab-panel" role="tabpanel" aria-labelledby="nav-sintonia">
+                <div class="sintonia-wrapper">
+                    <div class="sintonia-header">
+                        <h2 class="sintonia-title" data-i18n="sintonia.title">Sintonía</h2>
+                        <p class="sintonia-subtitle" data-i18n="sintonia.subtitle">Este espacio es para tu cerebro tal como es.</p>
+                    </div>
+
+                    <!-- Estado actual -->
+                    <div class="sintonia-section">
+                        <h3 class="sintonia-section-title" data-i18n="sintonia.state_title">¿Qué me está pasando?</h3>
+                        <div class="state-cards">
+                            <button class="state-card" data-state="sobrecarga" aria-expanded="false">
+                                <span class="state-icon" aria-hidden="true">⚡</span>
+                                <strong data-i18n="sintonia.state.sobrecarga">Sobrecarga sensorial</strong>
+                                <span class="state-desc" data-i18n="sintonia.state.sobrecarga_desc">Demasiado de todo</span>
+                            </button>
+                            <button class="state-card" data-state="meltdown" aria-expanded="false">
+                                <span class="state-icon" aria-hidden="true">🌊</span>
+                                <strong data-i18n="sintonia.state.meltdown">Meltdown</strong>
+                                <span class="state-desc" data-i18n="sintonia.state.meltdown_desc">El cuerpo reacciona solo</span>
+                            </button>
+                            <button class="state-card" data-state="shutdown" aria-expanded="false">
+                                <span class="state-icon" aria-hidden="true">🌫️</span>
+                                <strong data-i18n="sintonia.state.shutdown">Shutdown</strong>
+                                <span class="state-desc" data-i18n="sintonia.state.shutdown_desc">Me apago hacia adentro</span>
+                            </button>
+                            <button class="state-card" data-state="masking" aria-expanded="false">
+                                <span class="state-icon" aria-hidden="true">😶</span>
+                                <strong data-i18n="sintonia.state.masking">Agotamiento</strong>
+                                <span class="state-desc" data-i18n="sintonia.state.masking_desc">Cansado de fingir</span>
+                            </button>
+                        </div>
+                        <div id="sintonia-state-detail" class="state-detail hidden" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Kit de regulación -->
+                    <div class="sintonia-section">
+                        <h3 class="sintonia-section-title" data-i18n="sintonia.reg_title">Kit de regulación</h3>
+                        <div class="reg-grid">
+                            <button class="reg-card" data-reg="pressure">
+                                <span aria-hidden="true">🤗</span>
+                                <span data-i18n="sintonia.reg.pressure">Presión</span>
+                            </button>
+                            <button class="reg-card" data-reg="movement">
+                                <span aria-hidden="true">🔄</span>
+                                <span data-i18n="sintonia.reg.movement">Movimiento</span>
+                            </button>
+                            <button class="reg-card" data-reg="cold">
+                                <span aria-hidden="true">🧊</span>
+                                <span data-i18n="sintonia.reg.cold">Frío</span>
+                            </button>
+                            <button class="reg-card" data-reg="sound">
+                                <span aria-hidden="true">🎵</span>
+                                <span data-i18n="sintonia.reg.sound">Sonido</span>
+                            </button>
+                            <button class="reg-card" data-reg="texture">
+                                <span aria-hidden="true">👆</span>
+                                <span data-i18n="sintonia.reg.texture">Textura</span>
+                            </button>
+                            <button class="reg-card" data-reg="breath">
+                                <span aria-hidden="true">💨</span>
+                                <span data-i18n="sintonia.reg.breath">Respirar</span>
+                            </button>
+                        </div>
+                        <div id="sintonia-reg-detail" class="reg-detail hidden" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Decirlo sin palabras -->
+                    <div class="sintonia-section">
+                        <h3 class="sintonia-section-title" data-i18n="sintonia.show_title">Decirlo sin palabras</h3>
+                        <p class="sintonia-hint" data-i18n="sintonia.show_hint">Muestra esta pantalla a quien esté contigo.</p>
+                        <div class="show-cards">
+                            <div class="show-card">
+                                <span data-i18n="sintonia.show.overload">Estoy en sobrecarga. No es personal.</span>
+                            </div>
+                            <div class="show-card">
+                                <span data-i18n="sintonia.show.silence">Necesito silencio y espacio ahora.</span>
+                            </div>
+                            <div class="show-card">
+                                <span data-i18n="sintonia.show.notouch">No me toques por favor.</span>
+                            </div>
+                            <div class="show-card">
+                                <span data-i18n="sintonia.show.waiting">Vuelvo cuando pueda. Estoy bien.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comprender mi cerebro -->
+                    <div class="sintonia-section sintonia-understanding">
+                        <div class="understanding-card">
+                            <p data-i18n="sintonia.understand1">Tu sistema sensorial no está roto. Procesa más información de la que el mundo espera que proceses.</p>
+                        </div>
+                        <div class="understanding-card">
+                            <p data-i18n="sintonia.understand2">Enmascarar cuesta energía real. El agotamiento que sientes es físico, no un fallo de carácter.</p>
+                        </div>
+                        <div class="understanding-card">
+                            <p data-i18n="sintonia.understand3">Un meltdown no es una rabieta. Es el cuerpo liberando presión acumulada. No es tu culpa.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </main>
 
         <!-- Bottom Tab Navigation Bar -->
@@ -448,6 +567,13 @@
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                 </svg>
                 <span class="nav-label" data-i18n="nav.diario">Diario</span>
+            </button>
+            <button class="nav-item" id="nav-sintonia" data-tab="sintonia" aria-label="Sintonía — espacio autista">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 2C12 2 4 9 4 14a8 8 0 0 0 16 0c0-5-8-12-8-12z"/>
+                    <path d="M8 14 C10 11 11 16 12 14 C13 12 14 16 16 14" stroke-width="1.5" opacity="0.7"/>
+                </svg>
+                <span class="nav-label" data-i18n="nav.sintonia">Sintonía</span>
             </button>
             <button class="nav-item" id="nav-settings" data-tab="settings" aria-label="Configuración">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -1,10 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#0a0f0d"/>
-  <path d="M0 44 Q8 32 16 36 Q24 40 32 30 Q40 20 48 28 Q56 36 64 26 L64 64 L0 64Z"
-        fill="#4db896"/>
-  <path d="M0 44 Q8 32 16 36 Q24 40 32 30 Q40 20 48 28 Q56 36 64 26"
-        fill="none" stroke="#3a8a72" stroke-width="1.5"/>
-  <circle cx="18" cy="28" r="1.8" fill="#3a8a72" opacity="0.8"/>
-  <circle cx="34" cy="22" r="2" fill="#3a8a72" opacity="0.8"/>
-  <circle cx="52" cy="24" r="1.6" fill="#3a8a72" opacity="0.8"/>
+  <rect width="64" height="64" rx="14" fill="#0a0f0d"/>
+  <g stroke="#4db896" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="translate(4,4)">
+    <circle cx="28" cy="28" r="24" stroke-width="2.5"/>
+    <line x1="28" y1="28" x2="28" y2="7" stroke-width="3.2"/><line x1="22" y1="7" x2="34" y2="7" stroke-width="3.2"/>
+    <line x1="28" y1="28" x2="28" y2="49" stroke-width="3.2"/><line x1="23" y1="43" x2="33" y2="43" stroke-width="2.5"/><line x1="23" y1="49" x2="33" y2="49" stroke-width="2.5"/>
+    <line x1="28" y1="28" x2="49" y2="28" stroke-width="3.2"/><line x1="49" y1="22" x2="49" y2="34" stroke-width="2.5"/>
+    <line x1="28" y1="28" x2="7" y2="28" stroke-width="3.2"/><line x1="11" y1="23" x2="7" y2="28" stroke-width="3.2"/><line x1="11" y1="33" x2="7" y2="28" stroke-width="3.2"/>
+    <line x1="28" y1="28" x2="43" y2="13" stroke-width="2.8"/><line x1="40" y1="9" x2="47" y2="16" stroke-width="2.5"/>
+    <line x1="28" y1="28" x2="13" y2="43" stroke-width="2.8"/><line x1="9" y1="40" x2="16" y2="47" stroke-width="2.2"/>
+    <line x1="28" y1="28" x2="13" y2="13" stroke-width="2.8"/><line x1="9" y1="16" x2="16" y2="9" stroke-width="2.2"/>
+    <line x1="28" y1="28" x2="43" y2="43" stroke-width="2.8"/><line x1="47" y1="40" x2="40" y2="47" stroke-width="2.2"/>
+    <circle cx="28" cy="28" r="4" fill="#4db896" stroke="none"/>
+  </g>
 </svg>
