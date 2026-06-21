@@ -195,15 +195,20 @@ function boot() {
         const board = document.getElementById('alzheimer-crisis-board');
         const chatWrapper = document.querySelector('#tab-refugio .chat-wrapper');
         const navLabel = document.querySelector('#nav-refugio .nav-label');
+        const navBtn = document.getElementById('nav-refugio');
         const condition = localStorage.getItem('marea_condition') || '';
         if (condition === 'alzheimer') {
             board?.classList.remove('hidden');
             chatWrapper?.classList.add('hidden');
-            if (navLabel) navLabel.textContent = t('alz.nav_label') || 'Alzheimer';
+            const label = t('alz.nav_label') || 'Alzheimer';
+            if (navLabel) navLabel.textContent = label;
+            if (navBtn) navBtn.setAttribute('aria-label', label);
         } else {
             board?.classList.add('hidden');
             chatWrapper?.classList.remove('hidden');
-            if (navLabel) navLabel.textContent = t('nav.refugio');
+            const label = t('nav.refugio');
+            if (navLabel) navLabel.textContent = label;
+            if (navBtn) navBtn.setAttribute('aria-label', label);
         }
     }
 
@@ -1667,6 +1672,12 @@ function boot() {
             setTimeout(clearTrail, 400);
         }
 
+        function onTouchCancel() {
+            isSwiping = false;
+            highlightKey(null);
+            clearTrail();
+        }
+
         rowsEl.addEventListener('click', e => {
             const key = e.target.closest('.swipe-key');
             if (!key || isSwiping) return;
@@ -1692,6 +1703,7 @@ function boot() {
                 keyboard.addEventListener('touchstart', onTouchStart, { passive: false });
                 keyboard.addEventListener('touchmove', onTouchMove, { passive: false });
                 keyboard.addEventListener('touchend', onTouchEnd);
+                keyboard.addEventListener('touchcancel', onTouchCancel);
             } else {
                 keyboard.classList.add('hidden');
                 aacBoard?.classList.remove('hidden');
@@ -1700,6 +1712,7 @@ function boot() {
                 keyboard.removeEventListener('touchstart', onTouchStart);
                 keyboard.removeEventListener('touchmove', onTouchMove);
                 keyboard.removeEventListener('touchend', onTouchEnd);
+                keyboard.removeEventListener('touchcancel', onTouchCancel);
                 clearTrail();
             }
         }

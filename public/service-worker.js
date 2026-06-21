@@ -46,11 +46,8 @@ function isCacheable(response) {
 self.addEventListener('fetch', (e) => {
     if (e.request.method !== 'GET') return;
 
-    // Don't cache cross-origin CDN requests (WebGazer) — just pass through
     const url = new URL(e.request.url);
-    if (url.origin !== self.location.origin && !url.hostname.includes('unpkg.com')) {
-        return;
-    }
+    if (url.origin !== self.location.origin) return;
 
     e.respondWith(
         (async () => {

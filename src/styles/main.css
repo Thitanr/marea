@@ -2267,8 +2267,8 @@ textarea.safe-input {
    SWIPE KEYBOARD
    ========================================================================== */
 .swipe-keyboard {
-    position: absolute;
-    inset: 0;
+    flex: 1;
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--bg-card, #0f1a17);
