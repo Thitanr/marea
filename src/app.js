@@ -1496,6 +1496,9 @@ function boot() {
             calibOverlay.classList.add('hidden');
             eyeActive = true;
             eyeBtn.classList.add('active');
+            // Update button text now that tracking is live
+            const spanEl = eyeBtn.querySelector('span');
+            if (spanEl) spanEl.textContent = t('eye.btn_stop') || 'Detener';
             if (gazeCursor) gazeCursor.classList.remove('hidden');
             // Hide WebGazer's own UI elements
             ['webgazerVideoContainer', 'webgazerFaceOverlay', 'webgazerFaceFeedbackBox'].forEach(id => {
@@ -1512,9 +1515,9 @@ function boot() {
                 gazeCursor.style.left = x + 'px';
                 gazeCursor.style.top = y + 'px';
             }
-            // Dwell detection
+            // Dwell detection — .aac-card-btn = phrase buttons (dynamic), .aac-cat-btn = category tabs
             const el = document.elementFromPoint(x, y);
-            const card = el && el.closest('.aac-phrase-btn, .aac-cat-btn');
+            const card = el && el.closest('.aac-card-btn, .aac-cat-btn');
             if (card !== gazeTarget) {
                 if (gazeTarget) {
                     gazeTarget.style.removeProperty('--dwell');
