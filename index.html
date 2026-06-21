@@ -51,6 +51,7 @@
                 <span class="onb-dot active" data-onb-step="0"></span>
                 <span class="onb-dot" data-onb-step="1"></span>
                 <span class="onb-dot" data-onb-step="2"></span>
+                <span class="onb-dot" data-onb-step="3"></span>
             </div>
             <div class="onboarding-card" id="onb-step-0">
                 <div class="onb-icon-large">
@@ -146,7 +147,31 @@
                     <button class="onb-btn onb-btn-next" data-i18n="common.next">Siguiente</button>
                 </div>
             </div>
+            <!-- Step 2: Condition Selector -->
             <div class="onboarding-card hidden" id="onb-step-2">
+                <div class="onb-icon-large">
+                    <svg class="onb-svg-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <h2 class="onb-title" data-i18n="onboarding.condition_title">¿Qué describe mejor tu situación?</h2>
+                <p class="onb-text" data-i18n="onboarding.condition_subtitle">Personaliza Marea para ti. Siempre puedes cambiarlo en Ajustes.</p>
+                <div class="onb-condition-grid">
+                    <button class="onb-condition-btn" data-condition="alzheimer" data-i18n="onboarding.condition_alzheimer">Alzheimer / Demencia</button>
+                    <button class="onb-condition-btn" data-condition="autism" data-i18n="onboarding.condition_autism">Autismo / Neurodiversidad</button>
+                    <button class="onb-condition-btn" data-condition="aphasia" data-i18n="onboarding.condition_aphasia">Afasia / Comunicación</button>
+                    <button class="onb-condition-btn" data-condition="anxiety" data-i18n="onboarding.condition_anxiety">Ansiedad / Crisis emocional</button>
+                    <button class="onb-condition-btn" data-condition="caregiver" data-i18n="onboarding.condition_caregiver">Soy cuidador/a</button>
+                    <button class="onb-condition-btn onb-condition-btn--selected" data-condition="other" data-i18n="onboarding.condition_other">Otro / Prefiero no decir</button>
+                </div>
+                <div class="onb-buttons">
+                    <button class="onb-btn onb-btn-prev" data-i18n="common.prev">Atrás</button>
+                    <button class="onb-btn onb-btn-next" data-i18n="common.next">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Privacy -->
+            <div class="onboarding-card hidden" id="onb-step-3">
                 <div class="onb-icon-large">
                     <svg class="onb-svg-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48">
                         <rect x="5" y="11" width="14" height="10" rx="2" ry="2"/>
@@ -453,6 +478,40 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Notebook — libre writing & drawing -->
+                <div class="notebook-section">
+                    <div class="notebook-header">
+                        <h3 data-i18n="journal.notebook_title">Notas Libres</h3>
+                        <p class="canvas-caption" data-i18n="journal.notebook_subtitle">Escribe, dibuja o anota con tu dedo, pluma o teclado.</p>
+                    </div>
+                    <div class="notebook-toolbar" role="toolbar" aria-label="Herramientas de dibujo">
+                        <button class="notebook-tool-btn active" id="notebook-pen-btn" aria-pressed="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                            <span data-i18n="journal.notebook_pen">Pluma</span>
+                        </button>
+                        <button class="notebook-tool-btn" id="notebook-eraser-btn" aria-pressed="false">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M20 20H7L3 16l11-11 6 6-3.5 3.5"/><path d="M6.5 17.5 3 14"/></svg>
+                            <span data-i18n="journal.notebook_eraser">Borrador</span>
+                        </button>
+                        <label class="notebook-color-label" aria-label="Color de pluma">
+                            <input type="color" id="notebook-color" value="#4db896" class="notebook-color-input">
+                        </label>
+                        <div class="notebook-size-wrap">
+                            <input type="range" id="notebook-size" min="2" max="24" value="4" class="notebook-size-slider" aria-label="Grosor">
+                        </div>
+                        <button class="notebook-tool-btn notebook-clear-btn" id="notebook-clear-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                            <span data-i18n="journal.notebook_clear">Limpiar</span>
+                        </button>
+                    </div>
+                    <canvas id="notebook-draw-canvas" class="notebook-canvas" aria-label="Espacio de dibujo libre — soporta stylus, dedo y ratón"></canvas>
+                    <textarea id="notebook-text" class="notebook-text" placeholder="Escribe aquí con teclado..." aria-label="Notas de texto" rows="3"></textarea>
+                    <button id="notebook-save-btn" class="btn-primary notebook-save-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span data-i18n="journal.notebook_save">Guardar en dispositivo</span>
+                    </button>
+                </div>
             </section>
 
             <!-- 6. CONFIGURACIÓN -->
@@ -461,6 +520,22 @@
                     <h2 data-i18n="settings.title">Configuración y Accesibilidad</h2>
                     
                     <div class="settings-list">
+                        <!-- Perfil de usuario -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.condition_title">Tu Perfil</strong>
+                                <span data-i18n="settings.condition_desc">Personaliza qué tipo de apoyo prioriza Marea para ti.</span>
+                            </div>
+                            <select id="setting-condition" class="settings-select">
+                                <option value="" data-i18n="onboarding.condition_other">Otro / Prefiero no decir</option>
+                                <option value="alzheimer" data-i18n="onboarding.condition_alzheimer">Alzheimer / Demencia</option>
+                                <option value="autism" data-i18n="onboarding.condition_autism">Autismo / Neurodiversidad</option>
+                                <option value="aphasia" data-i18n="onboarding.condition_aphasia">Afasia / Comunicación</option>
+                                <option value="anxiety" data-i18n="onboarding.condition_anxiety">Ansiedad / Crisis emocional</option>
+                                <option value="caregiver" data-i18n="onboarding.condition_caregiver">Soy cuidador/a</option>
+                            </select>
+                        </div>
+
                         <!-- Idioma -->
                         <div class="settings-item">
                             <div class="setting-desc">

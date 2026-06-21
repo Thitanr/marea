@@ -5,11 +5,11 @@
    Only caches successful (HTTP 200) responses to prevent caching errors.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v4';
+const CACHE_NAME = 'marea-cache-v5';
 
 // Install Event — skip waiting so the new SW activates immediately
 self.addEventListener('install', () => {
-    console.log('[SW v4] Installing…');
+    console.log('[SW v5] Installing…');
     self.skipWaiting();
 });
 

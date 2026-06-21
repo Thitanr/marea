@@ -14,6 +14,18 @@ import { t, translateDOM, tLang } from './core/i18n.js';
 /* ----- Module-compatible init (Phase 1a) ----- */
 function boot() {
 
+    // 1b. Voice cache — pre-load TTS voices on boot for zero-delay speech
+    let _voiceCache = [];
+    function _warmVoices() {
+        _voiceCache = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    }
+    if ('speechSynthesis' in window) {
+        _warmVoices();
+        if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
+            window.speechSynthesis.onvoiceschanged = _warmVoices;
+        }
+    }
+
     // 2. DOM Elements
     const elements = {
         // App Frame
@@ -84,8 +96,19 @@ function boot() {
         onbStep0: document.getElementById("onb-step-0"),
         onbStep1: document.getElementById("onb-step-1"),
         onbStep2: document.getElementById("onb-step-2"),
+        onbStep3: document.getElementById("onb-step-3"),
         onbDots: document.querySelectorAll(".onb-dot"),
-        restartOnboardingBtn: document.getElementById("restart-onboarding-btn")
+        restartOnboardingBtn: document.getElementById("restart-onboarding-btn"),
+
+        // Notebook
+        notebookCanvas: document.getElementById("notebook-draw-canvas"),
+        notebookText: document.getElementById("notebook-text"),
+        notebookSaveBtn: document.getElementById("notebook-save-btn"),
+        notebookPenBtn: document.getElementById("notebook-pen-btn"),
+        notebookEraserBtn: document.getElementById("notebook-eraser-btn"),
+        notebookClearBtn: document.getElementById("notebook-clear-btn"),
+        notebookColor: document.getElementById("notebook-color"),
+        notebookSize: document.getElementById("notebook-size")
     };
 
     // 3. i18n Translation Engine
@@ -170,34 +193,39 @@ function boot() {
 
     function initChat() {
         elements.chatMessagesContainer.innerHTML = "";
-        addChatBubble(t("refugio.start_msg"), "system");
+        const condition = localStorage.getItem('marea_condition') || '';
+        const welcomeKey = condition === 'alzheimer' ? 'refugio.alzheimer.start_msg' : 'refugio.start_msg';
+        addChatBubble(t(welcomeKey), "system");
         loadQuickResponses();
         resetStillHereTimer();
     }
 
     function loadQuickResponses() {
         elements.chatQuickResponses.innerHTML = "";
-        const keys = [
-            "underwater",
-            "cant_breathe",
-            "want_cry",
-            "rumination",
-            "exhausted",
-            "just_stay"
-        ];
-        
+        const condition = localStorage.getItem('marea_condition') || '';
+
+        let keys, prefix;
+        if (condition === 'alzheimer') {
+            keys = ["lost", "confused", "home", "help", "family", "safe"];
+            prefix = "refugio.alzheimer.quick.";
+        } else {
+            keys = ["underwater", "cant_breathe", "want_cry", "rumination", "exhausted", "just_stay"];
+            prefix = "refugio.quick.";
+        }
+
         keys.forEach(key => {
             const btn = document.createElement("button");
             btn.className = "quick-response-btn";
-            btn.textContent = t(`refugio.quick.${key}`);
-            btn.addEventListener("click", () => handleUserMsg(t(`refugio.quick.${key}`), key));
+            btn.textContent = t(`${prefix}${key}`);
+            btn.addEventListener("click", () => handleUserMsg(t(`${prefix}${key}`), key, condition));
             elements.chatQuickResponses.appendChild(btn);
         });
     }
 
-    function handleUserMsg(text, key = "default") {
+    function handleUserMsg(text, key = "default", condition = null) {
         if (!text.trim()) return;
-        
+        const activeCondition = condition || localStorage.getItem('marea_condition') || '';
+
         // Add user msg
         addChatBubble(text, "user");
         elements.chatInput.value = "";
@@ -263,11 +291,24 @@ function boot() {
             }
         }
 
+        // Alzheimer profile: simple, calm, short replies — no complex intent matching needed
+        if (activeCondition === 'alzheimer') {
+            const alzKey = ['lost','confused','home','help','family','safe'].includes(key)
+                ? key : 'safe';
+            setTimeout(() => {
+                elements.chatTypingIndicator.classList.add("hidden");
+                elements.chatQuickResponses.classList.remove("hidden");
+                addChatBubble(t(`refugio.alzheimer.reply.${alzKey}`), "system");
+                resetStillHereTimer();
+            }, 800);
+            return;
+        }
+
         // Simulate thoughtful reflection time
         setTimeout(() => {
             elements.chatTypingIndicator.classList.add("hidden");
             elements.chatQuickResponses.classList.remove("hidden");
-            
+
             // Resolve reply using the target detected language
             const reply = tLang(replyLang, `refugio.reply.${matchedKey}`);
             addChatBubble(reply, "system");
@@ -490,37 +531,23 @@ function boot() {
     }
 
     function speakText(phrase) {
-        if (!phrase) return;
-        
-        // Use browser native SpeechSynthesis
-        if ('speechSynthesis' in window) {
-            // Cancel any ongoing speech
-            window.speechSynthesis.cancel();
-            
-            const utterance = new SpeechSynthesisUtterance(phrase);
-            const langMap = {
-                "es": "es-ES",
-                "en": "en-GB", // Standardised to British English
-                "it": "it-IT",
-                "fr": "fr-FR",
-                "de": "de-DE",
-                "zh": "zh-CN",
-                "pt": "pt-PT",
-                "ja": "ja-JP"
-            };
-            utterance.lang = langMap[state.lang] || "en-GB";
-            
-            // Try to find a nice local voice matching language
-            const voices = window.speechSynthesis.getVoices();
-            const matchingVoice = voices.find(v => v.lang.startsWith(utterance.lang));
-            if (matchingVoice) {
-                utterance.voice = matchingVoice;
-            }
-            
-            window.speechSynthesis.speak(utterance);
-        } else {
-            console.warn("Speech Synthesis not supported in this browser.");
-        }
+        if (!phrase || !phrase.trim()) return;
+        if (!('speechSynthesis' in window)) return;
+
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(phrase.trim());
+        const langMap = { es: "es-ES", en: "en-GB", it: "it-IT", fr: "fr-FR", de: "de-DE", zh: "zh-CN", pt: "pt-PT", ja: "ja-JP" };
+        utterance.lang = langMap[state.lang] || "en-GB";
+
+        // Use pre-warmed cache; fall back to live query if empty
+        const voices = (_voiceCache && _voiceCache.length) ? _voiceCache : window.speechSynthesis.getVoices();
+        const langPrefix = utterance.lang.substring(0, 2);
+        const voice = voices.find(v => v.lang === utterance.lang) || voices.find(v => v.lang.startsWith(langPrefix));
+        if (voice) utterance.voice = voice;
+
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
     }
 
     // 10. Safety Plan Anchors
@@ -700,6 +727,19 @@ function boot() {
             }
         });
 
+        // Condition / profile selector in settings
+        const selectCondition = document.getElementById('setting-condition');
+        if (selectCondition) {
+            selectCondition.value = localStorage.getItem('marea_condition') || '';
+            selectCondition.addEventListener('change', (e) => {
+                const cond = e.target.value;
+                localStorage.setItem('marea_condition', cond);
+                applyConditionPreset(cond);
+                initChat();
+                showToast(t('settings.condition_title'));
+            });
+        }
+
         // Restart onboarding guide
         if (elements.restartOnboardingBtn) {
             elements.restartOnboardingBtn.addEventListener("click", () => {
@@ -835,7 +875,11 @@ function boot() {
         });
 
         elements.btnAacSpeak.addEventListener("click", () => {
-            speakText(elements.aacSpeechText.value);
+            const text = elements.aacSpeechText.value.trim();
+            if (!text) return;
+            speakText(text);
+            // Clear pad after speaking so the next request starts fresh
+            setTimeout(() => { elements.aacSpeechText.value = ""; }, 300);
         });
 
         elements.aacCatBtns.forEach(btn => {
@@ -887,6 +931,10 @@ function boot() {
                 const key = card.getAttribute('data-state');
                 const isOpen = card.getAttribute('aria-expanded') === 'true';
 
+                // Read the card name aloud — critical for non-verbal autistic users
+                const cardLabel = card.querySelector('strong');
+                if (cardLabel) speakText(cardLabel.textContent);
+
                 document.querySelectorAll('.state-card').forEach(c => c.setAttribute('aria-expanded', 'false'));
 
                 if (isOpen) {
@@ -908,6 +956,10 @@ function boot() {
             card.addEventListener('click', () => {
                 const key = card.getAttribute('data-reg');
                 const isActive = card.classList.contains('active');
+
+                // Read the regulation card name aloud
+                const cardLabel = card.querySelector('span');
+                if (cardLabel) speakText(cardLabel.textContent);
 
                 document.querySelectorAll('.reg-card').forEach(c => c.classList.remove('active'));
 
@@ -1021,35 +1073,28 @@ function boot() {
         });
     }
 
-    // 13b. Onboarding Wizard — first-visit welcome guide
+    // 13b. Onboarding Wizard — 4-step welcome guide with condition selector
     function initOnboarding() {
         if (!elements.onboardingOverlay) return;
 
         const ONBOARDING_KEY = 'marea_onboarded';
+        let selectedCondition = localStorage.getItem('marea_condition') || 'other';
 
-        // Check if already onboarded
         if (localStorage.getItem(ONBOARDING_KEY) === '1') {
             elements.onboardingOverlay.classList.add('hidden');
             return;
         }
 
-        // Show overlay & translate its content
         elements.onboardingOverlay.classList.remove('hidden');
-        translateDOM(); // translate onboarding i18n
+        translateDOM();
         showOnboardingStep(0);
 
-        // --- Step navigation ---
         function showOnboardingStep(stepIndex) {
-            const cards = [elements.onbStep0, elements.onbStep1, elements.onbStep2];
+            const cards = [elements.onbStep0, elements.onbStep1, elements.onbStep2, elements.onbStep3];
             cards.forEach((card, i) => {
-                if (i === stepIndex) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
+                if (!card) return;
+                card.classList.toggle('hidden', i !== stepIndex);
             });
-
-            // Update dots
             elements.onbDots.forEach((dot, i) => {
                 dot.classList.remove('active', 'done');
                 if (i === stepIndex) dot.classList.add('active');
@@ -1057,62 +1102,296 @@ function boot() {
             });
         }
 
-        // --- Wire buttons ---
-        // Step 0: "Siguiente" → step 1
-        const btnNext0 = elements.onbStep0.querySelector('.onb-btn-next');
-        if (btnNext0) {
-            btnNext0.addEventListener('click', () => showOnboardingStep(1));
-        }
+        // Condition selector buttons (step 2)
+        elements.onbStep2 && elements.onbStep2.querySelectorAll('.onb-condition-btn').forEach(btn => {
+            // Mark pre-selected
+            if (btn.getAttribute('data-condition') === selectedCondition) {
+                btn.classList.add('onb-condition-btn--selected');
+            }
+            btn.addEventListener('click', () => {
+                elements.onbStep2.querySelectorAll('.onb-condition-btn').forEach(b => b.classList.remove('onb-condition-btn--selected'));
+                btn.classList.add('onb-condition-btn--selected');
+                selectedCondition = btn.getAttribute('data-condition');
+            });
+        });
 
-        // Step 1: "Anterior" + "Siguiente"
-        const btnPrev1 = elements.onbStep1.querySelector('.onb-btn-prev');
-        const btnNext1 = elements.onbStep1.querySelector('.onb-btn-next');
-        if (btnPrev1) {
-            btnPrev1.addEventListener('click', () => showOnboardingStep(0));
-        }
-        if (btnNext1) {
-            btnNext1.addEventListener('click', () => showOnboardingStep(2));
-        }
+        // Step 0 → 1
+        const btnNext0 = elements.onbStep0 && elements.onbStep0.querySelector('.onb-btn-next');
+        if (btnNext0) btnNext0.addEventListener('click', () => showOnboardingStep(1));
 
-        // Step 2: "Anterior" + "Comenzar"
-        const btnPrev2 = elements.onbStep2.querySelector('.onb-btn-prev');
-        const btnStart = elements.onbStep2.querySelector('.onb-btn-start');
-        if (btnPrev2) {
-            btnPrev2.addEventListener('click', () => showOnboardingStep(1));
-        }
+        // Step 1 → 0 / 2
+        const btnPrev1 = elements.onbStep1 && elements.onbStep1.querySelector('.onb-btn-prev');
+        const btnNext1 = elements.onbStep1 && elements.onbStep1.querySelector('.onb-btn-next');
+        if (btnPrev1) btnPrev1.addEventListener('click', () => showOnboardingStep(0));
+        if (btnNext1) btnNext1.addEventListener('click', () => showOnboardingStep(2));
+
+        // Step 2 → 1 / 3
+        const btnPrev2 = elements.onbStep2 && elements.onbStep2.querySelector('.onb-btn-prev');
+        const btnNext2 = elements.onbStep2 && elements.onbStep2.querySelector('.onb-btn-next');
+        if (btnPrev2) btnPrev2.addEventListener('click', () => showOnboardingStep(1));
+        if (btnNext2) btnNext2.addEventListener('click', () => showOnboardingStep(3));
+
+        // Step 3: prev + start (apply condition settings)
+        const btnPrev3 = elements.onbStep3 && elements.onbStep3.querySelector('.onb-btn-prev');
+        const btnStart = elements.onbStep3 && elements.onbStep3.querySelector('.onb-btn-start');
+        if (btnPrev3) btnPrev3.addEventListener('click', () => showOnboardingStep(2));
         if (btnStart) {
             btnStart.addEventListener('click', () => {
+                // Persist condition + apply preset settings
+                localStorage.setItem('marea_condition', selectedCondition);
+                applyConditionPreset(selectedCondition);
+
                 localStorage.setItem(ONBOARDING_KEY, '1');
                 elements.onboardingOverlay.classList.add('fade-out');
-                // Remove overlay after animation
                 setTimeout(() => {
                     elements.onboardingOverlay.classList.add('hidden');
                     elements.onboardingOverlay.classList.remove('fade-out');
+                    // Re-init chat with new condition
+                    initChat();
                 }, 380);
             });
+        }
+    }
+
+    // Apply sensible defaults for each condition profile
+    function applyConditionPreset(condition) {
+        const selectConditionEl = document.getElementById('setting-condition');
+        if (selectConditionEl) selectConditionEl.value = condition;
+
+        switch (condition) {
+            case 'alzheimer':
+                state.fontSize = 'xlarge'; persistFontSize('xlarge'); applyFontSize();
+                state.theme = 'warm-sand'; persistTheme('warm-sand'); applyTheme();
+                state.sensoryMode = true; persistSensoryMode(true); applySensoryMode();
+                if (document.getElementById('setting-font-size')) document.getElementById('setting-font-size').value = 'xlarge';
+                if (document.getElementById('setting-theme')) document.getElementById('setting-theme').value = 'warm-sand';
+                if (document.getElementById('setting-sensory-mode')) document.getElementById('setting-sensory-mode').checked = true;
+                switchTab('refugio');
+                break;
+            case 'autism':
+                state.sensoryMode = true; persistSensoryMode(true); applySensoryMode();
+                if (document.getElementById('setting-sensory-mode')) document.getElementById('setting-sensory-mode').checked = true;
+                switchTab('sintonia');
+                break;
+            case 'aphasia':
+                state.handMode = 'motor-right'; persistHandMode('motor-right'); applyHandMode();
+                if (document.getElementById('setting-hand-mode')) document.getElementById('setting-hand-mode').value = 'motor-right';
+                switchTab('voz');
+                break;
+            case 'anxiety':
+                switchTab('refugio');
+                break;
+            default:
+                break;
         }
     }
 
     // 13c. Restart onboarding (called from Settings button)
     function restartOnboarding() {
         localStorage.removeItem('marea_onboarded');
-        if (elements.onboardingOverlay) {
-            elements.onboardingOverlay.classList.remove('hidden', 'fade-out');
-            translateDOM(); // re-translate in case lang changed
-            // Reset to step 0
-            const cards = [elements.onbStep0, elements.onbStep1, elements.onbStep2];
-            cards.forEach((card, i) => {
-                if (i === 0) card.classList.remove('hidden');
-                else card.classList.add('hidden');
+        if (!elements.onboardingOverlay) return;
+        elements.onboardingOverlay.classList.remove('hidden', 'fade-out');
+        translateDOM();
+        // Reset card visibility & dots to step 0 (buttons are already wired from init)
+        const cards = [elements.onbStep0, elements.onbStep1, elements.onbStep2, elements.onbStep3];
+        cards.forEach((card, i) => { if (card) card.classList.toggle('hidden', i !== 0); });
+        elements.onbDots.forEach((dot, i) => {
+            dot.classList.remove('active', 'done');
+            if (i === 0) dot.classList.add('active');
+        });
+        // Restore current condition selection visually
+        const savedCond = localStorage.getItem('marea_condition') || 'other';
+        elements.onbStep2 && elements.onbStep2.querySelectorAll('.onb-condition-btn').forEach(btn => {
+            btn.classList.toggle('onb-condition-btn--selected', btn.getAttribute('data-condition') === savedCond);
+        });
+    }
+    window.restartOnboarding = restartOnboarding;
+
+    // 13e. Notebook Canvas — drawing pad with stylus/finger/mouse + typed notes
+    function initNotebook() {
+        const canvas = elements.notebookCanvas;
+        if (!canvas) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        let tool = 'pen';
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            const w = rect.width || 320;
+            const h = rect.height || 240;
+            // Preserve existing drawing
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = canvas.width;
+            tmpCanvas.height = canvas.height;
+            tmpCanvas.getContext('2d').drawImage(canvas, 0, 0);
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            ctx.drawImage(tmpCanvas, 0, 0, w, h);
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Restore saved drawing
+        const saved = localStorage.getItem('marea_notebook_canvas');
+        if (saved) {
+            const img = new Image();
+            img.onload = () => canvas.getContext('2d').drawImage(img, 0, 0, canvas.width / dpr, canvas.height / dpr);
+            img.src = saved;
+        }
+        if (elements.notebookText) {
+            elements.notebookText.value = localStorage.getItem('marea_notebook_text') || '';
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const src = e.touches ? e.touches[0] : e;
+            return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+        }
+
+        function startDraw(e) {
+            e.preventDefault();
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x; lastY = pos.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const ctx = canvas.getContext('2d');
+            const pos = getPos(e);
+            const pressure = (e.pressure !== undefined && e.pressure > 0) ? e.pressure : 0.5;
+            const size = parseFloat(elements.notebookSize ? elements.notebookSize.value : 4);
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+
+            if (tool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = size * 6;
+                ctx.strokeStyle = 'rgba(0,0,0,1)';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineWidth = Math.max(1, size * pressure * 1.5);
+                ctx.strokeStyle = elements.notebookColor ? elements.notebookColor.value : '#4db896';
+            }
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            lastX = pos.x; lastY = pos.y;
+        }
+
+        let _saveTimer = null;
+        function endDraw() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            const ctx = canvas.getContext('2d');
+            ctx.globalCompositeOperation = 'source-over';
+            // Auto-save debounced
+            clearTimeout(_saveTimer);
+            _saveTimer = setTimeout(() => {
+                try { localStorage.setItem('marea_notebook_canvas', canvas.toDataURL('image/png', 0.7)); } catch(e) {}
+            }, 1000);
+        }
+
+        canvas.addEventListener('pointerdown', startDraw, { passive: false });
+        canvas.addEventListener('pointermove', draw, { passive: false });
+        canvas.addEventListener('pointerup', endDraw);
+        canvas.addEventListener('pointercancel', endDraw);
+        canvas.addEventListener('pointerout', endDraw);
+        // Touch fallback for older browsers
+        canvas.addEventListener('touchstart', startDraw, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', endDraw);
+
+        // Tool buttons
+        if (elements.notebookPenBtn) {
+            elements.notebookPenBtn.addEventListener('click', () => {
+                tool = 'pen';
+                elements.notebookPenBtn.classList.add('active');
+                elements.notebookPenBtn.setAttribute('aria-pressed', 'true');
+                if (elements.notebookEraserBtn) {
+                    elements.notebookEraserBtn.classList.remove('active');
+                    elements.notebookEraserBtn.setAttribute('aria-pressed', 'false');
+                }
             });
-            elements.onbDots.forEach((dot, i) => {
-                dot.classList.remove('active', 'done');
-                if (i === 0) dot.classList.add('active');
+        }
+        if (elements.notebookEraserBtn) {
+            elements.notebookEraserBtn.addEventListener('click', () => {
+                tool = 'eraser';
+                elements.notebookEraserBtn.classList.add('active');
+                elements.notebookEraserBtn.setAttribute('aria-pressed', 'true');
+                if (elements.notebookPenBtn) {
+                    elements.notebookPenBtn.classList.remove('active');
+                    elements.notebookPenBtn.setAttribute('aria-pressed', 'false');
+                }
+            });
+        }
+        if (elements.notebookClearBtn) {
+            elements.notebookClearBtn.addEventListener('click', () => {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+                localStorage.removeItem('marea_notebook_canvas');
+            });
+        }
+
+        // Text auto-save
+        if (elements.notebookText) {
+            elements.notebookText.addEventListener('input', () => {
+                localStorage.setItem('marea_notebook_text', elements.notebookText.value);
+            });
+        }
+
+        // Save/share button — exports drawing + text as PNG to device
+        if (elements.notebookSaveBtn) {
+            elements.notebookSaveBtn.addEventListener('click', async () => {
+                // Compose final canvas: drawing + text below
+                const text = elements.notebookText ? elements.notebookText.value.trim() : '';
+                const exportCanvas = document.createElement('canvas');
+                const lineHeight = 22;
+                const lines = text ? text.split('\n') : [];
+                const textAreaH = lines.length > 0 ? lines.length * lineHeight + 40 : 0;
+                exportCanvas.width = canvas.width;
+                exportCanvas.height = canvas.height + textAreaH * dpr;
+
+                const ectx = exportCanvas.getContext('2d');
+                // White background
+                ectx.fillStyle = '#ffffff';
+                ectx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+                // Drawing
+                ectx.drawImage(canvas, 0, 0);
+                // Text
+                if (lines.length > 0) {
+                    ectx.fillStyle = '#1a1a1a';
+                    ectx.font = `${16 * dpr}px -apple-system, sans-serif`;
+                    ectx.fillStyle = '#333';
+                    lines.forEach((line, i) => {
+                        ectx.fillText(line, 16 * dpr, canvas.height + (i + 1) * lineHeight * dpr + 10 * dpr);
+                    });
+                }
+
+                exportCanvas.toBlob(async (blob) => {
+                    const fileName = `marea-nota-${new Date().toISOString().slice(0,10)}.png`;
+                    const file = new File([blob], fileName, { type: 'image/png' });
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try { await navigator.share({ files: [file], title: 'Marea — Nota Sensitiva' }); } catch (_) {}
+                    } else {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = fileName; a.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 5000);
+                    }
+                    showToast(t('journal.notebook_saved'));
+                }, 'image/png', 0.92);
             });
         }
     }
-    // Expose restartOnboarding globally for the Settings button onclick
-    window.restartOnboarding = restartOnboarding;
 
     // 14. Initialize App Lifecycle
     translateApp();
@@ -1124,6 +1403,7 @@ function boot() {
     initSintonia();
     initSpeechRecognition();
     initPwaInstall();
+    initNotebook();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {
