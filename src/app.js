@@ -1529,19 +1529,24 @@ function boot() {
                 gazeTarget.style.setProperty('--dwell', pct);
                 gazeTarget.classList.add('gaze-dwell');
                 if (elapsed >= DWELL_MS) {
-                    const t = gazeTarget;
+                    const target = gazeTarget;
                     gazeTarget = null;
                     gazeStart = null;
-                    t.style.removeProperty('--dwell');
-                    t.classList.remove('gaze-dwell');
-                    t.click();
+                    target.style.removeProperty('--dwell');
+                    target.classList.remove('gaze-dwell');
+                    target.click();
                 }
             }
         }
 
         function stopEyeTracking() {
             eyeActive = false;
-            if (window.webgazer) { try { window.webgazer.clearGazeListener(); window.webgazer.end(); } catch(_){} }
+            if (window.webgazer) {
+                try {
+                    window.webgazer.setGazeListener(null);
+                    window.webgazer.end();
+                } catch(_) {}
+            }
             if (gazeCursor) gazeCursor.classList.add('hidden');
             if (gazeTarget) { gazeTarget.style.removeProperty('--dwell'); gazeTarget.classList.remove('gaze-dwell'); }
             gazeTarget = null; gazeStart = null;
@@ -1549,27 +1554,38 @@ function boot() {
         }
 
         async function startEyeTracking() {
-            const origText = eyeBtn.querySelector('span');
-            if (origText) origText.textContent = '...';
+            const spanEl = eyeBtn.querySelector('span');
+            if (spanEl) spanEl.textContent = '...';
             eyeBtn.disabled = true;
             try {
                 await loadWebGazer();
-                window.webgazer.params.showVideoPreview = false;
-                window.webgazer.params.showFaceOverlay = false;
-                window.webgazer.params.showFaceFeedbackBox = false;
-                window.webgazer.setRegression('ridge');
-                await window.webgazer.begin();
-                window.webgazer.applyKalmanFilter(true);
+                const wg = window.webgazer;
+                // Disable all visual overlays before and after begin
+                wg.params.showVideoPreview = false;
+                wg.params.showFaceOverlay = false;
+                wg.params.showFaceFeedbackBox = false;
+                wg.setRegression('ridge');
+                // begin() may or may not return a promise depending on version
+                const begun = wg.begin();
+                if (begun && typeof begun.then === 'function') await begun;
+                // Re-apply hide methods after begin() (WebGazer resets params internally)
+                if (typeof wg.showVideoPreview === 'function') wg.showVideoPreview(false);
+                if (typeof wg.showFaceOverlay === 'function') wg.showFaceOverlay(false);
+                if (typeof wg.showFaceFeedbackBox === 'function') wg.showFaceFeedbackBox(false);
+                if (typeof wg.applyKalmanFilter === 'function') wg.applyKalmanFilter(true);
                 calibIndex = 0;
                 calibOverlay.classList.remove('hidden');
                 showCalibPoint(0);
                 calibDot.addEventListener('click', onCalibDotClick);
             } catch(err) {
+                console.error('[EyeTracking] Failed to start:', err);
                 showToast(t('eye.error') || 'No se pudo activar la cámara. Verifica los permisos.');
-                if (origText) origText.textContent = t('eye.btn_text') || 'Ojos';
+                if (spanEl) spanEl.textContent = t('eye.btn_text') || 'Ojos';
+                eyeBtn.disabled = false;
+                return;
             }
             eyeBtn.disabled = false;
-            if (origText) origText.textContent = eyeActive ? (t('eye.btn_stop') || 'Detener') : (t('eye.btn_text') || 'Ojos');
+            if (spanEl) spanEl.textContent = eyeActive ? (t('eye.btn_stop') || 'Detener') : (t('eye.btn_text') || 'Ojos');
         }
 
         eyeBtn.addEventListener('click', () => {
