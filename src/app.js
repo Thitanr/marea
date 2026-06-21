@@ -191,11 +191,28 @@ function boot() {
         elements.chatMessagesContainer.scrollTop = elements.chatMessagesContainer.scrollHeight;
     }
 
+    function updateAlzheimerMode() {
+        const board = document.getElementById('alzheimer-crisis-board');
+        const chatWrapper = document.querySelector('#tab-refugio .chat-wrapper');
+        const navLabel = document.querySelector('#nav-refugio .nav-label');
+        const condition = localStorage.getItem('marea_condition') || '';
+        if (condition === 'alzheimer') {
+            board?.classList.remove('hidden');
+            chatWrapper?.classList.add('hidden');
+            if (navLabel) navLabel.textContent = t('alz.nav_label') || 'Alzheimer';
+        } else {
+            board?.classList.add('hidden');
+            chatWrapper?.classList.remove('hidden');
+            if (navLabel) navLabel.textContent = t('nav.refugio');
+        }
+    }
+
     function initChat() {
         elements.chatMessagesContainer.innerHTML = "";
         const condition = localStorage.getItem('marea_condition') || '';
-        const welcomeKey = condition === 'alzheimer' ? 'refugio.alzheimer.start_msg' : 'refugio.start_msg';
-        addChatBubble(t(welcomeKey), "system");
+        updateAlzheimerMode();
+        if (condition === 'alzheimer') return;
+        addChatBubble(t('refugio.start_msg'), "system");
         loadQuickResponses();
         resetStillHereTimer();
     }
@@ -1091,22 +1108,39 @@ function boot() {
         }
 
         // Android / Desktop: native install prompt
+        async function triggerInstall() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            if (pwaItem) pwaItem.style.display = 'none';
+            const banner = document.getElementById('ios-install-banner');
+            if (banner) banner.classList.add('hidden');
+            if (outcome === 'accepted') showToast(t('settings.pwa_installed'));
+        }
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             if (pwaItem) pwaItem.style.display = '';
+            // Show prominent install banner (same element, different behavior)
+            if (!localStorage.getItem('marea_android_banner_shown')) {
+                setTimeout(() => {
+                    const banner = document.getElementById('ios-install-banner');
+                    if (!banner) return;
+                    banner.classList.remove('hidden');
+                    localStorage.setItem('marea_android_banner_shown', '1');
+                    document.getElementById('ios-banner-how')?.addEventListener('click', () => {
+                        banner.classList.add('hidden');
+                        triggerInstall();
+                    }, { once: true });
+                    document.getElementById('ios-banner-close')?.addEventListener('click', () =>
+                        banner.classList.add('hidden'), { once: true });
+                }, 3000);
+            }
         });
 
-        if (btnInstall) {
-            btnInstall.addEventListener('click', async () => {
-                if (!deferredPrompt) return;
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                if (pwaItem) pwaItem.style.display = 'none';
-                if (outcome === 'accepted') showToast(t('settings.pwa_installed'));
-            });
-        }
+        if (btnInstall) btnInstall.addEventListener('click', triggerInstall);
 
         window.addEventListener('appinstalled', () => {
             deferredPrompt = null;
@@ -1434,180 +1468,292 @@ function boot() {
         }
     }
 
-    // 13f. Eye Tracking — gaze-based AAC keyboard using WebGazer
-    function initEyeTracking() {
-        const eyeBtn = document.getElementById('eye-mode-btn');
-        const calibOverlay = document.getElementById('eye-calibration-overlay');
-        const calibDot = document.getElementById('eye-calib-dot');
-        const calibMsg = document.getElementById('eye-calib-message');
-        const calibCounter = document.getElementById('eye-calib-counter');
-        const calibCancel = document.getElementById('eye-calib-cancel');
-        const gazeCursor = document.getElementById('eye-gaze-cursor');
-        if (!eyeBtn || !calibOverlay) return;
+    // 13f. Swipe Keyboard — slide-to-type for fast/one-handed AAC input
+    function initSwipeKeyboard() {
+        const swipeBtn = document.getElementById('eye-mode-btn');
+        const keyboard = document.getElementById('swipe-keyboard');
+        const wordEl = document.getElementById('swipe-kb-word');
+        const hintEl = document.getElementById('swipe-kb-hint');
+        const closeBtn = document.getElementById('swipe-kb-close');
+        const rowsEl = document.getElementById('swipe-kb-rows');
+        if (!swipeBtn || !keyboard || !wordEl || !rowsEl) return;
 
-        let eyeActive = false;
-        let gazeTarget = null;
-        let gazeStart = null;
-        const DWELL_MS = 1500;
-        const CALIB_POSITIONS = [
-            { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 },
-            { x: 15, y: 50 }, { x: 50, y: 50 }, { x: 85, y: 50 },
-            { x: 15, y: 85 }, { x: 50, y: 85 }, { x: 85, y: 85 },
+        const ROWS = [
+            ['Q','W','E','R','T','Y','U','I','O','P'],
+            ['A','S','D','F','G','H','J','K','L'],
+            ['Z','X','C','V','B','N','M','⌫'],
         ];
-        let calibIndex = 0;
 
-        function loadWebGazer() {
-            return new Promise((resolve, reject) => {
-                if (window.webgazer) { resolve(); return; }
-                const s = document.createElement('script');
-                s.src = 'https://unpkg.com/webgazer@2.1.0/dist/webgazer.js';
-                s.crossOrigin = 'anonymous';
-                s.onload = resolve;
-                s.onerror = () => reject(new Error('Failed to load WebGazer'));
-                document.head.appendChild(s);
+        let active = false;
+        let isSwiping = false;
+        let lastKey = null;
+        let builtText = '';
+        let trailCanvas = null;
+        let ctx = null;
+        let trailPoints = [];
+
+        function buildKeyboard() {
+            rowsEl.innerHTML = '';
+            ROWS.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'swipe-kb-row';
+                row.forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.className = 'swipe-key' + (letter === '⌫' ? ' swipe-key-del' : '');
+                    btn.dataset.key = letter;
+                    btn.textContent = letter;
+                    btn.type = 'button';
+                    rowDiv.appendChild(btn);
+                });
+                rowsEl.appendChild(rowDiv);
             });
+            const bottomRow = document.createElement('div');
+            bottomRow.className = 'swipe-kb-row swipe-kb-bottom';
+            const spaceBtn = document.createElement('button');
+            spaceBtn.className = 'swipe-key swipe-key-space';
+            spaceBtn.dataset.key = 'SPACE';
+            spaceBtn.textContent = t('swipe.space') || 'Espacio';
+            spaceBtn.type = 'button';
+            const sendBtn = document.createElement('button');
+            sendBtn.className = 'swipe-key swipe-key-send';
+            sendBtn.dataset.key = 'SEND';
+            sendBtn.textContent = t('swipe.send') || 'Añadir';
+            sendBtn.type = 'button';
+            bottomRow.appendChild(spaceBtn);
+            bottomRow.appendChild(sendBtn);
+            rowsEl.appendChild(bottomRow);
+
+            const existing = keyboard.querySelector('.swipe-trail-canvas');
+            if (existing) existing.remove();
+            trailCanvas = document.createElement('canvas');
+            trailCanvas.className = 'swipe-trail-canvas';
+            trailCanvas.setAttribute('aria-hidden', 'true');
+            keyboard.insertBefore(trailCanvas, rowsEl);
+            ctx = trailCanvas.getContext('2d');
+            setTimeout(resizeCanvas, 20);
         }
 
-        function showCalibPoint(idx) {
-            if (idx >= CALIB_POSITIONS.length) { finishCalib(); return; }
-            const p = CALIB_POSITIONS[idx];
-            calibDot.style.left = p.x + 'vw';
-            calibDot.style.top = p.y + 'vh';
-            calibDot.classList.remove('pulse');
-            void calibDot.offsetWidth; // reflow to restart animation
-            calibDot.classList.add('pulse');
-            if (calibMsg) calibMsg.setAttribute('data-i18n', '');
-            if (calibMsg) calibMsg.textContent = t('eye.calib_msg') || 'Mira este punto y tócalo';
-            if (calibCounter) calibCounter.textContent = `${idx + 1} / ${CALIB_POSITIONS.length}`;
+        function resizeCanvas() {
+            if (!trailCanvas || !rowsEl) return;
+            const rect = rowsEl.getBoundingClientRect();
+            trailCanvas.width = rect.width;
+            trailCanvas.height = rect.height;
+            trailCanvas.style.width = rect.width + 'px';
+            trailCanvas.style.height = rect.height + 'px';
+            trailCanvas.style.top = rowsEl.offsetTop + 'px';
         }
 
-        function onCalibDotClick() {
-            calibDot.classList.remove('pulse');
-            calibIndex++;
-            if (calibIndex < CALIB_POSITIONS.length) {
-                showCalibPoint(calibIndex);
-            } else {
-                finishCalib();
+        function clearTrail() {
+            if (ctx && trailCanvas) ctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+            trailPoints = [];
+        }
+
+        function drawTrail() {
+            if (!ctx || !trailCanvas || trailPoints.length < 2) return;
+            ctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+            ctx.strokeStyle = 'rgba(77,184,150,0.65)';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(77,184,150,0.4)';
+            ctx.beginPath();
+            ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
+            for (let i = 1; i < trailPoints.length; i++) ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            const last = trailPoints[trailPoints.length - 1];
+            ctx.fillStyle = 'rgba(77,184,150,0.9)';
+            ctx.beginPath();
+            ctx.arc(last.x, last.y, 7, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function getKeyAt(cx, cy) {
+            const el = document.elementFromPoint(cx, cy);
+            if (!el) return null;
+            const k = el.closest('.swipe-key');
+            return k && k.closest('#swipe-kb-rows') ? k : null;
+        }
+
+        function highlightKey(el) {
+            rowsEl.querySelectorAll('.swipe-key.key-active').forEach(k => k.classList.remove('key-active'));
+            if (el) el.classList.add('key-active');
+        }
+
+        function getAACText() { return document.getElementById('aac-speech-text'); }
+
+        function sendToAAC() {
+            const aacText = getAACText();
+            const text = builtText.trim();
+            if (aacText && text) {
+                const existing = aacText.value;
+                aacText.value = existing + (existing && !existing.endsWith(' ') ? ' ' : '') + text;
             }
+            builtText = '';
+            wordEl.textContent = '';
+            if (hintEl) hintEl.style.display = '';
         }
 
-        function finishCalib() {
-            calibDot.removeEventListener('click', onCalibDotClick);
-            calibOverlay.classList.add('hidden');
-            eyeActive = true;
-            eyeBtn.classList.add('active');
-            // Update button text now that tracking is live
-            const spanEl = eyeBtn.querySelector('span');
-            if (spanEl) spanEl.textContent = t('eye.btn_stop') || 'Detener';
-            if (gazeCursor) gazeCursor.classList.remove('hidden');
-            // Hide WebGazer's own UI elements
-            ['webgazerVideoContainer', 'webgazerFaceOverlay', 'webgazerFaceFeedbackBox'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) { el.style.display = 'none'; el.style.visibility = 'hidden'; }
-            });
-            window.webgazer.setGazeListener(onGaze);
-        }
-
-        function onGaze(data) {
-            if (!data || !eyeActive) return;
-            const { x, y } = data;
-            if (gazeCursor) {
-                gazeCursor.style.left = x + 'px';
-                gazeCursor.style.top = y + 'px';
-            }
-            // Dwell detection — .aac-card-btn = phrase buttons (dynamic), .aac-cat-btn = category tabs
-            const el = document.elementFromPoint(x, y);
-            const card = el && el.closest('.aac-card-btn, .aac-cat-btn');
-            if (card !== gazeTarget) {
-                if (gazeTarget) {
-                    gazeTarget.style.removeProperty('--dwell');
-                    gazeTarget.classList.remove('gaze-dwell');
+        function handleSpecial(k) {
+            if (k === '⌫') {
+                const aacText = getAACText();
+                if (builtText.length > 0) {
+                    builtText = builtText.slice(0, -1);
+                } else if (aacText && aacText.value.length > 0) {
+                    aacText.value = aacText.value.slice(0, -1);
                 }
-                gazeTarget = card;
-                gazeStart = card ? Date.now() : null;
+                wordEl.textContent = builtText;
+                return true;
             }
-            if (gazeTarget && gazeStart) {
-                const elapsed = Date.now() - gazeStart;
-                const pct = Math.min(elapsed / DWELL_MS, 1);
-                gazeTarget.style.setProperty('--dwell', pct);
-                gazeTarget.classList.add('gaze-dwell');
-                if (elapsed >= DWELL_MS) {
-                    const target = gazeTarget;
-                    gazeTarget = null;
-                    gazeStart = null;
-                    target.style.removeProperty('--dwell');
-                    target.classList.remove('gaze-dwell');
-                    target.click();
-                }
+            if (k === 'SPACE') {
+                builtText += builtText && !builtText.endsWith(' ') ? ' ' : '';
+                wordEl.textContent = builtText;
+                return true;
+            }
+            if (k === 'SEND') {
+                sendToAAC();
+                toggleKeyboard(false);
+                return true;
+            }
+            return false;
+        }
+
+        function onTouchStart(e) {
+            if (!active) return;
+            const touch = e.touches[0];
+            const keyEl = getKeyAt(touch.clientX, touch.clientY);
+            if (!keyEl) return;
+            e.preventDefault();
+            isSwiping = true;
+            lastKey = null;
+            clearTrail();
+            const kRect = rowsEl.getBoundingClientRect();
+            trailPoints.push({ x: touch.clientX - kRect.left, y: touch.clientY - kRect.top });
+            const k = keyEl.dataset.key;
+            if (!handleSpecial(k)) {
+                builtText += k.toLowerCase();
+                lastKey = k;
+                wordEl.textContent = builtText;
+                if (hintEl) hintEl.style.display = 'none';
+                highlightKey(keyEl);
             }
         }
 
-        function stopEyeTracking() {
-            eyeActive = false;
-            if (window.webgazer) {
-                try {
-                    window.webgazer.setGazeListener(null);
-                    window.webgazer.end();
-                } catch(_) {}
+        function onTouchMove(e) {
+            if (!isSwiping || !active) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const kRect = rowsEl.getBoundingClientRect();
+            trailPoints.push({ x: touch.clientX - kRect.left, y: touch.clientY - kRect.top });
+            drawTrail();
+            const keyEl = getKeyAt(touch.clientX, touch.clientY);
+            if (!keyEl) return;
+            const k = keyEl.dataset.key;
+            if (k !== lastKey && k !== '⌫' && k !== 'SPACE' && k !== 'SEND') {
+                builtText += k.toLowerCase();
+                lastKey = k;
+                wordEl.textContent = builtText;
+                highlightKey(keyEl);
             }
-            if (gazeCursor) gazeCursor.classList.add('hidden');
-            if (gazeTarget) { gazeTarget.style.removeProperty('--dwell'); gazeTarget.classList.remove('gaze-dwell'); }
-            gazeTarget = null; gazeStart = null;
-            eyeBtn.classList.remove('active');
         }
 
-        async function startEyeTracking() {
-            const spanEl = eyeBtn.querySelector('span');
-            if (spanEl) spanEl.textContent = '...';
-            eyeBtn.disabled = true;
-            try {
-                await loadWebGazer();
-                const wg = window.webgazer;
-                // Disable all visual overlays before and after begin
-                wg.params.showVideoPreview = false;
-                wg.params.showFaceOverlay = false;
-                wg.params.showFaceFeedbackBox = false;
-                wg.setRegression('ridge');
-                // begin() may or may not return a promise depending on version
-                const begun = wg.begin();
-                if (begun && typeof begun.then === 'function') await begun;
-                // Re-apply hide methods after begin() (WebGazer resets params internally)
-                if (typeof wg.showVideoPreview === 'function') wg.showVideoPreview(false);
-                if (typeof wg.showFaceOverlay === 'function') wg.showFaceOverlay(false);
-                if (typeof wg.showFaceFeedbackBox === 'function') wg.showFaceFeedbackBox(false);
-                if (typeof wg.applyKalmanFilter === 'function') wg.applyKalmanFilter(true);
-                calibIndex = 0;
-                calibOverlay.classList.remove('hidden');
-                showCalibPoint(0);
-                calibDot.addEventListener('click', onCalibDotClick);
-            } catch(err) {
-                console.error('[EyeTracking] Failed to start:', err);
-                showToast(t('eye.error') || 'No se pudo activar la cámara. Verifica los permisos.');
-                if (spanEl) spanEl.textContent = t('eye.btn_text') || 'Ojos';
-                eyeBtn.disabled = false;
-                return;
-            }
-            eyeBtn.disabled = false;
-            if (spanEl) spanEl.textContent = eyeActive ? (t('eye.btn_stop') || 'Detener') : (t('eye.btn_text') || 'Ojos');
+        function onTouchEnd() {
+            if (!isSwiping) return;
+            isSwiping = false;
+            highlightKey(null);
+            if (builtText && !builtText.endsWith(' ')) builtText += ' ';
+            wordEl.textContent = builtText;
+            setTimeout(clearTrail, 400);
         }
 
-        eyeBtn.addEventListener('click', () => {
-            if (eyeActive) {
-                stopEyeTracking();
-                const sp = eyeBtn.querySelector('span');
-                if (sp) sp.textContent = t('eye.btn_text') || 'Ojos';
-            } else {
-                startEyeTracking();
-            }
+        rowsEl.addEventListener('click', e => {
+            const key = e.target.closest('.swipe-key');
+            if (!key || isSwiping) return;
+            const k = key.dataset.key;
+            if (handleSpecial(k)) return;
+            builtText += k.toLowerCase();
+            wordEl.textContent = builtText;
+            if (hintEl) hintEl.style.display = 'none';
         });
 
-        calibCancel && calibCancel.addEventListener('click', () => {
-            calibDot.removeEventListener('click', onCalibDotClick);
-            calibOverlay.classList.add('hidden');
-            if (window.webgazer) { try { window.webgazer.end(); } catch(_){} }
-            eyeBtn.disabled = false;
-            const sp = eyeBtn.querySelector('span');
-            if (sp) sp.textContent = t('eye.btn_text') || 'Ojos';
+        function toggleKeyboard(show) {
+            active = show !== undefined ? show : !active;
+            const aacBoard = document.querySelector('.aac-board-wrapper');
+            const span = swipeBtn.querySelector('span');
+            if (active) {
+                keyboard.classList.remove('hidden');
+                aacBoard?.classList.add('hidden');
+                if (span) span.textContent = t('eye.btn_stop') || 'Cerrar';
+                swipeBtn.classList.add('active');
+                builtText = '';
+                wordEl.textContent = '';
+                buildKeyboard();
+                keyboard.addEventListener('touchstart', onTouchStart, { passive: false });
+                keyboard.addEventListener('touchmove', onTouchMove, { passive: false });
+                keyboard.addEventListener('touchend', onTouchEnd);
+            } else {
+                keyboard.classList.add('hidden');
+                aacBoard?.classList.remove('hidden');
+                if (span) span.textContent = t('eye.btn_text') || 'Deslizar';
+                swipeBtn.classList.remove('active');
+                keyboard.removeEventListener('touchstart', onTouchStart);
+                keyboard.removeEventListener('touchmove', onTouchMove);
+                keyboard.removeEventListener('touchend', onTouchEnd);
+                clearTrail();
+            }
+        }
+
+        swipeBtn.addEventListener('click', () => toggleKeyboard());
+        closeBtn?.addEventListener('click', () => { sendToAAC(); toggleKeyboard(false); });
+    }
+
+    // 13g. Alzheimer Crisis Board — caregiver-operated crisis support
+    function initAlzheimerBoard() {
+        const board = document.getElementById('alzheimer-crisis-board');
+        const responsePanel = document.getElementById('alz-response-panel');
+        const responseText = document.getElementById('alz-response-text');
+        const speakBtn = document.getElementById('alz-speak-btn');
+        const backBtn = document.getElementById('alz-back-btn');
+        if (!board) return;
+
+        const LANG_MAP = { es:'es-ES', en:'en-US', it:'it-IT', fr:'fr-FR', de:'de-DE', zh:'zh-CN', pt:'pt-PT', ja:'ja-JP' };
+
+        function autoSpeak(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = LANG_MAP[state.lang] || 'es-ES';
+            u.rate = 0.82;
+            window.speechSynthesis.speak(u);
+        }
+
+        function showResponse(text) {
+            if (!responsePanel || !responseText) return;
+            responseText.textContent = text;
+            responsePanel.classList.remove('hidden');
+            board.querySelector('.alz-grid')?.classList.add('hidden');
+            autoSpeak(text);
+        }
+
+        board.querySelectorAll('.alz-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.dataset.alzKey;
+                const reply = t(`alz.reply.${key}`) || t(`refugio.alzheimer.reply.${key}`) || t('alz.reply.lost');
+                showResponse(reply);
+            });
+        });
+
+        speakBtn?.addEventListener('click', () => {
+            const text = responseText?.textContent;
+            if (text) autoSpeak(text);
+        });
+
+        backBtn?.addEventListener('click', () => {
+            responsePanel?.classList.add('hidden');
+            if (responseText) responseText.textContent = '';
+            board.querySelector('.alz-grid')?.classList.remove('hidden');
+            window.speechSynthesis?.cancel();
         });
     }
 
@@ -1617,12 +1763,13 @@ function boot() {
     initOnboarding();
     initSettings();
     initChat();
+    initAlzheimerBoard();
     loadSafetyPlan();
     initSintonia();
     initSpeechRecognition();
     initPwaInstall();
     initNotebook();
-    initEyeTracking();
+    initSwipeKeyboard();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {

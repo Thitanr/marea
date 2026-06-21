@@ -225,20 +225,17 @@
         <!-- Main Content Area -->
         <main id="main-content" class="main-content">
             
-            <!-- 1. EL REFUGIO (CHAT) -->
+            <!-- 1. EL REFUGIO (CHAT / ALZHEIMER BOARD) -->
             <section id="tab-refugio" class="tab-panel" role="tabpanel" aria-labelledby="nav-refugio">
+                <!-- Normal chat (hidden when condition = alzheimer) -->
                 <div class="chat-wrapper">
-                    <div id="chat-messages" class="chat-messages" aria-live="polite">
-                        <!-- Dynamic conversation entries will go here -->
-                    </div>
+                    <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
                     <div id="chat-typing-indicator" class="chat-typing-indicator hidden" aria-hidden="true">
                         <div class="dots-pulse"></div>
                         <span data-i18n="refugio.still_here">Sigo aquí. No tienes que decir nada...</span>
                     </div>
                     <div class="chat-controls">
-                        <div class="chat-quick-responses" id="chat-quick-responses">
-                            <!-- Populated dynamically by app.js -->
-                        </div>
+                        <div class="chat-quick-responses" id="chat-quick-responses"></div>
                         <div class="chat-input-area">
                             <button id="chat-mic-btn" class="btn-secondary round-icon-btn mic-btn" aria-label="Hablar" data-i18n-aria="refugio.mic_start">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
@@ -255,6 +252,66 @@
                                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                                 </svg>
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alzheimer Crisis Board (shown when condition = alzheimer) -->
+                <div id="alzheimer-crisis-board" class="alz-board hidden" aria-live="polite">
+                    <div class="alz-board-header">
+                        <h2 class="alz-board-title" data-i18n="alz.board_title">Alzheimer · Apoyo en Crisis</h2>
+                        <p class="alz-board-hint" data-i18n="alz.board_hint">El cuidador toca el botón que describe la situación</p>
+                    </div>
+                    <div class="alz-grid">
+                        <button class="alz-btn" data-alz-key="lost">
+                            <span class="alz-icon" aria-hidden="true">😰</span>
+                            <span class="alz-label" data-i18n="alz.btn.lost">Se siente perdido/a</span>
+                        </button>
+                        <button class="alz-btn" data-alz-key="home">
+                            <span class="alz-icon" aria-hidden="true">🏠</span>
+                            <span class="alz-label" data-i18n="alz.btn.home">Quiere irse a casa</span>
+                        </button>
+                        <button class="alz-btn" data-alz-key="scared">
+                            <span class="alz-icon" aria-hidden="true">😨</span>
+                            <span class="alz-label" data-i18n="alz.btn.scared">Está asustado/a</span>
+                        </button>
+                        <button class="alz-btn" data-alz-key="time">
+                            <span class="alz-icon" aria-hidden="true">🕐</span>
+                            <span class="alz-label" data-i18n="alz.btn.time">Confusión hora/día</span>
+                        </button>
+                        <button class="alz-btn" data-alz-key="agitated">
+                            <span class="alz-icon" aria-hidden="true">😤</span>
+                            <span class="alz-label" data-i18n="alz.btn.agitated">Está agitado/a</span>
+                        </button>
+                        <button class="alz-btn" data-alz-key="family">
+                            <span class="alz-icon" aria-hidden="true">👨‍👩‍👧</span>
+                            <span class="alz-label" data-i18n="alz.btn.family">Pregunta por familia</span>
+                        </button>
+                        <button class="alz-btn" data-alz-key="pain">
+                            <span class="alz-icon" aria-hidden="true">🤕</span>
+                            <span class="alz-label" data-i18n="alz.btn.pain">Parece tener dolor</span>
+                        </button>
+                        <button class="alz-btn" data-alz-key="calm">
+                            <span class="alz-icon" aria-hidden="true">🌊</span>
+                            <span class="alz-label" data-i18n="alz.btn.calm">Momento de calma</span>
+                        </button>
+                        <button class="alz-btn alz-btn-emergency" data-alz-key="emergency">
+                            <span class="alz-icon" aria-hidden="true">🏥</span>
+                            <span class="alz-label" data-i18n="alz.btn.emergency">Llamar ayuda médica</span>
+                        </button>
+                    </div>
+                    <!-- Response panel shown when a button is pressed -->
+                    <div id="alz-response-panel" class="alz-response-panel hidden" aria-live="assertive">
+                        <div id="alz-response-text" class="alz-response-text"></div>
+                        <div class="alz-response-actions">
+                            <button id="alz-speak-btn" class="btn-primary alz-speak-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                </svg>
+                                <span data-i18n="alz.speak_response">Leer en voz alta</span>
+                            </button>
+                            <button id="alz-back-btn" class="btn-secondary alz-back-btn" data-i18n="alz.back">← Volver</button>
                         </div>
                     </div>
                 </div>
@@ -352,11 +409,20 @@
                             <button class="aac-cat-btn" data-category="social" role="tab" aria-selected="false" data-i18n="aac.cat_social">Social</button>
                             <button class="aac-cat-btn" data-category="emotions" role="tab" aria-selected="false" data-i18n="aac.cat_emotions">Sentir</button>
                         </div>
-
                         <!-- Grid content -->
-                        <div class="aac-grid-container" id="aac-grid">
-                            <!-- Populated dynamically based on category -->
+                        <div class="aac-grid-container" id="aac-grid"></div>
+                    </div>
+
+                    <!-- Swipe Keyboard (shown when swipe mode active, replaces AAC board) -->
+                    <div id="swipe-keyboard" class="swipe-keyboard hidden" aria-label="Teclado deslizante">
+                        <div class="swipe-kb-header">
+                            <div class="swipe-kb-display">
+                                <span id="swipe-kb-word" class="swipe-kb-word"></span>
+                                <span id="swipe-kb-hint" class="swipe-kb-hint" data-i18n="swipe.hint">Desliza el dedo por las letras para escribir</span>
+                            </div>
+                            <button id="swipe-kb-close" class="swipe-kb-close-btn" aria-label="Cerrar teclado" data-i18n-aria="eye.btn_stop">✕</button>
                         </div>
+                        <div class="swipe-kb-rows" id="swipe-kb-rows" role="group"></div>
                     </div>
                 </div>
             </section>
@@ -902,20 +968,6 @@
             <p class="ios-modal-note" data-i18n="install.modal_note">Marea aparecerá como app nativa y funcionará sin conexión.</p>
         </div>
     </div>
-
-    <!-- Eye Tracking Calibration Overlay -->
-    <div id="eye-calibration-overlay" class="eye-calibration-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="eye-calib-title">
-        <div class="eye-calib-header">
-            <h2 id="eye-calib-title" data-i18n="eye.calib_title">Calibración de mirada</h2>
-            <p id="eye-calib-message" class="eye-calib-message" data-i18n="eye.calib_msg">Mira el punto verde y tócalo</p>
-            <div id="eye-calib-counter" class="eye-calib-counter"></div>
-        </div>
-        <div id="eye-calib-dot" class="eye-calib-dot" role="button" aria-label="Punto de calibración"></div>
-        <button id="eye-calib-cancel" class="eye-calib-cancel" data-i18n="common.cancel">Cancelar</button>
-    </div>
-
-    <!-- Gaze Cursor (floating dot that follows eye gaze) -->
-    <div id="eye-gaze-cursor" class="eye-gaze-cursor hidden" aria-hidden="true"></div>
 
     <!-- Application Entry (Vite ESM) -->
     <script type="module" src="/src/main.ts"></script>

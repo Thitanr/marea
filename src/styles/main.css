@@ -759,6 +759,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    position: relative;
     gap: 12px;
     overflow: hidden;
 }
@@ -2247,7 +2248,7 @@ textarea.safe-input {
 }
 
 /* ==========================================================================
-   EYE TRACKING
+   SWIPE / SLIDE KEYBOARD BUTTON
    ========================================================================== */
 .eye-mode-btn {
     display: flex;
@@ -2262,106 +2263,274 @@ textarea.safe-input {
     border-color: var(--accent, #4db896);
 }
 
-/* Calibration overlay */
-.eye-calibration-overlay {
-    position: fixed;
+/* ==========================================================================
+   SWIPE KEYBOARD
+   ========================================================================== */
+.swipe-keyboard {
+    position: absolute;
     inset: 0;
-    z-index: 10000;
-    background: rgba(6, 9, 13, 0.96);
-    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card, #0f1a17);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 10;
 }
-.eye-calibration-overlay.hidden { display: none; }
-.eye-calib-header {
-    position: absolute;
-    top: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    pointer-events: none;
-    width: 90%;
-    max-width: 420px;
+.swipe-keyboard.hidden { display: none; }
+
+.swipe-kb-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem 0.4rem;
+    border-bottom: 1px solid var(--border-subtle, rgba(77,184,150,0.12));
+    flex-shrink: 0;
 }
-.eye-calib-header h2 {
-    color: var(--text, #e8f0ed);
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+.swipe-kb-display {
+    flex: 1;
+    min-height: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    overflow: hidden;
 }
-.eye-calib-message {
-    color: var(--text-muted, #7aa394);
-    font-size: 0.95rem;
-    margin: 0;
-}
-.eye-calib-counter {
+.swipe-kb-word {
+    font-size: 1.05rem;
+    font-weight: 600;
     color: var(--accent, #4db896);
-    font-size: 1rem;
-    font-weight: 700;
-    margin-top: 0.5rem;
+    letter-spacing: 0.04em;
+    min-width: 4px;
 }
-.eye-calib-dot {
-    position: absolute;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--accent, #4db896);
-    border: 3px solid rgba(255,255,255,0.6);
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-    transition: left 0.4s ease, top 0.4s ease;
-    box-shadow: 0 0 0 0 rgba(77,184,150,0.6);
-}
-.eye-calib-dot.pulse {
-    animation: calibPulse 1.2s ease-in-out infinite;
-}
-@keyframes calibPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(77,184,150,0.6); }
-    70%  { box-shadow: 0 0 0 18px rgba(77,184,150,0); }
-    100% { box-shadow: 0 0 0 0 rgba(77,184,150,0); }
-}
-.eye-calib-cancel {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: transparent;
-    border: 1.5px solid var(--text-muted, #7aa394);
+.swipe-kb-hint {
+    font-size: 0.78rem;
     color: var(--text-muted, #7aa394);
-    padding: 0.6rem 1.5rem;
-    border-radius: 999px;
-    font-size: 0.9rem;
+    font-style: italic;
+}
+.swipe-kb-close-btn {
+    background: transparent;
+    border: 1px solid var(--border-subtle, rgba(77,184,150,0.2));
+    color: var(--text-muted, #7aa394);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
     cursor: pointer;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Gaze cursor */
-.eye-gaze-cursor {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgba(77,184,150,0.7);
-    border: 2px solid #ffffff;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: left 80ms linear, top 80ms linear;
-    box-shadow: 0 0 12px rgba(77,184,150,0.5);
-}
-.eye-gaze-cursor.hidden { display: none; }
-
-/* Dwell progress on AAC cards — .aac-card-btn is the actual class from renderAACBoard() */
-.aac-card-btn { position: relative; overflow: visible; }
-.aac-cat-btn  { position: relative; overflow: visible; }
-.aac-card-btn.gaze-dwell::before,
-.aac-cat-btn.gaze-dwell::before {
-    content: '';
+.swipe-trail-canvas {
     position: absolute;
-    inset: -5px;
-    border-radius: inherit;
-    background: conic-gradient(
-        var(--accent, #4db896) calc(var(--dwell, 0) * 360deg),
-        transparent 0
-    );
-    opacity: 0.55;
     pointer-events: none;
-    z-index: 0;
+    z-index: 2;
+    left: 0;
+}
+
+.swipe-kb-rows {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 4px 8px;
+    position: relative;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.swipe-kb-row {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+}
+.swipe-key {
+    flex: 1;
+    max-width: 40px;
+    height: 44px;
+    border-radius: 7px;
+    background: var(--surface-secondary, #1a2820);
+    border: 1px solid var(--border-subtle, rgba(77,184,150,0.12));
+    color: var(--text-primary, #e8f0ed);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.08s, transform 0.08s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.swipe-key:active,
+.swipe-key.key-active {
+    background: var(--accent, #4db896);
+    color: #0a0f0d;
+    transform: scale(1.12);
+    z-index: 4;
+}
+.swipe-key-del {
+    max-width: 52px;
+    background: var(--surface-elevated, #1f2e28);
+    font-size: 1rem;
+}
+.swipe-kb-bottom {
+    margin-top: 1px;
+}
+.swipe-key-space {
+    flex: 4;
+    max-width: 200px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+}
+.swipe-key-send {
+    flex: 2;
+    max-width: 100px;
+    background: var(--accent, #4db896);
+    color: #0a0f0d;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-color: var(--accent, #4db896);
+}
+.swipe-key-send:active { opacity: 0.8; }
+
+/* ==========================================================================
+   ALZHEIMER CRISIS BOARD
+   ========================================================================== */
+.alz-board {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem;
+    gap: 1rem;
+    overflow-y: auto;
+    position: relative;
+}
+.alz-board.hidden { display: none; }
+
+.alz-board-header {
+    text-align: center;
+}
+.alz-board-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--accent, #4db896);
+    margin: 0 0 0.35rem;
+}
+.alz-board-hint {
+    font-size: 0.82rem;
+    color: var(--text-muted, #7aa394);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.alz-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+    flex: 1;
+}
+
+.alz-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.9rem 0.5rem;
+    background: var(--surface-secondary, #1a2820);
+    border: 1.5px solid var(--border-subtle, rgba(77,184,150,0.18));
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    min-height: 90px;
+    width: 100%;
+}
+.alz-btn:hover, .alz-btn:focus-visible {
+    background: var(--surface-elevated, #1f2e28);
+    border-color: var(--accent, #4db896);
+}
+.alz-btn:active {
+    transform: scale(0.96);
+    background: rgba(77,184,150,0.15);
+}
+.alz-btn-emergency {
+    border-color: #e05555;
+    background: rgba(224, 85, 85, 0.08);
+}
+.alz-btn-emergency:hover, .alz-btn-emergency:focus-visible {
+    background: rgba(224, 85, 85, 0.18);
+    border-color: #e05555;
+}
+.alz-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    display: block;
+}
+.alz-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-primary, #e8f0ed);
+    line-height: 1.3;
+    display: block;
+}
+
+.alz-response-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 2rem 1.5rem;
+    background: var(--bg-card, #0f1a17);
+    border-radius: 12px;
+    animation: alz-fade-in 0.3s ease;
+}
+.alz-response-panel.hidden { display: none; }
+
+@keyframes alz-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.alz-response-text {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-primary, #e8f0ed);
+    line-height: 1.7;
+    text-align: center;
+    max-width: 480px;
+}
+
+.alz-response-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 320px;
+}
+.alz-speak-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    padding: 0.9rem 1.5rem;
+}
+.alz-back-btn {
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Tab-refugio positioning context for crisis board */
+#tab-refugio {
+    position: relative;
 }
 
