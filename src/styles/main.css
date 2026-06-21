@@ -2275,6 +2275,7 @@ textarea.safe-input {
     border-radius: 12px;
     overflow: hidden;
     z-index: 10;
+    touch-action: none;
 }
 .swipe-keyboard.hidden { display: none; }
 

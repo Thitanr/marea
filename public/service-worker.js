@@ -1,10 +1,10 @@
 /* ==========================================================================
-   MAREA - SERVICE WORKER v6
+   MAREA - SERVICE WORKER v7
    Network-first with cache fallback. Always serves freshest content.
-   v6: User-controlled updates — shows popup instead of auto-reloading.
+   v7: Auto-apply updates immediately — page reloads when new SW activates.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v6';
+const CACHE_NAME = 'marea-cache-v7';
 
 // Install — do NOT auto-skipWaiting so the app can show an update popup.
 // On first install there is no controller, so the app sends SKIP_WAITING immediately.

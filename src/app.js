@@ -1496,6 +1496,7 @@ function boot() {
         let trailCanvas = null;
         let ctx = null;
         let trailPoints = [];
+        let pointerHandled = false;  // suppress click after pointer interaction
 
         function buildKeyboard() {
             rowsEl.innerHTML = '';
@@ -1624,17 +1625,20 @@ function boot() {
             return false;
         }
 
-        function onTouchStart(e) {
+        // Pointer events — work for mouse, touch, and stylus
+        function onPointerDown(e) {
             if (!active) return;
-            const touch = e.touches[0];
-            const keyEl = getKeyAt(touch.clientX, touch.clientY);
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            const keyEl = getKeyAt(e.clientX, e.clientY);
             if (!keyEl) return;
             e.preventDefault();
+            keyboard.setPointerCapture(e.pointerId);
+            pointerHandled = true;
             isSwiping = true;
             lastKey = null;
             clearTrail();
             const kRect = rowsEl.getBoundingClientRect();
-            trailPoints.push({ x: touch.clientX - kRect.left, y: touch.clientY - kRect.top });
+            trailPoints.push({ x: e.clientX - kRect.left, y: e.clientY - kRect.top });
             const k = keyEl.dataset.key;
             if (!handleSpecial(k)) {
                 builtText += k.toLowerCase();
@@ -1645,14 +1649,13 @@ function boot() {
             }
         }
 
-        function onTouchMove(e) {
+        function onPointerMove(e) {
             if (!isSwiping || !active) return;
             e.preventDefault();
-            const touch = e.touches[0];
             const kRect = rowsEl.getBoundingClientRect();
-            trailPoints.push({ x: touch.clientX - kRect.left, y: touch.clientY - kRect.top });
+            trailPoints.push({ x: e.clientX - kRect.left, y: e.clientY - kRect.top });
             drawTrail();
-            const keyEl = getKeyAt(touch.clientX, touch.clientY);
+            const keyEl = getKeyAt(e.clientX, e.clientY);
             if (!keyEl) return;
             const k = keyEl.dataset.key;
             if (k !== lastKey && k !== '⌫' && k !== 'SPACE' && k !== 'SEND') {
@@ -1663,7 +1666,7 @@ function boot() {
             }
         }
 
-        function onTouchEnd() {
+        function onPointerUp() {
             if (!isSwiping) return;
             isSwiping = false;
             highlightKey(null);
@@ -1672,15 +1675,18 @@ function boot() {
             setTimeout(clearTrail, 400);
         }
 
-        function onTouchCancel() {
+        function onPointerCancel() {
             isSwiping = false;
+            pointerHandled = false;
             highlightKey(null);
             clearTrail();
         }
 
         rowsEl.addEventListener('click', e => {
+            // Suppress click when pointer already handled the interaction
+            if (pointerHandled) { pointerHandled = false; return; }
             const key = e.target.closest('.swipe-key');
-            if (!key || isSwiping) return;
+            if (!key) return;
             const k = key.dataset.key;
             if (handleSpecial(k)) return;
             builtText += k.toLowerCase();
@@ -1700,19 +1706,19 @@ function boot() {
                 builtText = '';
                 wordEl.textContent = '';
                 buildKeyboard();
-                keyboard.addEventListener('touchstart', onTouchStart, { passive: false });
-                keyboard.addEventListener('touchmove', onTouchMove, { passive: false });
-                keyboard.addEventListener('touchend', onTouchEnd);
-                keyboard.addEventListener('touchcancel', onTouchCancel);
+                keyboard.addEventListener('pointerdown', onPointerDown, { passive: false });
+                keyboard.addEventListener('pointermove', onPointerMove, { passive: false });
+                keyboard.addEventListener('pointerup', onPointerUp);
+                keyboard.addEventListener('pointercancel', onPointerCancel);
             } else {
                 keyboard.classList.add('hidden');
                 aacBoard?.classList.remove('hidden');
                 if (span) span.textContent = t('eye.btn_text') || 'Deslizar';
                 swipeBtn.classList.remove('active');
-                keyboard.removeEventListener('touchstart', onTouchStart);
-                keyboard.removeEventListener('touchmove', onTouchMove);
-                keyboard.removeEventListener('touchend', onTouchEnd);
-                keyboard.removeEventListener('touchcancel', onTouchCancel);
+                keyboard.removeEventListener('pointerdown', onPointerDown);
+                keyboard.removeEventListener('pointermove', onPointerMove);
+                keyboard.removeEventListener('pointerup', onPointerUp);
+                keyboard.removeEventListener('pointercancel', onPointerCancel);
                 clearTrail();
             }
         }
@@ -1797,11 +1803,13 @@ function boot() {
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed') {
                                 if (!navigator.serviceWorker.controller) {
-                                    // First install — activate immediately, no popup needed
+                                    // First install — activate immediately
                                     newWorker.postMessage({ type: 'SKIP_WAITING' });
                                 } else {
-                                    // Update available — let the user decide
-                                    _showUpdateBanner(reg);
+                                    // Update available — auto-apply and show brief notification
+                                    _reloadPending = true;
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    _showUpdateBanner();
                                 }
                             }
                         });
@@ -1815,13 +1823,12 @@ function boot() {
                 if (_reloadPending) window.location.reload();
             });
 
-            function _showUpdateBanner(reg) {
+            function _showUpdateBanner() {
                 const banner = document.getElementById('sw-update-banner');
                 if (!banner) return;
                 banner.classList.remove('hidden');
+                // Update is already applied — page will reload via controllerchange
                 document.getElementById('sw-update-btn')?.addEventListener('click', () => {
-                    _reloadPending = true;
-                    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
                     banner.classList.add('hidden');
                 }, { once: true });
                 document.getElementById('sw-update-dismiss')?.addEventListener('click', () => {
