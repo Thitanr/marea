@@ -3,7 +3,7 @@
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: no-referrer
-  Permissions-Policy: camera=self, microphone=self, geolocation=(), payment=(), interest-cohort=()
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(), payment=(), interest-cohort=()
   Content-Security-Policy: default-src 'self'; script-src 'self' https://unpkg.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://unpkg.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; frame-ancestors 'none';
 
 /service-worker.js
