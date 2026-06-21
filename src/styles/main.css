@@ -2047,3 +2047,320 @@ textarea.safe-input {
     border-color: #ffff00 !important;
 }
 
+/* ==========================================================================
+   SW UPDATE BANNER
+   ========================================================================== */
+.sw-update-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--accent, #4db896);
+    color: #0a0f0d;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 2px 12px rgba(77,184,150,0.4);
+    animation: slideDown 0.3s ease;
+}
+.sw-update-banner span { flex: 1; }
+.sw-update-btn {
+    padding: 0.35rem 0.9rem;
+    border: 2px solid #0a0f0d;
+    border-radius: 999px;
+    background: #0a0f0d;
+    color: var(--accent, #4db896);
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.sw-update-btn:active { opacity: 0.8; }
+.sw-update-dismiss {
+    background: none;
+    border: none;
+    color: #0a0f0d;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    opacity: 0.7;
+}
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(0); }
+}
+
+/* ==========================================================================
+   iOS INSTALL BANNER
+   ========================================================================== */
+.ios-install-banner {
+    position: fixed;
+    bottom: 5rem; /* above nav bar */
+    left: 0.75rem;
+    right: 0.75rem;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface, #121a17);
+    border: 1px solid var(--accent, #4db896);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    font-size: 0.875rem;
+    color: var(--text, #e8f0ed);
+    animation: slideUp 0.35s ease;
+}
+.ios-install-banner svg { flex-shrink: 0; stroke: var(--accent, #4db896); }
+.ios-install-banner span { flex: 1; }
+.ios-banner-how {
+    padding: 0.3rem 0.75rem;
+    border: 1.5px solid var(--accent, #4db896);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--accent, #4db896);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.ios-banner-close {
+    background: none;
+    border: none;
+    color: var(--text-muted, #7aa394);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 0.2rem;
+    flex-shrink: 0;
+}
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ==========================================================================
+   iOS INSTALL MODAL
+   ========================================================================== */
+.ios-install-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9500;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+.ios-install-modal.hidden { display: none; }
+.ios-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+}
+.ios-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface, #121a17);
+    border-radius: 20px 20px 0 0;
+    padding: 2rem 1.5rem 3rem;
+    box-shadow: 0 -4px 32px rgba(0,0,0,0.5);
+    animation: slideUpModal 0.35s ease;
+}
+@keyframes slideUpModal {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+.ios-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--surface-alt, #1e2925);
+    border: none;
+    color: var(--text-muted, #7aa394);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ios-modal-icon {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+.ios-modal-content h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text, #e8f0ed);
+    margin-bottom: 0.4rem;
+    text-align: center;
+}
+.ios-modal-content > p {
+    color: var(--text-muted, #7aa394);
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+}
+.ios-install-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.ios-install-steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    color: var(--text, #e8f0ed);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.ios-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent, #4db896);
+    color: #0a0f0d;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.ios-modal-note {
+    font-size: 0.82rem;
+    color: var(--text-muted, #7aa394);
+    text-align: center;
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border, rgba(77,184,150,0.15));
+}
+
+/* ==========================================================================
+   EYE TRACKING
+   ========================================================================== */
+.eye-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+}
+.eye-mode-btn.active {
+    background: var(--accent, #4db896);
+    color: #0a0f0d;
+    border-color: var(--accent, #4db896);
+}
+
+/* Calibration overlay */
+.eye-calibration-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(6, 9, 13, 0.96);
+    backdrop-filter: blur(8px);
+}
+.eye-calibration-overlay.hidden { display: none; }
+.eye-calib-header {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+.eye-calib-header h2 {
+    color: var(--text, #e8f0ed);
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+.eye-calib-message {
+    color: var(--text-muted, #7aa394);
+    font-size: 0.95rem;
+    margin: 0;
+}
+.eye-calib-counter {
+    color: var(--accent, #4db896);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+.eye-calib-dot {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent, #4db896);
+    border: 3px solid rgba(255,255,255,0.6);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: left 0.4s ease, top 0.4s ease;
+    box-shadow: 0 0 0 0 rgba(77,184,150,0.6);
+}
+.eye-calib-dot.pulse {
+    animation: calibPulse 1.2s ease-in-out infinite;
+}
+@keyframes calibPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(77,184,150,0.6); }
+    70%  { box-shadow: 0 0 0 18px rgba(77,184,150,0); }
+    100% { box-shadow: 0 0 0 0 rgba(77,184,150,0); }
+}
+.eye-calib-cancel {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: transparent;
+    border: 1.5px solid var(--text-muted, #7aa394);
+    color: var(--text-muted, #7aa394);
+    padding: 0.6rem 1.5rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Gaze cursor */
+.eye-gaze-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(77,184,150,0.7);
+    border: 2px solid #ffffff;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: left 80ms linear, top 80ms linear;
+    box-shadow: 0 0 12px rgba(77,184,150,0.5);
+}
+.eye-gaze-cursor.hidden { display: none; }
+
+/* Dwell progress on AAC cards */
+.aac-phrase-btn { position: relative; overflow: visible; }
+.aac-phrase-btn.gaze-dwell::before,
+.aac-cat-btn.gaze-dwell::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: inherit;
+    background: conic-gradient(
+        var(--accent, #4db896) calc(var(--dwell, 0) * 360deg),
+        transparent 0
+    );
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+}
+.aac-cat-btn { position: relative; overflow: visible; }
+

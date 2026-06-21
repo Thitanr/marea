@@ -1,12 +1,16 @@
 {
+  "id": "/",
   "name": "Marea — Sostén & Dignidad",
   "short_name": "Marea",
   "description": "Sovereign holding & sensory anchor for crisis regulation. By Lana Technologies.",
-  "start_url": "./index.html",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#0a0f0d",
   "theme_color": "#4db896",
   "orientation": "portrait",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",
@@ -31,6 +35,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

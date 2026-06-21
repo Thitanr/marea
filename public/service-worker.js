@@ -1,74 +1,76 @@
 /* ==========================================================================
-   MAREA - SERVICE WORKER
+   MAREA - SERVICE WORKER v6
    Network-first with cache fallback. Always serves freshest content.
-   Cache version bumped to v4 to purge potential stale/corrupted entries.
-   Only caches successful (HTTP 200) responses to prevent caching errors.
+   v6: User-controlled updates — shows popup instead of auto-reloading.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v5';
+const CACHE_NAME = 'marea-cache-v6';
 
-// Install Event — skip waiting so the new SW activates immediately
+// Install — do NOT auto-skipWaiting so the app can show an update popup.
+// On first install there is no controller, so the app sends SKIP_WAITING immediately.
 self.addEventListener('install', () => {
-    console.log('[SW v5] Installing…');
-    self.skipWaiting();
+    console.log('[SW v6] Installing…');
 });
 
-// Activate Event — clean old caches and claim clients
+// Message handler — app sends { type: 'SKIP_WAITING' } when user approves update
+self.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'SKIP_WAITING') {
+        console.log('[SW v6] Skip waiting — activating now');
+        self.skipWaiting();
+    }
+});
+
+// Activate — clean old caches and claim all clients
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
                 keys.filter((key) => key !== CACHE_NAME)
                     .map((key) => {
-                        console.log('[SW v4] Removing old cache:', key);
+                        console.log('[SW v6] Removing old cache:', key);
                         return caches.delete(key);
                     })
             );
         }).then(() => {
-            console.log('[SW v4] Activated — claiming clients');
+            console.log('[SW v6] Activated — claiming clients');
             return self.clients.claim();
         })
     );
 });
 
-// Helper: only cache responses we actually want to keep
 function isCacheable(response) {
     return response && response.ok && response.status === 200;
 }
 
-// Fetch Event — network-first, fallback to cache, update cache on success
+// Fetch — network-first, cache fallback
 self.addEventListener('fetch', (e) => {
-    // Only handle GET navigation and same-origin requests
     if (e.request.method !== 'GET') return;
+
+    // Don't cache cross-origin CDN requests (WebGazer) — just pass through
+    const url = new URL(e.request.url);
+    if (url.origin !== self.location.origin && !url.hostname.includes('unpkg.com')) {
+        return;
+    }
 
     e.respondWith(
         (async () => {
             try {
-                // Try network first
                 const networkResponse = await fetch(e.request);
-
-                // Only cache healthy responses — never cache errors or redirects
                 if (isCacheable(networkResponse)) {
                     const cache = await caches.open(CACHE_NAME);
                     cache.put(e.request, networkResponse.clone());
                 }
-
                 return networkResponse;
             } catch (_err) {
-                // Offline — serve from cache
                 const cachedResponse = await caches.match(e.request);
                 if (cachedResponse) {
-                    console.log('[SW v4] Serving from cache:', e.request.url);
+                    console.log('[SW v6] Serving from cache:', e.request.url);
                     return cachedResponse;
                 }
-
-                // If navigating and no cache match, try the root
                 if (e.request.mode === 'navigate') {
-                    const fallback = await caches.match('./index.html');
+                    const fallback = await caches.match('/');
                     if (fallback) return fallback;
                 }
-
-                // Nothing we can do
                 return new Response('Sin conexión — volvé a intentar cuando tengas internet.', {
                     status: 503,
                     headers: { 'Content-Type': 'text/plain; charset=utf-8' }

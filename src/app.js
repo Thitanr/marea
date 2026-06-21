@@ -1050,6 +1050,47 @@ function boot() {
         const pwaItem = document.getElementById('pwa-install-item');
         const btnInstall = document.getElementById('btn-install-pwa');
 
+        // Detect iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = ('standalone' in navigator && navigator.standalone) ||
+                             window.matchMedia('(display-mode: standalone)').matches;
+
+        function showIOSInstallModal() {
+            const modal = document.getElementById('ios-install-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            const closeBtn = modal.querySelector('.ios-modal-close');
+            const backdrop = modal.querySelector('.ios-modal-backdrop');
+            const handler = () => modal.classList.add('hidden');
+            if (closeBtn) closeBtn.addEventListener('click', handler, { once: true });
+            if (backdrop) backdrop.addEventListener('click', handler, { once: true });
+        }
+        window._showIOSInstallModal = showIOSInstallModal;
+
+        // iOS: show banner on first visit (not already installed)
+        if (isIOS && !isStandalone) {
+            if (pwaItem) pwaItem.style.display = '';
+            const iosHowBtn = document.getElementById('ios-banner-how');
+            if (iosHowBtn) iosHowBtn.addEventListener('click', showIOSInstallModal);
+            if (btnInstall) btnInstall.addEventListener('click', showIOSInstallModal);
+
+            if (!localStorage.getItem('marea_ios_banner_shown')) {
+                setTimeout(() => {
+                    const banner = document.getElementById('ios-install-banner');
+                    if (banner) {
+                        banner.classList.remove('hidden');
+                        localStorage.setItem('marea_ios_banner_shown', '1');
+                        document.getElementById('ios-banner-close')?.addEventListener('click', () =>
+                            banner.classList.add('hidden'), { once: true });
+                        document.getElementById('ios-banner-how')?.addEventListener('click', () =>
+                            banner.classList.add('hidden'), { once: true });
+                    }
+                }, 4000);
+            }
+            return; // iOS doesn't fire beforeinstallprompt
+        }
+
+        // Android / Desktop: native install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -1393,6 +1434,164 @@ function boot() {
         }
     }
 
+    // 13f. Eye Tracking — gaze-based AAC keyboard using WebGazer
+    function initEyeTracking() {
+        const eyeBtn = document.getElementById('eye-mode-btn');
+        const calibOverlay = document.getElementById('eye-calibration-overlay');
+        const calibDot = document.getElementById('eye-calib-dot');
+        const calibMsg = document.getElementById('eye-calib-message');
+        const calibCounter = document.getElementById('eye-calib-counter');
+        const calibCancel = document.getElementById('eye-calib-cancel');
+        const gazeCursor = document.getElementById('eye-gaze-cursor');
+        if (!eyeBtn || !calibOverlay) return;
+
+        let eyeActive = false;
+        let gazeTarget = null;
+        let gazeStart = null;
+        const DWELL_MS = 1500;
+        const CALIB_POSITIONS = [
+            { x: 15, y: 15 }, { x: 50, y: 15 }, { x: 85, y: 15 },
+            { x: 15, y: 50 }, { x: 50, y: 50 }, { x: 85, y: 50 },
+            { x: 15, y: 85 }, { x: 50, y: 85 }, { x: 85, y: 85 },
+        ];
+        let calibIndex = 0;
+
+        function loadWebGazer() {
+            return new Promise((resolve, reject) => {
+                if (window.webgazer) { resolve(); return; }
+                const s = document.createElement('script');
+                s.src = 'https://unpkg.com/webgazer@2.1.0/dist/webgazer.js';
+                s.crossOrigin = 'anonymous';
+                s.onload = resolve;
+                s.onerror = () => reject(new Error('Failed to load WebGazer'));
+                document.head.appendChild(s);
+            });
+        }
+
+        function showCalibPoint(idx) {
+            if (idx >= CALIB_POSITIONS.length) { finishCalib(); return; }
+            const p = CALIB_POSITIONS[idx];
+            calibDot.style.left = p.x + 'vw';
+            calibDot.style.top = p.y + 'vh';
+            calibDot.classList.remove('pulse');
+            void calibDot.offsetWidth; // reflow to restart animation
+            calibDot.classList.add('pulse');
+            if (calibMsg) calibMsg.setAttribute('data-i18n', '');
+            if (calibMsg) calibMsg.textContent = t('eye.calib_msg') || 'Mira este punto y tócalo';
+            if (calibCounter) calibCounter.textContent = `${idx + 1} / ${CALIB_POSITIONS.length}`;
+        }
+
+        function onCalibDotClick() {
+            calibDot.classList.remove('pulse');
+            calibIndex++;
+            if (calibIndex < CALIB_POSITIONS.length) {
+                showCalibPoint(calibIndex);
+            } else {
+                finishCalib();
+            }
+        }
+
+        function finishCalib() {
+            calibDot.removeEventListener('click', onCalibDotClick);
+            calibOverlay.classList.add('hidden');
+            eyeActive = true;
+            eyeBtn.classList.add('active');
+            if (gazeCursor) gazeCursor.classList.remove('hidden');
+            // Hide WebGazer's own UI elements
+            ['webgazerVideoContainer', 'webgazerFaceOverlay', 'webgazerFaceFeedbackBox'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.style.display = 'none'; el.style.visibility = 'hidden'; }
+            });
+            window.webgazer.setGazeListener(onGaze);
+        }
+
+        function onGaze(data) {
+            if (!data || !eyeActive) return;
+            const { x, y } = data;
+            if (gazeCursor) {
+                gazeCursor.style.left = x + 'px';
+                gazeCursor.style.top = y + 'px';
+            }
+            // Dwell detection
+            const el = document.elementFromPoint(x, y);
+            const card = el && el.closest('.aac-phrase-btn, .aac-cat-btn');
+            if (card !== gazeTarget) {
+                if (gazeTarget) {
+                    gazeTarget.style.removeProperty('--dwell');
+                    gazeTarget.classList.remove('gaze-dwell');
+                }
+                gazeTarget = card;
+                gazeStart = card ? Date.now() : null;
+            }
+            if (gazeTarget && gazeStart) {
+                const elapsed = Date.now() - gazeStart;
+                const pct = Math.min(elapsed / DWELL_MS, 1);
+                gazeTarget.style.setProperty('--dwell', pct);
+                gazeTarget.classList.add('gaze-dwell');
+                if (elapsed >= DWELL_MS) {
+                    const t = gazeTarget;
+                    gazeTarget = null;
+                    gazeStart = null;
+                    t.style.removeProperty('--dwell');
+                    t.classList.remove('gaze-dwell');
+                    t.click();
+                }
+            }
+        }
+
+        function stopEyeTracking() {
+            eyeActive = false;
+            if (window.webgazer) { try { window.webgazer.clearGazeListener(); window.webgazer.end(); } catch(_){} }
+            if (gazeCursor) gazeCursor.classList.add('hidden');
+            if (gazeTarget) { gazeTarget.style.removeProperty('--dwell'); gazeTarget.classList.remove('gaze-dwell'); }
+            gazeTarget = null; gazeStart = null;
+            eyeBtn.classList.remove('active');
+        }
+
+        async function startEyeTracking() {
+            const origText = eyeBtn.querySelector('span');
+            if (origText) origText.textContent = '...';
+            eyeBtn.disabled = true;
+            try {
+                await loadWebGazer();
+                window.webgazer.params.showVideoPreview = false;
+                window.webgazer.params.showFaceOverlay = false;
+                window.webgazer.params.showFaceFeedbackBox = false;
+                window.webgazer.setRegression('ridge');
+                await window.webgazer.begin();
+                window.webgazer.applyKalmanFilter(true);
+                calibIndex = 0;
+                calibOverlay.classList.remove('hidden');
+                showCalibPoint(0);
+                calibDot.addEventListener('click', onCalibDotClick);
+            } catch(err) {
+                showToast(t('eye.error') || 'No se pudo activar la cámara. Verifica los permisos.');
+                if (origText) origText.textContent = t('eye.btn_text') || 'Ojos';
+            }
+            eyeBtn.disabled = false;
+            if (origText) origText.textContent = eyeActive ? (t('eye.btn_stop') || 'Detener') : (t('eye.btn_text') || 'Ojos');
+        }
+
+        eyeBtn.addEventListener('click', () => {
+            if (eyeActive) {
+                stopEyeTracking();
+                const sp = eyeBtn.querySelector('span');
+                if (sp) sp.textContent = t('eye.btn_text') || 'Ojos';
+            } else {
+                startEyeTracking();
+            }
+        });
+
+        calibCancel && calibCancel.addEventListener('click', () => {
+            calibDot.removeEventListener('click', onCalibDotClick);
+            calibOverlay.classList.add('hidden');
+            if (window.webgazer) { try { window.webgazer.end(); } catch(_){} }
+            eyeBtn.disabled = false;
+            const sp = eyeBtn.querySelector('span');
+            if (sp) sp.textContent = t('eye.btn_text') || 'Ojos';
+        });
+    }
+
     // 14. Initialize App Lifecycle
     translateApp();
     setupEventListeners();
@@ -1404,28 +1603,52 @@ function boot() {
     initSpeechRecognition();
     initPwaInstall();
     initNotebook();
+    initEyeTracking();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./service-worker.js')
+            navigator.serviceWorker.register('/service-worker.js')
                 .then(reg => {
-                    console.log('[Service Worker] Registered successfully:', reg.scope);
+                    console.log('[Service Worker] Registered:', reg.scope);
 
-                    // Detect when a new SW is waiting and reload to apply it
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         if (!newWorker) return;
                         newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // New SW installed and waiting — activate it now
-                                console.log('[Service Worker] New version detected — reloading to activate');
-                                window.location.reload();
+                            if (newWorker.state === 'installed') {
+                                if (!navigator.serviceWorker.controller) {
+                                    // First install — activate immediately, no popup needed
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                } else {
+                                    // Update available — let the user decide
+                                    _showUpdateBanner(reg);
+                                }
                             }
                         });
                     });
                 })
                 .catch(err => console.error('[Service Worker] Registration failed:', err));
+
+            // After SKIP_WAITING the controller changes — reload to pick up new assets
+            let _reloadPending = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (_reloadPending) window.location.reload();
+            });
+
+            function _showUpdateBanner(reg) {
+                const banner = document.getElementById('sw-update-banner');
+                if (!banner) return;
+                banner.classList.remove('hidden');
+                document.getElementById('sw-update-btn')?.addEventListener('click', () => {
+                    _reloadPending = true;
+                    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    banner.classList.add('hidden');
+                }, { once: true });
+                document.getElementById('sw-update-dismiss')?.addEventListener('click', () => {
+                    banner.classList.add('hidden');
+                }, { once: true });
+            }
         });
     }
 }
