@@ -182,47 +182,24 @@ function boot() {
         }
     }
 
-    // 5. El Refugio (Validating Active Listening Chat)
-    function addChatBubble(text, sender = "system") {
-        const bubble = document.createElement("div");
-        bubble.className = `chat-msg ${sender}`;
-        bubble.textContent = text;
-        elements.chatMessagesContainer.appendChild(bubble);
-        elements.chatMessagesContainer.scrollTop = elements.chatMessagesContainer.scrollHeight;
-    }
+    // 5. El Refugio — Alzheimer Crisis Board only (chat removed)
+    function addChatBubble() { /* chat removed */ }
 
     function updateAlzheimerMode() {
-        const board = document.getElementById('alzheimer-crisis-board');
-        const chatWrapper = document.querySelector('#tab-refugio .chat-wrapper');
+        // Board is always shown — no chat mode
         const navLabel = document.querySelector('#nav-refugio .nav-label');
         const navBtn = document.getElementById('nav-refugio');
-        const condition = localStorage.getItem('marea_condition') || '';
-        if (condition === 'alzheimer') {
-            board?.classList.remove('hidden');
-            chatWrapper?.classList.add('hidden');
-            const label = t('alz.nav_label') || 'Alzheimer';
-            if (navLabel) navLabel.textContent = label;
-            if (navBtn) navBtn.setAttribute('aria-label', label);
-        } else {
-            board?.classList.add('hidden');
-            chatWrapper?.classList.remove('hidden');
-            const label = t('nav.refugio');
-            if (navLabel) navLabel.textContent = label;
-            if (navBtn) navBtn.setAttribute('aria-label', label);
-        }
+        const label = t('alz.nav_label') || 'Alzheimer';
+        if (navLabel) navLabel.textContent = label;
+        if (navBtn) navBtn.setAttribute('aria-label', label);
     }
 
     function initChat() {
-        elements.chatMessagesContainer.innerHTML = "";
-        const condition = localStorage.getItem('marea_condition') || '';
         updateAlzheimerMode();
-        if (condition === 'alzheimer') return;
-        addChatBubble(t('refugio.start_msg'), "system");
-        loadQuickResponses();
-        resetStillHereTimer();
     }
 
     function loadQuickResponses() {
+        if (!elements.chatQuickResponses) return;
         elements.chatQuickResponses.innerHTML = "";
         const condition = localStorage.getItem('marea_condition') || '';
 
@@ -246,6 +223,7 @@ function boot() {
 
     function handleUserMsg(text, key = "default", condition = null) {
         if (!text.trim()) return;
+        if (!elements.chatMessagesContainer) return;
         const activeCondition = condition || localStorage.getItem('marea_condition') || '';
 
         // Add user msg
@@ -339,13 +317,11 @@ function boot() {
     }
 
     function resetStillHereTimer() {
+        if (!elements.chatTypingIndicator) return;
         clearTimeout(state.chatTimer);
         elements.chatTypingIndicator.classList.add("hidden");
-        
-        // After 25s of silence, pulse the "I'm still here" indicator softly
         state.chatTimer = setTimeout(() => {
-            elements.chatTypingIndicator.classList.remove("hidden");
-            elements.chatMessagesContainer.scrollTop = elements.chatMessagesContainer.scrollHeight;
+            elements.chatTypingIndicator?.classList.remove("hidden");
         }, 25000);
     }
 
@@ -847,15 +823,12 @@ function boot() {
             window.location.href = "https://www.google.com";
         });
 
-        // Chat send mechanisms
-        elements.chatSendBtn.addEventListener("click", () => {
-            handleUserMsg(elements.chatInput.value);
+        // Chat send mechanisms (guarded — chat removed from refugio tab)
+        elements.chatSendBtn?.addEventListener("click", () => {
+            handleUserMsg(elements.chatInput?.value ?? '');
         });
-        
-        elements.chatInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                handleUserMsg(elements.chatInput.value);
-            }
+        elements.chatInput?.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleUserMsg(elements.chatInput.value);
         });
 
         // Grounding Stepper navigation buttons

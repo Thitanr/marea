@@ -132,7 +132,7 @@
                         <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
-                        <span data-i18n="onboarding.tip_refugio">Chat Apoyo — Conversación sin juicios</span>
+                        <span data-i18n="onboarding.tip_refugio">Alzheimer — Apoyo en crisis para cuidadores</span>
                     </li>
                     <li>
                         <svg class="onb-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
@@ -225,39 +225,10 @@
         <!-- Main Content Area -->
         <main id="main-content" class="main-content">
             
-            <!-- 1. EL REFUGIO (CHAT / ALZHEIMER BOARD) -->
+            <!-- 1. ALZHEIMER / CRISIS BOARD -->
             <section id="tab-refugio" class="tab-panel" role="tabpanel" aria-labelledby="nav-refugio">
-                <!-- Normal chat (hidden when condition = alzheimer) -->
-                <div class="chat-wrapper">
-                    <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
-                    <div id="chat-typing-indicator" class="chat-typing-indicator hidden" aria-hidden="true">
-                        <div class="dots-pulse"></div>
-                        <span data-i18n="refugio.still_here">Sigo aquí. No tienes que decir nada...</span>
-                    </div>
-                    <div class="chat-controls">
-                        <div class="chat-quick-responses" id="chat-quick-responses"></div>
-                        <div class="chat-input-area">
-                            <button id="chat-mic-btn" class="btn-secondary round-icon-btn mic-btn" aria-label="Hablar" data-i18n-aria="refugio.mic_start">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
-                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                                </svg>
-                            </button>
-                            <input type="text" id="chat-text-input" placeholder="Escribe aquí si lo deseas..." aria-label="Mensaje para el refugio" data-i18n-placeholder="refugio.input_placeholder">
-                            <button id="chat-send-btn" class="btn-primary round-icon-btn" aria-label="Enviar">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Alzheimer Crisis Board (shown when condition = alzheimer) -->
-                <div id="alzheimer-crisis-board" class="alz-board hidden" aria-live="polite">
+                <!-- Alzheimer Crisis Board — always visible -->
+                <div id="alzheimer-crisis-board" class="alz-board" aria-live="polite">
                     <div class="alz-board-header">
                         <h2 class="alz-board-title" data-i18n="alz.board_title">Alzheimer · Apoyo en Crisis</h2>
                         <p class="alz-board-hint" data-i18n="alz.board_hint">El cuidador toca el botón que describe la situación</p>
@@ -909,11 +880,12 @@
                 </svg>
                 <span class="nav-label" data-i18n="nav.sintonia">Sintonía</span>
             </button>
-            <button class="nav-item" id="nav-refugio" data-tab="refugio" data-i18n-aria="nav.refugio" aria-label="Chat Apoyo">
+            <button class="nav-item" id="nav-refugio" data-tab="refugio" data-i18n-aria="alz.nav_label" aria-label="Alzheimer">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+                    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
                 </svg>
-                <span class="nav-label" data-i18n="nav.refugio">Refugio</span>
+                <span class="nav-label" data-i18n="alz.nav_label">Alzheimer</span>
             </button>
             <button class="nav-item" id="nav-settings" data-tab="settings" data-i18n-aria="nav.settings" aria-label="Ajustes">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
