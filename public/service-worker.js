@@ -1,10 +1,10 @@
 /* ==========================================================================
    MAREA - SERVICE WORKER v7
    Network-first with cache fallback. Always serves freshest content.
-   v8: Alzheimer board always-on, chat removed from refugio tab.
+   v9: Swipe keyboard removed from AAC panel.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v8';
+const CACHE_NAME = 'marea-cache-v9';
 
 // Install — do NOT auto-skipWaiting so the app can show an update popup.
 // On first install there is no controller, so the app sends SKIP_WAITING immediately.
