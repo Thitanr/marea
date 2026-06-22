@@ -289,7 +289,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "Para el cuidador/a",
         "swipe.hint": "Desliza el dedo por las letras para escribir palabras",
         "swipe.space": "Espacio",
-        "swipe.send": "Añadir al texto"
+        "swipe.send": "Añadir al texto",
+        "eye.gaze_btn": "Mirada",
+        "eye.gaze_loading": "Cargando cámara...",
+        "eye.gaze_error": "No se pudo acceder a la cámara.",
+        "eye.gaze_calib_title": "Calibración de mirada",
+        "eye.gaze_calib_hint": "El cuidador clica cada punto mientras el usuario lo mira fijamente",
+        "eye.gaze_skip": "Omitir calibración",
+        "eye.gaze_dwell_hint": "Mira una tecla 1 segundo para seleccionarla",
+        "eye.gaze_close": "Cerrar cámara",
+        "eye.gaze_recalib": "↺ Recalibrar"
     },
     en: {
         "nav.refugio": "Support Chat",
@@ -579,7 +588,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "For the caregiver",
         "swipe.hint": "Slide your finger across letters to write words",
         "swipe.space": "Space",
-        "swipe.send": "Add to text"
+        "swipe.send": "Add to text",
+        "eye.gaze_btn": "Eye Gaze",
+        "eye.gaze_loading": "Loading camera...",
+        "eye.gaze_error": "Could not access the camera.",
+        "eye.gaze_calib_title": "Gaze Calibration",
+        "eye.gaze_calib_hint": "Caregiver clicks each dot while user looks at it",
+        "eye.gaze_skip": "Skip calibration",
+        "eye.gaze_dwell_hint": "Look at a key for 1 second to select it",
+        "eye.gaze_close": "Close camera",
+        "eye.gaze_recalib": "↺ Recalibrate"
     },
     it: {
         "nav.refugio": "Chat Supporto",
@@ -869,7 +887,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "Per il caregiver",
         "swipe.hint": "Scorri il dito sulle lettere per scrivere parole",
         "swipe.space": "Spazio",
-        "swipe.send": "Aggiungi al testo"
+        "swipe.send": "Aggiungi al testo",
+        "eye.gaze_btn": "Sguardo",
+        "eye.gaze_loading": "Caricamento fotocamera...",
+        "eye.gaze_error": "Impossibile accedere alla fotocamera.",
+        "eye.gaze_calib_title": "Calibrazione sguardo",
+        "eye.gaze_calib_hint": "Il caregiver clicca ogni punto mentre l'utente lo guarda fisso",
+        "eye.gaze_skip": "Salta calibrazione",
+        "eye.gaze_dwell_hint": "Guarda un tasto per 1 secondo per selezionarlo",
+        "eye.gaze_close": "Chiudi fotocamera",
+        "eye.gaze_recalib": "↺ Ricalibrare"
     },
     fr: {
         "nav.refugio": "Chat Soutien",
@@ -1159,7 +1186,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "Pour l'aidant/e",
         "swipe.hint": "Glissez le doigt sur les lettres pour écrire des mots",
         "swipe.space": "Espace",
-        "swipe.send": "Ajouter au texte"
+        "swipe.send": "Ajouter au texte",
+        "eye.gaze_btn": "Regard",
+        "eye.gaze_loading": "Chargement caméra...",
+        "eye.gaze_error": "Impossible d'accéder à la caméra.",
+        "eye.gaze_calib_title": "Calibration du regard",
+        "eye.gaze_calib_hint": "L'aidant clique chaque point pendant que l'utilisateur le regarde",
+        "eye.gaze_skip": "Ignorer la calibration",
+        "eye.gaze_dwell_hint": "Regardez une touche 1 seconde pour la sélectionner",
+        "eye.gaze_close": "Fermer la caméra",
+        "eye.gaze_recalib": "↺ Recalibrer"
     },
     de: {
         "nav.refugio": "Support Chat",
@@ -1449,7 +1485,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "Für die Pflegeperson",
         "swipe.hint": "Finger über die Buchstaben gleiten lassen, um Wörter zu schreiben",
         "swipe.space": "Leerzeichen",
-        "swipe.send": "Zum Text hinzufügen"
+        "swipe.send": "Zum Text hinzufügen",
+        "eye.gaze_btn": "Blick",
+        "eye.gaze_loading": "Kamera wird geladen...",
+        "eye.gaze_error": "Kamera konnte nicht geöffnet werden.",
+        "eye.gaze_calib_title": "Blickkalibrierung",
+        "eye.gaze_calib_hint": "Betreuer klickt jeden Punkt, während Benutzer darauf schaut",
+        "eye.gaze_skip": "Kalibrierung überspringen",
+        "eye.gaze_dwell_hint": "Schauen Sie 1 Sekunde auf eine Taste um sie auszuwählen",
+        "eye.gaze_close": "Kamera schließen",
+        "eye.gaze_recalib": "↺ Neu kalibrieren"
     },
     zh: {
         "nav.refugio": "支持对话",
@@ -1739,7 +1784,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "给护理者",
         "swipe.hint": "用手指在字母上滑动来输入单词",
         "swipe.space": "空格",
-        "swipe.send": "添加到文本"
+        "swipe.send": "添加到文本",
+        "eye.gaze_btn": "眼控",
+        "eye.gaze_loading": "加载摄像头...",
+        "eye.gaze_error": "无法访问摄像头。",
+        "eye.gaze_calib_title": "眼控校准",
+        "eye.gaze_calib_hint": "护理人员点击每个点，同时用户盯住该点",
+        "eye.gaze_skip": "跳过校准",
+        "eye.gaze_dwell_hint": "注视按键1秒钟以选择",
+        "eye.gaze_close": "关闭摄像头",
+        "eye.gaze_recalib": "↺ 重新校准"
     },
     pt: {
         "nav.refugio": "Chat Apoio",
@@ -2029,7 +2083,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "Para o/a cuidador/a",
         "swipe.hint": "Deslize o dedo pelas letras para escrever palavras",
         "swipe.space": "Espaço",
-        "swipe.send": "Adicionar ao texto"
+        "swipe.send": "Adicionar ao texto",
+        "eye.gaze_btn": "Olhar",
+        "eye.gaze_loading": "A carregar câmara...",
+        "eye.gaze_error": "Não foi possível aceder à câmara.",
+        "eye.gaze_calib_title": "Calibração do olhar",
+        "eye.gaze_calib_hint": "O cuidador clica cada ponto enquanto o utilizador o olha fixamente",
+        "eye.gaze_skip": "Ignorar calibração",
+        "eye.gaze_dwell_hint": "Olhe para uma tecla 1 segundo para a selecionar",
+        "eye.gaze_close": "Fechar câmara",
+        "eye.gaze_recalib": "↺ Recalibrar"
     },
     ja: {
         "nav.refugio": "サポート",
@@ -2319,7 +2382,16 @@ const i18n: I18nDict = {
         "alz.caregiver_note": "介護者の方へ",
         "swipe.hint": "文字の上を指でスライドして単語を入力",
         "swipe.space": "スペース",
-        "swipe.send": "テキストに追加"
+        "swipe.send": "テキストに追加",
+        "eye.gaze_btn": "視線入力",
+        "eye.gaze_loading": "カメラを読み込み中...",
+        "eye.gaze_error": "カメラにアクセスできませんでした。",
+        "eye.gaze_calib_title": "視線キャリブレーション",
+        "eye.gaze_calib_hint": "介護者が各点をクリックし、ユーザーはその点を見つめます",
+        "eye.gaze_skip": "キャリブレーションをスキップ",
+        "eye.gaze_dwell_hint": "キーを1秒間見つめると選択されます",
+        "eye.gaze_close": "カメラを閉じる",
+        "eye.gaze_recalib": "↺ 再キャリブレーション"
     }
 };
 

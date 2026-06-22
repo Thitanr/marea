@@ -1776,6 +1776,277 @@ function boot() {
         });
     }
 
+    // 13h. Eye Gaze Keyboard — webcam eye tracking with dwell selection
+    function initEyeGazeKeyboard() {
+        const gazeBtn    = document.getElementById('eye-gaze-btn');
+        const gazeKb     = document.getElementById('eye-gaze-keyboard');
+        const gazeCursor = document.getElementById('eye-gaze-cursor');
+        const phaseCalib = document.getElementById('eye-phase-calib');
+        const phaseType  = document.getElementById('eye-phase-type');
+        const calibDots  = document.getElementById('eye-calib-dots');
+        const calibStatus= document.getElementById('eye-calib-status');
+        const skipBtn    = document.getElementById('eye-skip-calib');
+        const wordDisplay= document.getElementById('eye-word-display');
+        const letterGrid = document.getElementById('eye-letter-grid');
+        const closeBtn   = document.getElementById('eye-gaze-close');
+        const recalibBtn = document.getElementById('eye-recalib-btn');
+        if (!gazeBtn || !gazeKb) return;
+
+        const DWELL_MS    = 1200;
+        const CALIB_CLICKS= 3;     // clicks per dot for calibration
+        const WG_CDN      = 'https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.min.js';
+        const LANG_MAP    = { es:'es-ES', en:'en-US', it:'it-IT', fr:'fr-FR', de:'de-DE', zh:'zh-CN', pt:'pt-PT', ja:'ja-JP' };
+
+        let wg = null;
+        let isActive = false;
+        let dwellEl = null;
+        let dwellStart = 0;
+        let builtText = '';
+        let totalCalibClicks = 0;
+
+        // ── Letter grid (A-Z + ⌫ Space Send) ──────────────────────────────
+        const GRID_KEYS = [
+            'A','B','C','D','E',
+            'F','G','H','I','J',
+            'K','L','M','N','O',
+            'P','Q','R','S','T',
+            'U','V','W','X','Y',
+            'Z','DEL','SPACE','SEND'
+        ];
+
+        function buildLetterGrid() {
+            letterGrid.innerHTML = '';
+            GRID_KEYS.forEach(k => {
+                const div = document.createElement('div');
+                div.className = 'eye-key';
+                div.dataset.key = k;
+                if (k === 'DEL')   div.classList.add('eye-key-del');
+                if (k === 'SPACE') div.classList.add('eye-key-space');
+                if (k === 'SEND')  div.classList.add('eye-key-send');
+                const label = k === 'DEL'   ? '⌫'
+                            : k === 'SPACE' ? (t('swipe.space') || 'Espacio')
+                            : k === 'SEND'  ? (t('swipe.send')  || '→ Texto')
+                            : k;
+                div.innerHTML = `<span class="eye-key-label">${label}</span>`
+                    + `<svg class="eye-dwell-ring" viewBox="0 0 40 40" aria-hidden="true">`
+                    + `<circle class="eye-ring-bg"   cx="20" cy="20" r="17" fill="none" stroke-width="3"/>`
+                    + `<circle class="eye-ring-fill" cx="20" cy="20" r="17" fill="none" stroke-width="3"`
+                    + ` stroke-dasharray="106.81" stroke-dashoffset="106.81"/></svg>`;
+                letterGrid.appendChild(div);
+            });
+        }
+
+        // ── Calibration dots (3×3 grid) ───────────────────────────────────
+        function buildCalibDots() {
+            calibDots.innerHTML = '';
+            totalCalibClicks = 0;
+            if (calibStatus) calibStatus.textContent = `0 / ${9 * CALIB_CLICKS}`;
+            for (let i = 0; i < 9; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'eye-calib-dot';
+                dot.dataset.clicks = '0';
+                dot.dataset.idx = i;
+                dot.setAttribute('aria-label', `Punto ${i + 1}`);
+                dot.innerHTML = `<span class="eye-calib-dot-fill"></span>`;
+                dot.addEventListener('click', () => onCalibClick(dot));
+                calibDots.appendChild(dot);
+            }
+        }
+
+        function onCalibClick(dot) {
+            const clicks = parseInt(dot.dataset.clicks) + 1;
+            dot.dataset.clicks = clicks;
+            totalCalibClicks++;
+            const pct = (clicks / CALIB_CLICKS) * 100;
+            dot.querySelector('.eye-calib-dot-fill').style.height = pct + '%';
+            if (clicks >= CALIB_CLICKS) dot.classList.add('eye-calib-done');
+            if (calibStatus) calibStatus.textContent = `${totalCalibClicks} / ${9 * CALIB_CLICKS}`;
+            if (totalCalibClicks >= 9 * CALIB_CLICKS) finishCalib();
+        }
+
+        function finishCalib() {
+            localStorage.setItem('marea_eye_calibrated', '1');
+            showTypingPhase();
+        }
+
+        // ── Phase switching ───────────────────────────────────────────────
+        function showCalibPhase() {
+            phaseType?.classList.add('hidden');
+            phaseCalib?.classList.remove('hidden');
+            buildCalibDots();
+        }
+
+        function showTypingPhase() {
+            phaseCalib?.classList.add('hidden');
+            phaseType?.classList.remove('hidden');
+            buildLetterGrid();
+            updateWordDisplay();
+        }
+
+        function updateWordDisplay() {
+            if (!wordDisplay) return;
+            wordDisplay.textContent = builtText || (t('eye.gaze_dwell_hint') || 'Mira una tecla 1s');
+            wordDisplay.classList.toggle('eye-word-hint', !builtText);
+        }
+
+        // ── Dwell selection ───────────────────────────────────────────────
+        function setDwellProgress(el, pct) {
+            const fill = el?.querySelector('.eye-ring-fill');
+            if (!fill) return;
+            fill.style.strokeDashoffset = 106.81 * (1 - pct);
+            el.classList.toggle('eye-key-dwelling', pct > 0.05);
+        }
+
+        function resetDwell(el) {
+            if (!el) return;
+            setDwellProgress(el, 0);
+            el.classList.remove('eye-key-dwelling', 'eye-key-selected');
+        }
+
+        function commitKey(el) {
+            const k = el.dataset.key;
+            el.classList.add('eye-key-selected');
+            setTimeout(() => el.classList.remove('eye-key-selected'), 350);
+
+            if (k === 'DEL') {
+                builtText = builtText.slice(0, -1);
+            } else if (k === 'SPACE') {
+                if (builtText && !builtText.endsWith(' ')) builtText += ' ';
+            } else if (k === 'SEND') {
+                const aacEl = document.getElementById('aac-speech-text');
+                const text = builtText.trim();
+                if (aacEl && text) {
+                    aacEl.value = aacEl.value + (aacEl.value && !aacEl.value.endsWith(' ') ? ' ' : '') + text;
+                }
+                builtText = '';
+            } else {
+                builtText += k.toLowerCase();
+            }
+            updateWordDisplay();
+        }
+
+        // ── WebGazer gaze listener ────────────────────────────────────────
+        function onGaze(data) {
+            if (!data || !isActive) return;
+            const { x, y } = data;
+
+            // Move cursor
+            if (gazeCursor) {
+                gazeCursor.style.transform = `translate(${x}px, ${y}px)`;
+                gazeCursor.style.opacity = '1';
+            }
+
+            // Only process dwell during typing phase
+            if (phaseType?.classList.contains('hidden')) return;
+
+            const el = document.elementFromPoint(x, y)?.closest('.eye-key[data-key]');
+            const now = Date.now();
+
+            if (el !== dwellEl) {
+                resetDwell(dwellEl);
+                dwellEl = el;
+                dwellStart = el ? now : 0;
+            } else if (el) {
+                const elapsed = now - dwellStart;
+                const pct = Math.min(elapsed / DWELL_MS, 1);
+                setDwellProgress(el, pct);
+                if (elapsed >= DWELL_MS) {
+                    const selected = el;
+                    dwellEl = null;
+                    dwellStart = 0;
+                    resetDwell(selected);
+                    commitKey(selected);
+                }
+            }
+        }
+
+        // ── WebGazer loading & lifecycle ──────────────────────────────────
+        async function loadWebGazer() {
+            if (window.webgazer) return window.webgazer;
+            return new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = WG_CDN;
+                s.crossOrigin = 'anonymous';
+                s.onload = () => resolve(window.webgazer);
+                s.onerror = () => reject(new Error('WebGazer CDN failed'));
+                document.head.appendChild(s);
+            });
+        }
+
+        async function startGazeTracking() {
+            wg = window.webgazer;
+            wg.setRegression('ridge');
+            wg.setGazeListener(onGaze);
+            await wg.begin();
+            wg.showVideoPreview(true);   // show small camera preview
+            wg.showPredictionPoints(false);
+            // Style the WebGazer video to sit in a corner
+            const wgVideo = document.getElementById('webgazerVideoContainer');
+            if (wgVideo) {
+                wgVideo.style.cssText = 'position:fixed!important;bottom:80px!important;right:8px!important;'
+                    + 'width:120px!important;height:90px!important;border-radius:8px!important;'
+                    + 'overflow:hidden!important;opacity:0.85!important;z-index:10001!important;';
+            }
+            isActive = true;
+        }
+
+        function stopGazeTracking() {
+            isActive = false;
+            resetDwell(dwellEl);
+            dwellEl = null;
+            if (gazeCursor) gazeCursor.style.opacity = '0';
+            if (wg) {
+                try { wg.clearGazeListener(); wg.end(); } catch (_) {}
+                wg = null;
+            }
+            // Hide WebGazer video
+            const wgVideo = document.getElementById('webgazerVideoContainer');
+            if (wgVideo) wgVideo.style.display = 'none';
+        }
+
+        // ── Open / close ──────────────────────────────────────────────────
+        async function openGazeKb() {
+            gazeBtn.disabled = true;
+            const span = gazeBtn.querySelector('span');
+            if (span) span.textContent = t('eye.gaze_loading') || '...';
+            gazeKb.classList.remove('hidden');
+            builtText = '';
+
+            try {
+                await loadWebGazer();
+                await startGazeTracking();
+                if (localStorage.getItem('marea_eye_calibrated')) {
+                    showTypingPhase();
+                } else {
+                    showCalibPhase();
+                }
+            } catch (_) {
+                gazeKb.classList.add('hidden');
+                showToast(t('eye.gaze_error') || 'No se pudo activar la cámara');
+            } finally {
+                gazeBtn.disabled = false;
+                if (span) span.textContent = t('eye.gaze_btn') || 'Mirada';
+            }
+        }
+
+        function closeGazeKb() {
+            stopGazeTracking();
+            gazeKb.classList.add('hidden');
+        }
+
+        // ── Event listeners ───────────────────────────────────────────────
+        gazeBtn.addEventListener('click', openGazeKb);
+        closeBtn?.addEventListener('click', closeGazeKb);
+        skipBtn?.addEventListener('click', () => {
+            localStorage.setItem('marea_eye_calibrated', '1');
+            showTypingPhase();
+        });
+        recalibBtn?.addEventListener('click', () => {
+            localStorage.removeItem('marea_eye_calibrated');
+            showCalibPhase();
+        });
+    }
+
     // 14. Initialize App Lifecycle
     translateApp();
     setupEventListeners();
@@ -1789,6 +2060,7 @@ function boot() {
     initPwaInstall();
     initNotebook();
     initSwipeKeyboard();
+    initEyeGazeKeyboard();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {
