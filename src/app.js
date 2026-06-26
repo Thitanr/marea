@@ -996,6 +996,8 @@ function boot() {
         let listening = false;
 
         function startListening() {
+            // Abort any in-progress session before creating a new one
+            if (recognition) { try { recognition.abort(); } catch (_) {} }
             recognition = new SR();
             recognition.lang = LANG_MAP[state.lang] || 'es-ES';
             recognition.continuous = false;
@@ -1009,17 +1011,21 @@ function boot() {
             recognition.onresult = (e) => {
                 const text = e.results[0][0].transcript;
                 const input = elements.chatInput;
-                input.value = (input.value + ' ' + text).trim();
-                input.focus();
+                if (input) input.value = (input.value + ' ' + text).trim();
+                if (input) input.focus();
             };
             recognition.onend = () => {
                 listening = false;
                 micBtn.classList.remove('listening');
                 micBtn.setAttribute('aria-label', t('refugio.mic_start'));
             };
-            recognition.onerror = () => {
+            recognition.onerror = (e) => {
                 listening = false;
                 micBtn.classList.remove('listening');
+                micBtn.setAttribute('aria-label', t('refugio.mic_start'));
+                if (e.error === 'not-allowed') {
+                    showToast(t('refugio.mic_denied') || 'Permiso de micrófono denegado');
+                }
             };
             recognition.start();
         }

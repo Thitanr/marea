@@ -1,4 +1,7 @@
 export function showToast(message: string): void {
+  // Remove any existing toast immediately to avoid stacking
+  document.querySelectorAll('.toast-notification').forEach(el => el.remove());
+
   const toast = document.createElement('div');
   toast.className = 'toast-notification';
   toast.setAttribute('role', 'status');

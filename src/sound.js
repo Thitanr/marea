@@ -36,11 +36,20 @@ class OceanSynth {
 
     start() {
         if (this.isPlaying) return;
-        
+
         if (!this.ctx) {
             this.init();
+            // Suspend AudioContext when tab is hidden to save battery on mobile
+            document.addEventListener('visibilitychange', () => {
+                if (!this.ctx) return;
+                if (document.hidden) {
+                    this.ctx.suspend();
+                } else if (this.isPlaying) {
+                    this.ctx.resume();
+                }
+            });
         }
-        
+
         // Resume context if suspended (mobile browsers policy)
         if (this.ctx.state === 'suspended') {
             this.ctx.resume();
