@@ -2766,6 +2766,88 @@ textarea.safe-input {
     animation: scan-pulse 0.55s ease-in-out infinite;
 }
 
+/* ── Scan onboarding overlay ──────────────────────────────────────────────── */
+.scan-onboard-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10001;
+    background: rgba(8,14,11,0.97);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+.scan-onboard-overlay.hidden { display: none; }
+
+.scan-onboard-card {
+    background: var(--bg-card, #0d1a14);
+    border: 1px solid rgba(77,184,150,0.25);
+    border-radius: 16px;
+    padding: 2rem 1.5rem 1.5rem;
+    max-width: 380px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.scan-onboard-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--accent, #4db896);
+    text-align: center;
+    margin: 0;
+}
+
+.scan-onboard-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.scan-onboard-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+}
+
+.scan-onboard-icon {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgba(77,184,150,0.18);
+    border: 1.5px solid rgba(77,184,150,0.45);
+    color: var(--accent, #4db896);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scan-onboard-step p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--text-primary, #d4ede7);
+    padding-top: 0.2rem;
+}
+
+.scan-onboard-ok {
+    background: var(--accent, #4db896);
+    color: #060913;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s, transform 0.1s;
+}
+.scan-onboard-ok:active { transform: scale(0.97); }
+
 /* Close button pinned at bottom */
 .eye-gaze-close-btn {
     flex-shrink: 0;

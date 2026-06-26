@@ -1,21 +1,21 @@
 /* ==========================================================================
-   MAREA - SERVICE WORKER v12
+   MAREA - SERVICE WORKER v13
    Network-first with cache fallback. Always serves freshest content.
-   v12: Same-origin only — no external CDN calls. Full offline privacy.
+   v13: Scan keyboard onboarding, fixed SEND key (speaks + closes), always slow scan.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v12';
+const CACHE_NAME = 'marea-cache-v13';
 
 // Install — do NOT auto-skipWaiting so the app can show an update popup.
 // On first install there is no controller, so the app sends SKIP_WAITING immediately.
 self.addEventListener('install', () => {
-    console.log('[SW v12] Installing…');
+    console.log('[SW v13] Installing…');
 });
 
 // Message handler — app sends { type: 'SKIP_WAITING' } when user approves update
 self.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'SKIP_WAITING') {
-        console.log('[SW v12] Skip waiting — activating now');
+        console.log('[SW v13] Skip waiting — activating now');
         self.skipWaiting();
     }
 });
@@ -27,12 +27,12 @@ self.addEventListener('activate', (e) => {
             return Promise.all(
                 keys.filter((key) => key !== CACHE_NAME)
                     .map((key) => {
-                        console.log('[SW v12] Removing old cache:', key);
+                        console.log('[SW v13] Removing old cache:', key);
                         return caches.delete(key);
                     })
             );
         }).then(() => {
-            console.log('[SW v12] Activated — claiming clients');
+            console.log('[SW v13] Activated — claiming clients');
             return self.clients.claim();
         })
     );
@@ -61,7 +61,7 @@ self.addEventListener('fetch', (e) => {
             } catch (_err) {
                 const cachedResponse = await caches.match(e.request);
                 if (cachedResponse) {
-                    console.log('[SW v12] Serving from cache:', e.request.url);
+                    console.log('[SW v13] Serving from cache:', e.request.url);
                     return cachedResponse;
                 }
                 if (e.request.mode === 'navigate') {

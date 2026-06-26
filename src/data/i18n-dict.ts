@@ -300,7 +300,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "Omitir calibración",
         "eye.gaze_dwell_hint": "Toca en cualquier lugar para seleccionar la letra iluminada",
         "eye.gaze_close": "✕ Cerrar",
-        "eye.gaze_recalib": "↺ Recalibrar"
+        "eye.gaze_recalib": "↺ Recalibrar",
+        "eye.onboard_title": "Cómo usar el escaneo",
+        "eye.onboard_step1": "Las filas se iluminan una a una automáticamente",
+        "eye.onboard_step2": "Toca en cualquier lugar para entrar en la fila iluminada",
+        "eye.onboard_step3": "Toca de nuevo para seleccionar la letra iluminada",
+        "eye.onboard_ok": "¡Entendido, empezar!"
     },
     en: {
         "nav.refugio": "Support Chat",
@@ -601,7 +606,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "Skip calibration",
         "eye.gaze_dwell_hint": "Tap anywhere to select the highlighted letter",
         "eye.gaze_close": "✕ Close",
-        "eye.gaze_recalib": "↺ Recalibrate"
+        "eye.gaze_recalib": "↺ Recalibrate",
+        "eye.onboard_title": "How to use scanning",
+        "eye.onboard_step1": "Rows highlight one by one automatically",
+        "eye.onboard_step2": "Tap anywhere to enter the highlighted row",
+        "eye.onboard_step3": "Tap again to select the highlighted letter",
+        "eye.onboard_ok": "Got it, start!"
     },
     it: {
         "nav.refugio": "Chat Supporto",
@@ -902,7 +912,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "Salta calibrazione",
         "eye.gaze_dwell_hint": "Tocca ovunque per selezionare la lettera evidenziata",
         "eye.gaze_close": "✕ Chiudi",
-        "eye.gaze_recalib": "↺ Ricalibrare"
+        "eye.gaze_recalib": "↺ Ricalibrare",
+        "eye.onboard_title": "Come usare la scansione",
+        "eye.onboard_step1": "Le righe si illuminano una a una automaticamente",
+        "eye.onboard_step2": "Tocca ovunque per entrare nella riga illuminata",
+        "eye.onboard_step3": "Tocca di nuovo per selezionare la lettera illuminata",
+        "eye.onboard_ok": "Capito, inizia!"
     },
     fr: {
         "nav.refugio": "Chat Soutien",
@@ -1203,7 +1218,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "Ignorer la calibration",
         "eye.gaze_dwell_hint": "Appuyez n'importe où pour sélectionner la lettre illuminée",
         "eye.gaze_close": "✕ Fermer",
-        "eye.gaze_recalib": "↺ Recalibrer"
+        "eye.gaze_recalib": "↺ Recalibrer",
+        "eye.onboard_title": "Comment utiliser le balayage",
+        "eye.onboard_step1": "Les rangées s'illuminent une à une automatiquement",
+        "eye.onboard_step2": "Touchez n'importe où pour entrer dans la rangée éclairée",
+        "eye.onboard_step3": "Touchez à nouveau pour sélectionner la lettre éclairée",
+        "eye.onboard_ok": "Compris, commencer !"
     },
     de: {
         "nav.refugio": "Support Chat",
@@ -1504,7 +1524,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "Kalibrierung überspringen",
         "eye.gaze_dwell_hint": "Tippen Sie irgendwo, um den markierten Buchstaben auszuwählen",
         "eye.gaze_close": "✕ Schließen",
-        "eye.gaze_recalib": "↺ Neu kalibrieren"
+        "eye.gaze_recalib": "↺ Neu kalibrieren",
+        "eye.onboard_title": "Scannen verwenden",
+        "eye.onboard_step1": "Zeilen leuchten automatisch nacheinander auf",
+        "eye.onboard_step2": "Tippe irgendwo, um die leuchtende Zeile auszuwählen",
+        "eye.onboard_step3": "Tippe erneut, um den leuchtenden Buchstaben auszuwählen",
+        "eye.onboard_ok": "Verstanden, los!"
     },
     zh: {
         "nav.refugio": "支持对话",
@@ -1805,7 +1830,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "跳过校准",
         "eye.gaze_dwell_hint": "点击任意位置以选择高亮的字母",
         "eye.gaze_close": "✕ 关闭",
-        "eye.gaze_recalib": "↺ 重新校准"
+        "eye.gaze_recalib": "↺ 重新校准",
+        "eye.onboard_title": "如何使用扫描",
+        "eye.onboard_step1": "行会自动逐一高亮显示",
+        "eye.onboard_step2": "点击任意位置进入高亮行",
+        "eye.onboard_step3": "再次点击选择高亮字母",
+        "eye.onboard_ok": "明白了，开始！"
     },
     pt: {
         "nav.refugio": "Chat Apoio",
@@ -2106,7 +2136,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "Ignorar calibração",
         "eye.gaze_dwell_hint": "Toque em qualquer lugar para selecionar a letra iluminada",
         "eye.gaze_close": "✕ Fechar",
-        "eye.gaze_recalib": "↺ Recalibrar"
+        "eye.gaze_recalib": "↺ Recalibrar",
+        "eye.onboard_title": "Como usar o varrimento",
+        "eye.onboard_step1": "As linhas iluminam-se uma a uma automaticamente",
+        "eye.onboard_step2": "Toque em qualquer lugar para entrar na linha iluminada",
+        "eye.onboard_step3": "Toque novamente para selecionar a letra iluminada",
+        "eye.onboard_ok": "Entendido, começar!"
     },
     ja: {
         "nav.refugio": "サポート",
@@ -2407,7 +2442,12 @@ const i18n: I18nDict = {
         "eye.gaze_skip": "キャリブレーションをスキップ",
         "eye.gaze_dwell_hint": "どこでもタップして、ハイライトされた文字を選択",
         "eye.gaze_close": "✕ 閉じる",
-        "eye.gaze_recalib": "↺ 再キャリブレーション"
+        "eye.gaze_recalib": "↺ 再キャリブレーション",
+        "eye.onboard_title": "スキャンの使い方",
+        "eye.onboard_step1": "行が自動的に一つずつハイライトされます",
+        "eye.onboard_step2": "どこかタップしてハイライトされた行に入る",
+        "eye.onboard_step3": "もう一度タップしてハイライトされた文字を選択",
+        "eye.onboard_ok": "わかった、始める！"
     }
 };
 
