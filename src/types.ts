@@ -66,6 +66,7 @@ export interface AppState {
 
   // Breathing
   breathingInterval: ReturnType<typeof setInterval> | null;
+  breathingCountdown: ReturnType<typeof setInterval> | null;
   breathingState: BreathingPhase;
   breathingCycles: number;
 
