@@ -1940,11 +1940,15 @@ function boot() {
             if (!overlay) { startScan(); return; }
             overlay.classList.remove('hidden');
             const okBtn = overlay.querySelector('.scan-onboard-ok');
-            okBtn?.addEventListener('click', () => {
-                localStorage.setItem(ONBOARD_KEY, '1');
-                overlay.classList.add('hidden');
-                startScan();
-            }, { once: true });
+            if (okBtn) {
+                // Use onclick (not addEventListener) so repeated open/close doesn't stack handlers
+                okBtn.onclick = () => {
+                    localStorage.setItem(ONBOARD_KEY, '1');
+                    overlay.classList.add('hidden');
+                    okBtn.onclick = null;
+                    startScan();
+                };
+            }
         }
 
         function startScan() {
@@ -1971,6 +1975,8 @@ function boot() {
             clearInterval(scanTimer);
             scanTimer = null;
             clearHighlights();
+            // Also hide onboarding overlay if it was open (in case user closed without completing)
+            document.getElementById('scan-onboard-overlay')?.classList.add('hidden');
             scanKb.classList.add('hidden');
             scanBtn.classList.remove('active');
         }
