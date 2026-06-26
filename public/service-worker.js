@@ -1,21 +1,21 @@
 /* ==========================================================================
-   MAREA - SERVICE WORKER v7
+   MAREA - SERVICE WORKER v10
    Network-first with cache fallback. Always serves freshest content.
-   v9: Swipe keyboard removed from AAC panel.
+   v10: -webkit-backdrop-filter prefix + isolation:isolate fix for Motorola G05.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v9';
+const CACHE_NAME = 'marea-cache-v10';
 
 // Install — do NOT auto-skipWaiting so the app can show an update popup.
 // On first install there is no controller, so the app sends SKIP_WAITING immediately.
 self.addEventListener('install', () => {
-    console.log('[SW v6] Installing…');
+    console.log('[SW v10] Installing…');
 });
 
 // Message handler — app sends { type: 'SKIP_WAITING' } when user approves update
 self.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'SKIP_WAITING') {
-        console.log('[SW v6] Skip waiting — activating now');
+        console.log('[SW v10] Skip waiting — activating now');
         self.skipWaiting();
     }
 });
@@ -27,12 +27,12 @@ self.addEventListener('activate', (e) => {
             return Promise.all(
                 keys.filter((key) => key !== CACHE_NAME)
                     .map((key) => {
-                        console.log('[SW v6] Removing old cache:', key);
+                        console.log('[SW v10] Removing old cache:', key);
                         return caches.delete(key);
                     })
             );
         }).then(() => {
-            console.log('[SW v6] Activated — claiming clients');
+            console.log('[SW v10] Activated — claiming clients');
             return self.clients.claim();
         })
     );
@@ -61,7 +61,7 @@ self.addEventListener('fetch', (e) => {
             } catch (_err) {
                 const cachedResponse = await caches.match(e.request);
                 if (cachedResponse) {
-                    console.log('[SW v6] Serving from cache:', e.request.url);
+                    console.log('[SW v10] Serving from cache:', e.request.url);
                     return cachedResponse;
                 }
                 if (e.request.mode === 'navigate') {
