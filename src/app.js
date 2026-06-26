@@ -1780,47 +1780,47 @@ function boot() {
         });
     }
 
-    // 13h. Eye Gaze Keyboard — webcam eye tracking with dwell selection
-    function initEyeGazeKeyboard() {
-        const gazeBtn    = document.getElementById('eye-gaze-btn');
-        const gazeKb     = document.getElementById('eye-gaze-keyboard');
-        const gazeCursor = document.getElementById('eye-gaze-cursor');
-        const phaseCalib = document.getElementById('eye-phase-calib');
-        const phaseType  = document.getElementById('eye-phase-type');
-        const calibDots  = document.getElementById('eye-calib-dots');
-        const calibStatus= document.getElementById('eye-calib-status');
-        const skipBtn    = document.getElementById('eye-skip-calib');
+    // 13h. Scan Keyboard — row-column switch scanning, zero dependencies, 100% offline
+    function initScanKeyboard() {
+        const scanBtn    = document.getElementById('eye-gaze-btn');
+        const scanKb     = document.getElementById('eye-gaze-keyboard');
         const wordDisplay= document.getElementById('eye-word-display');
         const letterGrid = document.getElementById('eye-letter-grid');
         const closeBtn   = document.getElementById('eye-gaze-close');
-        const recalibBtn = document.getElementById('eye-recalib-btn');
-        if (!gazeBtn || !gazeKb) return;
+        const speedBtn   = document.getElementById('eye-recalib-btn');
+        if (!scanBtn || !scanKb) return;
 
         const DWELL_MS    = 1200;
         const CALIB_CLICKS= 3;     // clicks per dot for calibration
         const WG_CDN      = 'https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.min.js';
         const LANG_MAP    = { es:'es-ES', en:'en-US', it:'it-IT', fr:'fr-FR', de:'de-DE', zh:'zh-CN', pt:'pt-PT', ja:'ja-JP' };
 
-        let wg = null;
-        let isActive = false;
-        let dwellEl = null;
-        let dwellStart = 0;
-        let builtText = '';
-        let totalCalibClicks = 0;
-
-        // ── Letter grid (A-Z + ⌫ Space Send) ──────────────────────────────
-        const GRID_KEYS = [
-            'A','B','C','D','E',
-            'F','G','H','I','J',
-            'K','L','M','N','O',
-            'P','Q','R','S','T',
-            'U','V','W','X','Y',
-            'Z','DEL','SPACE','SEND'
+        // Row definitions — determines scanning order and groupings
+        const SCAN_ROWS = [
+            ['A','B','C','D','E'],
+            ['F','G','H','I','J'],
+            ['K','L','M','N','O'],
+            ['P','Q','R','S','T'],
+            ['U','V','W','X','Y'],
+            ['Z','DEL','SPACE','SEND'],
         ];
+        // Scan speeds in ms: slow / normal / fast
+        const SPEEDS    = [1600, 1100, 700];
+        const SPEED_ICONS = ['🐢', '▶', '⚡'];
 
-        function buildLetterGrid() {
+        let builtText = '';
+        let phase     = 'row'; // 'row' | 'key'
+        let rowIdx    = 0;
+        let keyIdx    = 0;
+        let scanTimer = null;
+        let speedIdx  = 1; // default: normal
+        let isOpen    = false;
+
+        // ── Grid builder ─────────────────────────────────────────────────
+        function buildGrid() {
+            if (!letterGrid) return;
             letterGrid.innerHTML = '';
-            GRID_KEYS.forEach(k => {
+            SCAN_ROWS.flat().forEach(k => {
                 const div = document.createElement('div');
                 div.className = 'eye-key';
                 div.dataset.key = k;
@@ -1831,229 +1831,149 @@ function boot() {
                             : k === 'SPACE' ? (t('swipe.space') || 'Espacio')
                             : k === 'SEND'  ? (t('swipe.send')  || '→ Texto')
                             : k;
-                div.innerHTML = `<span class="eye-key-label">${label}</span>`
-                    + `<svg class="eye-dwell-ring" viewBox="0 0 40 40" aria-hidden="true">`
-                    + `<circle class="eye-ring-bg"   cx="20" cy="20" r="17" fill="none" stroke-width="3"/>`
-                    + `<circle class="eye-ring-fill" cx="20" cy="20" r="17" fill="none" stroke-width="3"`
-                    + ` stroke-dasharray="106.81" stroke-dashoffset="106.81"/></svg>`;
+                div.innerHTML = `<span class="eye-key-label">${label}</span>`;
                 letterGrid.appendChild(div);
             });
         }
 
-        // ── Calibration dots (3×3 grid) ───────────────────────────────────
-        function buildCalibDots() {
-            calibDots.innerHTML = '';
-            totalCalibClicks = 0;
-            if (calibStatus) calibStatus.textContent = `0 / ${9 * CALIB_CLICKS}`;
-            for (let i = 0; i < 9; i++) {
-                const dot = document.createElement('button');
-                dot.className = 'eye-calib-dot';
-                dot.dataset.clicks = '0';
-                dot.dataset.idx = i;
-                dot.setAttribute('aria-label', `Punto ${i + 1}`);
-                dot.innerHTML = `<span class="eye-calib-dot-fill"></span>`;
-                dot.addEventListener('click', () => onCalibClick(dot));
-                calibDots.appendChild(dot);
-            }
-        }
-
-        function onCalibClick(dot) {
-            const clicks = parseInt(dot.dataset.clicks) + 1;
-            dot.dataset.clicks = clicks;
-            totalCalibClicks++;
-            const pct = (clicks / CALIB_CLICKS) * 100;
-            dot.querySelector('.eye-calib-dot-fill').style.height = pct + '%';
-            if (clicks >= CALIB_CLICKS) dot.classList.add('eye-calib-done');
-            if (calibStatus) calibStatus.textContent = `${totalCalibClicks} / ${9 * CALIB_CLICKS}`;
-            if (totalCalibClicks >= 9 * CALIB_CLICKS) finishCalib();
-        }
-
-        function finishCalib() {
-            localStorage.setItem('marea_eye_calibrated', '1');
-            showTypingPhase();
-        }
-
-        // ── Phase switching ───────────────────────────────────────────────
-        function showCalibPhase() {
-            phaseType?.classList.add('hidden');
-            phaseCalib?.classList.remove('hidden');
-            buildCalibDots();
-        }
-
-        function showTypingPhase() {
-            phaseCalib?.classList.add('hidden');
-            phaseType?.classList.remove('hidden');
-            buildLetterGrid();
-            updateWordDisplay();
-        }
-
-        function updateWordDisplay() {
+        // ── Word display ─────────────────────────────────────────────────
+        function updateDisplay() {
             if (!wordDisplay) return;
-            wordDisplay.textContent = builtText || (t('eye.gaze_dwell_hint') || 'Mira una tecla 1s');
+            const hint = t('eye.gaze_dwell_hint') || 'Toca en cualquier lugar para seleccionar';
+            wordDisplay.textContent = builtText || hint;
             wordDisplay.classList.toggle('eye-word-hint', !builtText);
         }
 
-        // ── Dwell selection ───────────────────────────────────────────────
-        function setDwellProgress(el, pct) {
-            const fill = el?.querySelector('.eye-ring-fill');
-            if (!fill) return;
-            fill.style.strokeDashoffset = 106.81 * (1 - pct);
-            el.classList.toggle('eye-key-dwelling', pct > 0.05);
+        // ── Highlight helpers ─────────────────────────────────────────────
+        function keyEl(k) {
+            return letterGrid?.querySelector(`.eye-key[data-key="${k}"]`);
         }
 
-        function resetDwell(el) {
-            if (!el) return;
-            setDwellProgress(el, 0);
-            el.classList.remove('eye-key-dwelling', 'eye-key-selected');
+        function clearHighlights() {
+            letterGrid?.querySelectorAll('.eye-key-scan-row, .eye-key-scan-active')
+                .forEach(el => el.classList.remove('eye-key-scan-row', 'eye-key-scan-active'));
         }
 
-        function commitKey(el) {
-            const k = el.dataset.key;
-            el.classList.add('eye-key-selected');
-            setTimeout(() => el.classList.remove('eye-key-selected'), 350);
+        function highlightRow(rIdx) {
+            clearHighlights();
+            SCAN_ROWS[rIdx]?.forEach(k => keyEl(k)?.classList.add('eye-key-scan-row'));
+        }
 
+        function highlightKey(rIdx, kIdx) {
+            clearHighlights();
+            // Keep the rest of the row dimly lit for orientation
+            SCAN_ROWS[rIdx]?.forEach(k => keyEl(k)?.classList.add('eye-key-scan-row'));
+            const activeK = SCAN_ROWS[rIdx]?.[kIdx];
+            if (activeK) {
+                const el = keyEl(activeK);
+                el?.classList.remove('eye-key-scan-row');
+                el?.classList.add('eye-key-scan-active');
+            }
+        }
+
+        // ── Scanner phases ────────────────────────────────────────────────
+        function startRowPhase() {
+            clearInterval(scanTimer);
+            phase  = 'row';
+            rowIdx = 0;
+            highlightRow(0);
+            scanTimer = setInterval(() => {
+                rowIdx = (rowIdx + 1) % SCAN_ROWS.length;
+                highlightRow(rowIdx);
+            }, SPEEDS[speedIdx]);
+        }
+
+        function startKeyPhase() {
+            clearInterval(scanTimer);
+            phase  = 'key';
+            keyIdx = 0;
+            highlightKey(rowIdx, 0);
+            scanTimer = setInterval(() => {
+                keyIdx = (keyIdx + 1) % SCAN_ROWS[rowIdx].length;
+                highlightKey(rowIdx, keyIdx);
+            }, SPEEDS[speedIdx]);
+        }
+
+        // ── Key commit ────────────────────────────────────────────────────
+        function selectKey(k) {
+            const el = keyEl(k);
+            if (el) {
+                el.classList.add('eye-key-selected');
+                setTimeout(() => el.classList.remove('eye-key-selected'), 350);
+            }
             if (k === 'DEL') {
                 builtText = builtText.slice(0, -1);
             } else if (k === 'SPACE') {
                 if (builtText && !builtText.endsWith(' ')) builtText += ' ';
             } else if (k === 'SEND') {
                 const aacEl = document.getElementById('aac-speech-text');
-                const text = builtText.trim();
+                const text  = builtText.trim();
                 if (aacEl && text) {
-                    aacEl.value = aacEl.value + (aacEl.value && !aacEl.value.endsWith(' ') ? ' ' : '') + text;
+                    aacEl.value = aacEl.value
+                        + (aacEl.value && !aacEl.value.endsWith(' ') ? ' ' : '')
+                        + text;
                 }
                 builtText = '';
             } else {
                 builtText += k.toLowerCase();
             }
-            updateWordDisplay();
+            updateDisplay();
         }
 
-        // ── WebGazer gaze listener ────────────────────────────────────────
-        function onGaze(data) {
-            if (!data || !isActive) return;
-            const { x, y } = data;
-
-            // Move cursor
-            if (gazeCursor) {
-                gazeCursor.style.transform = `translate(${x}px, ${y}px)`;
-                gazeCursor.style.opacity = '1';
-            }
-
-            // Only process dwell during typing phase
-            if (phaseType?.classList.contains('hidden')) return;
-
-            const el = document.elementFromPoint(x, y)?.closest('.eye-key[data-key]');
-            const now = Date.now();
-
-            if (el !== dwellEl) {
-                resetDwell(dwellEl);
-                dwellEl = el;
-                dwellStart = el ? now : 0;
-            } else if (el) {
-                const elapsed = now - dwellStart;
-                const pct = Math.min(elapsed / DWELL_MS, 1);
-                setDwellProgress(el, pct);
-                if (elapsed >= DWELL_MS) {
-                    const selected = el;
-                    dwellEl = null;
-                    dwellStart = 0;
-                    resetDwell(selected);
-                    commitKey(selected);
-                }
+        // ── Tap anywhere to advance / select ─────────────────────────────
+        function onTap(e) {
+            if (e.target.closest('button')) return; // let close/speed buttons handle themselves
+            if (phase === 'row') {
+                startKeyPhase();
+            } else {
+                const k = SCAN_ROWS[rowIdx]?.[keyIdx];
+                if (k) selectKey(k);
+                startRowPhase();
             }
         }
 
-        // ── WebGazer loading & lifecycle ──────────────────────────────────
-        async function loadWebGazer() {
-            if (window.webgazer) return window.webgazer;
-            return new Promise((resolve, reject) => {
-                const s = document.createElement('script');
-                s.src = WG_CDN;
-                s.crossOrigin = 'anonymous';
-                s.onload = () => resolve(window.webgazer);
-                s.onerror = () => reject(new Error('WebGazer CDN failed'));
-                document.head.appendChild(s);
-            });
-        }
-
-        async function startGazeTracking() {
-            wg = window.webgazer;
-            wg.setRegression('ridge');
-            wg.setGazeListener(onGaze);
-            await wg.begin();
-            wg.showVideoPreview(true);   // show small camera preview
-            wg.showPredictionPoints(false);
-            // Style the WebGazer video to sit in a corner
-            const wgVideo = document.getElementById('webgazerVideoContainer');
-            if (wgVideo) {
-                wgVideo.style.cssText = 'position:fixed!important;bottom:80px!important;right:8px!important;'
-                    + 'width:120px!important;height:90px!important;border-radius:8px!important;'
-                    + 'overflow:hidden!important;opacity:0.85!important;z-index:10001!important;';
-            }
-            isActive = true;
-        }
-
-        function stopGazeTracking() {
-            isActive = false;
-            resetDwell(dwellEl);
-            dwellEl = null;
-            if (gazeCursor) gazeCursor.style.opacity = '0';
-            if (wg) {
-                try { wg.clearGazeListener(); wg.end(); } catch (_) {}
-                wg = null;
-            }
-            // Hide WebGazer video
-            const wgVideo = document.getElementById('webgazerVideoContainer');
-            if (wgVideo) wgVideo.style.display = 'none';
-        }
-
-        // ── Open / close ──────────────────────────────────────────────────
-        async function openGazeKb() {
-            gazeBtn.disabled = true;
-            const span = gazeBtn.querySelector('span');
-            if (span) span.textContent = t('eye.gaze_loading') || '...';
-            gazeKb.classList.remove('hidden');
+        // ── Open / Close ──────────────────────────────────────────────────
+        function openScanKb() {
+            isOpen    = true;
             builtText = '';
+            scanKb.classList.remove('hidden');
+            scanBtn.classList.add('active');
+            buildGrid();
+            updateDisplay();
+            startRowPhase();
+        }
 
-            try {
-                await loadWebGazer();
-                await startGazeTracking();
-                if (localStorage.getItem('marea_eye_calibrated')) {
-                    showTypingPhase();
-                } else {
-                    showCalibPhase();
-                }
-            } catch (err) {
-                gazeKb.classList.add('hidden');
-                const isNetworkErr = err && (err.message === 'WebGazer CDN failed' || err instanceof TypeError);
-                if (isNetworkErr) {
-                    showToast(t('eye.gaze_no_internet') || 'Mirada necesita internet la primera vez. Conéctate e inténtalo de nuevo.');
-                } else {
-                    showToast(t('eye.gaze_error') || 'No se pudo activar la cámara. Permite el acceso en ajustes del navegador.');
-                }
-            } finally {
-                gazeBtn.disabled = false;
-                if (span) span.textContent = t('eye.gaze_btn') || 'Mirada';
+        function closeScanKb() {
+            isOpen = false;
+            clearInterval(scanTimer);
+            scanTimer = null;
+            clearHighlights();
+            scanKb.classList.add('hidden');
+            scanBtn.classList.remove('active');
+        }
+
+        // ── Speed toggle ──────────────────────────────────────────────────
+        function updateSpeedBtn() {
+            if (!speedBtn) return;
+            speedBtn.textContent = SPEED_ICONS[speedIdx];
+        }
+
+        speedBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            speedIdx = (speedIdx + 1) % SPEEDS.length;
+            updateSpeedBtn();
+            if (isOpen) {
+                if (phase === 'row') startRowPhase();
+                else startKeyPhase();
             }
-        }
-
-        function closeGazeKb() {
-            stopGazeTracking();
-            gazeKb.classList.add('hidden');
-        }
-
-        // ── Event listeners ───────────────────────────────────────────────
-        gazeBtn.addEventListener('click', openGazeKb);
-        closeBtn?.addEventListener('click', closeGazeKb);
-        skipBtn?.addEventListener('click', () => {
-            localStorage.setItem('marea_eye_calibrated', '1');
-            showTypingPhase();
         });
-        recalibBtn?.addEventListener('click', () => {
-            localStorage.removeItem('marea_eye_calibrated');
-            showCalibPhase();
-        });
+
+        // ── Event wiring ──────────────────────────────────────────────────
+        scanBtn.addEventListener('click', openScanKb);
+        closeBtn?.addEventListener('click', closeScanKb);
+        scanKb.addEventListener('pointerdown', onTap);
+
+        updateSpeedBtn();
     }
 
     // 14. Initialize App Lifecycle
@@ -2069,7 +1989,7 @@ function boot() {
     initPwaInstall();
     initNotebook();
     initSwipeKeyboard();
-    initEyeGazeKeyboard();
+    initScanKeyboard();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {
