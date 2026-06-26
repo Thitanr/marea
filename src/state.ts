@@ -34,6 +34,7 @@ const state: AppState = {
 
   // Breathing
   breathingInterval: null,
+  breathingCountdown: null,
   breathingState: 0,
   breathingCycles: 0,
 

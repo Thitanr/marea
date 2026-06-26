@@ -328,26 +328,29 @@ function boot() {
     // 6. El Ancla - Box Breathing (4-4-4-4)
     function startBreathingGuide() {
         if (state.breathingInterval) return;
-        
+
         state.breathingState = 0;
         state.breathingCycles = 0;
-        
+
         const runCycle = () => {
             const ring = elements.breathingRing;
             const text = elements.breathingRingText;
             const inst = elements.breathingInstruction;
-            
+
             if (!ring || !text || !inst) return;
-            
+
             let seconds = 4;
             text.textContent = seconds + "s";
-            
-            const countdown = setInterval(() => {
+
+            // Track countdown so stopBreathingGuide can cancel it immediately
+            if (state.breathingCountdown) clearInterval(state.breathingCountdown);
+            state.breathingCountdown = setInterval(() => {
                 seconds--;
                 if (seconds >= 0) {
                     text.textContent = seconds + "s";
                 } else {
-                    clearInterval(countdown);
+                    clearInterval(state.breathingCountdown);
+                    state.breathingCountdown = null;
                 }
             }, 1000);
 
@@ -387,15 +390,17 @@ function boot() {
     }
 
     function stopBreathingGuide() {
+        if (state.breathingCountdown) {
+            clearInterval(state.breathingCountdown);
+            state.breathingCountdown = null;
+        }
         if (state.breathingInterval) {
             clearInterval(state.breathingInterval);
             state.breathingInterval = null;
         }
-        if (elements.breathingRing) {
-            elements.breathingRing.style.transform = "scale(0.6)";
-            elements.breathingRingText.textContent = "4s";
-            elements.breathingInstruction.textContent = t("anchor.breath_ready");
-        }
+        if (elements.breathingRing) elements.breathingRing.style.transform = "scale(0.6)";
+        if (elements.breathingRingText) elements.breathingRingText.textContent = "4s";
+        if (elements.breathingInstruction) elements.breathingInstruction.textContent = t("anchor.breath_ready");
     }
 
     // 7. El Ancla - 5-4-3-2-1 Sensory Grounding Wizard
@@ -567,19 +572,25 @@ function boot() {
         const canvas = elements.sensorCanvas;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
-        
+        if (!ctx) return;
+
         const l = parseInt(elements.sliderLight.value);
         const s = parseInt(elements.sliderSound.value);
         const p = parseInt(elements.sliderPressure.value);
         const pain = parseInt(elements.sliderPain.value);
         const r = parseInt(elements.sliderRumination.value);
 
-        // Update slider value labels
-        document.getElementById("label-val-light").textContent = t(`journal.val.${l}`);
-        document.getElementById("label-val-sound").textContent = t(`journal.val.${s}`);
-        document.getElementById("label-val-pressure").textContent = t(`journal.val.${p}`);
-        document.getElementById("label-val-pain").textContent = t(`journal.val.${pain}`);
-        document.getElementById("label-val-rumination").textContent = t(`journal.val.${r}`);
+        // Update slider value labels — use optional chaining in case elements are missing
+        const lblLight = document.getElementById("label-val-light");
+        const lblSound = document.getElementById("label-val-sound");
+        const lblPressure = document.getElementById("label-val-pressure");
+        const lblPain = document.getElementById("label-val-pain");
+        const lblRumination = document.getElementById("label-val-rumination");
+        if (lblLight) lblLight.textContent = t(`journal.val.${l}`);
+        if (lblSound) lblSound.textContent = t(`journal.val.${s}`);
+        if (lblPressure) lblPressure.textContent = t(`journal.val.${p}`);
+        if (lblPain) lblPain.textContent = t(`journal.val.${pain}`);
+        if (lblRumination) lblRumination.textContent = t(`journal.val.${r}`);
 
         // Clear canvas
         ctx.fillStyle = "#0B1120";
@@ -901,7 +912,9 @@ function boot() {
 
         elements.btnSaveJournal.addEventListener("click", () => {
             // Save state to local database log
-            const dailyLogs = JSON.parse(localStorage.getItem("marea_journal_logs") || "[]");
+            let dailyLogs;
+            try { dailyLogs = JSON.parse(localStorage.getItem("marea_journal_logs") || "[]"); }
+            catch (_) { dailyLogs = []; }
             const entry = {
                 date: new Date().toISOString().split('T')[0],
                 light: elements.sliderLight.value,
@@ -983,6 +996,8 @@ function boot() {
         let listening = false;
 
         function startListening() {
+            // Abort any in-progress session before creating a new one
+            if (recognition) { try { recognition.abort(); } catch (_) {} }
             recognition = new SR();
             recognition.lang = LANG_MAP[state.lang] || 'es-ES';
             recognition.continuous = false;
@@ -996,17 +1011,21 @@ function boot() {
             recognition.onresult = (e) => {
                 const text = e.results[0][0].transcript;
                 const input = elements.chatInput;
-                input.value = (input.value + ' ' + text).trim();
-                input.focus();
+                if (input) input.value = (input.value + ' ' + text).trim();
+                if (input) input.focus();
             };
             recognition.onend = () => {
                 listening = false;
                 micBtn.classList.remove('listening');
                 micBtn.setAttribute('aria-label', t('refugio.mic_start'));
             };
-            recognition.onerror = () => {
+            recognition.onerror = (e) => {
                 listening = false;
                 micBtn.classList.remove('listening');
+                micBtn.setAttribute('aria-label', t('refugio.mic_start'));
+                if (e.error === 'not-allowed') {
+                    showToast(t('refugio.mic_denied') || 'Permiso de micrófono denegado');
+                }
             };
             recognition.start();
         }
@@ -1278,10 +1297,12 @@ function boot() {
             const tmpCanvas = document.createElement('canvas');
             tmpCanvas.width = canvas.width;
             tmpCanvas.height = canvas.height;
-            tmpCanvas.getContext('2d').drawImage(canvas, 0, 0);
+            const tmpCtx = tmpCanvas.getContext('2d');
+            if (tmpCtx) tmpCtx.drawImage(canvas, 0, 0);
             canvas.width = w * dpr;
             canvas.height = h * dpr;
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             ctx.scale(dpr, dpr);
             ctx.drawImage(tmpCanvas, 0, 0, w, h);
         }
@@ -1293,7 +1314,10 @@ function boot() {
         const saved = localStorage.getItem('marea_notebook_canvas');
         if (saved) {
             const img = new Image();
-            img.onload = () => canvas.getContext('2d').drawImage(img, 0, 0, canvas.width / dpr, canvas.height / dpr);
+            img.onload = () => {
+                const rctx = canvas.getContext('2d');
+                if (rctx) rctx.drawImage(img, 0, 0, canvas.width / dpr, canvas.height / dpr);
+            };
             img.src = saved;
         }
         if (elements.notebookText) {
@@ -1317,6 +1341,7 @@ function boot() {
             if (!isDrawing) return;
             e.preventDefault();
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             const pos = getPos(e);
             const pressure = (e.pressure !== undefined && e.pressure > 0) ? e.pressure : 0.5;
             const size = parseFloat(elements.notebookSize ? elements.notebookSize.value : 4);
@@ -1345,11 +1370,15 @@ function boot() {
             if (!isDrawing) return;
             isDrawing = false;
             const ctx = canvas.getContext('2d');
-            ctx.globalCompositeOperation = 'source-over';
+            if (ctx) ctx.globalCompositeOperation = 'source-over';
             // Auto-save debounced
             clearTimeout(_saveTimer);
             _saveTimer = setTimeout(() => {
-                try { localStorage.setItem('marea_notebook_canvas', canvas.toDataURL('image/png', 0.7)); } catch(e) {}
+                try {
+                    localStorage.setItem('marea_notebook_canvas', canvas.toDataURL('image/png', 0.7));
+                } catch (e) {
+                    showToast(t('journal.save_error') || 'No se pudo guardar el dibujo (almacenamiento lleno)');
+                }
             }, 1000);
         }
 
@@ -1389,6 +1418,7 @@ function boot() {
         if (elements.notebookClearBtn) {
             elements.notebookClearBtn.addEventListener('click', () => {
                 const ctx = canvas.getContext('2d');
+                if (!ctx) return;
                 ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
                 localStorage.removeItem('marea_notebook_canvas');
             });
@@ -1414,6 +1444,7 @@ function boot() {
                 exportCanvas.height = canvas.height + textAreaH * dpr;
 
                 const ectx = exportCanvas.getContext('2d');
+                if (!ectx) { showToast(t('journal.notebook_saved')); return; }
                 // White background
                 ectx.fillStyle = '#ffffff';
                 ectx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
