@@ -1790,11 +1790,6 @@ function boot() {
         const speedBtn   = document.getElementById('eye-recalib-btn');
         if (!scanBtn || !scanKb) return;
 
-        const DWELL_MS    = 1200;
-        const CALIB_CLICKS= 3;     // clicks per dot for calibration
-        const WG_CDN      = 'https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.min.js';
-        const LANG_MAP    = { es:'es-ES', en:'en-US', it:'it-IT', fr:'fr-FR', de:'de-DE', zh:'zh-CN', pt:'pt-PT', ja:'ja-JP' };
-
         // Row definitions — determines scanning order and groupings
         const SCAN_ROWS = [
             ['A','B','C','D','E'],
@@ -1804,16 +1799,14 @@ function boot() {
             ['U','V','W','X','Y'],
             ['Z','DEL','SPACE','SEND'],
         ];
-        // Scan speeds in ms: slow / normal / fast
-        const SPEEDS    = [1600, 1100, 700];
-        const SPEED_ICONS = ['🐢', '▶', '⚡'];
+        // Always slow: 1600ms per step — AAC users need time to react
+        const SCAN_SPEED = 1600;
 
         let builtText = '';
         let phase     = 'row'; // 'row' | 'key'
         let rowIdx    = 0;
         let keyIdx    = 0;
         let scanTimer = null;
-        let speedIdx  = 1; // default: normal
         let isOpen    = false;
 
         // ── Grid builder ─────────────────────────────────────────────────
@@ -1880,7 +1873,7 @@ function boot() {
             scanTimer = setInterval(() => {
                 rowIdx = (rowIdx + 1) % SCAN_ROWS.length;
                 highlightRow(rowIdx);
-            }, SPEEDS[speedIdx]);
+            }, SCAN_SPEED);
         }
 
         function startKeyPhase() {
@@ -1891,7 +1884,7 @@ function boot() {
             scanTimer = setInterval(() => {
                 keyIdx = (keyIdx + 1) % SCAN_ROWS[rowIdx].length;
                 highlightKey(rowIdx, keyIdx);
-            }, SPEEDS[speedIdx]);
+            }, SCAN_SPEED);
         }
 
         // ── Key commit ────────────────────────────────────────────────────
@@ -1908,12 +1901,18 @@ function boot() {
             } else if (k === 'SEND') {
                 const aacEl = document.getElementById('aac-speech-text');
                 const text  = builtText.trim();
-                if (aacEl && text) {
-                    aacEl.value = aacEl.value
-                        + (aacEl.value && !aacEl.value.endsWith(' ') ? ' ' : '')
-                        + text;
+                if (text) {
+                    speakText(text);
+                    if (aacEl) {
+                        aacEl.value = aacEl.value
+                            + (aacEl.value && !aacEl.value.endsWith(' ') ? ' ' : '')
+                            + text;
+                    }
                 }
                 builtText = '';
+                updateDisplay();
+                closeScanKb();
+                return;
             } else {
                 builtText += k.toLowerCase();
             }
@@ -1922,7 +1921,8 @@ function boot() {
 
         // ── Tap anywhere to advance / select ─────────────────────────────
         function onTap(e) {
-            if (e.target.closest('button')) return; // let close/speed buttons handle themselves
+            if (e.target.closest('button')) return; // let close/OK buttons handle themselves
+            if (e.target.closest('#scan-onboard-overlay')) return; // onboarding overlay absorbs taps
             if (phase === 'row') {
                 startKeyPhase();
             } else {
@@ -1932,15 +1932,38 @@ function boot() {
             }
         }
 
+        // ── Onboarding ────────────────────────────────────────────────────
+        const ONBOARD_KEY = 'marea_scan_onboarded';
+
+        function showOnboarding() {
+            const overlay = document.getElementById('scan-onboard-overlay');
+            if (!overlay) { startScan(); return; }
+            overlay.classList.remove('hidden');
+            const okBtn = overlay.querySelector('.scan-onboard-ok');
+            okBtn?.addEventListener('click', () => {
+                localStorage.setItem(ONBOARD_KEY, '1');
+                overlay.classList.add('hidden');
+                startScan();
+            }, { once: true });
+        }
+
+        function startScan() {
+            buildGrid();
+            updateDisplay();
+            startRowPhase();
+        }
+
         // ── Open / Close ──────────────────────────────────────────────────
         function openScanKb() {
             isOpen    = true;
             builtText = '';
             scanKb.classList.remove('hidden');
             scanBtn.classList.add('active');
-            buildGrid();
-            updateDisplay();
-            startRowPhase();
+            if (!localStorage.getItem(ONBOARD_KEY)) {
+                showOnboarding();
+            } else {
+                startScan();
+            }
         }
 
         function closeScanKb() {
@@ -1952,28 +1975,10 @@ function boot() {
             scanBtn.classList.remove('active');
         }
 
-        // ── Speed toggle ──────────────────────────────────────────────────
-        function updateSpeedBtn() {
-            if (!speedBtn) return;
-            speedBtn.textContent = SPEED_ICONS[speedIdx];
-        }
-
-        speedBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            speedIdx = (speedIdx + 1) % SPEEDS.length;
-            updateSpeedBtn();
-            if (isOpen) {
-                if (phase === 'row') startRowPhase();
-                else startKeyPhase();
-            }
-        });
-
         // ── Event wiring ──────────────────────────────────────────────────
         scanBtn.addEventListener('click', openScanKb);
         closeBtn?.addEventListener('click', closeScanKb);
         scanKb.addEventListener('pointerdown', onTap);
-
-        updateSpeedBtn();
     }
 
     // 14. Initialize App Lifecycle

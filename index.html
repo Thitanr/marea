@@ -881,11 +881,33 @@
 
     <!-- Scan Keyboard (full-screen fixed overlay, activated by eye-gaze-btn) -->
     <div id="eye-gaze-keyboard" class="eye-gaze-kb hidden" role="dialog" aria-modal="true" data-i18n-aria="eye.gaze_btn">
+
+        <!-- Onboarding overlay (shown on first use only) -->
+        <div id="scan-onboard-overlay" class="scan-onboard-overlay hidden" role="region" aria-label="Tutorial de escaneo">
+            <div class="scan-onboard-card">
+                <h2 class="scan-onboard-title" data-i18n="eye.onboard_title">Cómo usar el escaneo</h2>
+                <div class="scan-onboard-steps">
+                    <div class="scan-onboard-step">
+                        <span class="scan-onboard-icon">1</span>
+                        <p data-i18n="eye.onboard_step1">Las filas se iluminan una a una automáticamente</p>
+                    </div>
+                    <div class="scan-onboard-step">
+                        <span class="scan-onboard-icon">2</span>
+                        <p data-i18n="eye.onboard_step2">Toca en cualquier lugar para entrar en la fila iluminada</p>
+                    </div>
+                    <div class="scan-onboard-step">
+                        <span class="scan-onboard-icon">3</span>
+                        <p data-i18n="eye.onboard_step3">Toca de nuevo para seleccionar la letra iluminada</p>
+                    </div>
+                </div>
+                <button class="scan-onboard-ok" data-i18n="eye.onboard_ok">¡Entendido, empezar!</button>
+            </div>
+        </div>
+
         <!-- Scanning / typing phase -->
         <div id="eye-phase-type" class="eye-phase">
             <div class="eye-type-header">
                 <div id="eye-word-display" class="eye-word-display" aria-live="polite"></div>
-                <button id="eye-recalib-btn" class="btn-secondary eye-sm-btn" aria-label="Velocidad de escaneo">▶</button>
             </div>
             <div id="eye-letter-grid" class="eye-letter-grid" role="group" aria-label="Teclado de escaneo"></div>
         </div>
