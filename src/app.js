@@ -2024,9 +2024,14 @@ function boot() {
                 } else {
                     showCalibPhase();
                 }
-            } catch (_) {
+            } catch (err) {
                 gazeKb.classList.add('hidden');
-                showToast(t('eye.gaze_error') || 'No se pudo activar la cámara');
+                const isNetworkErr = err && (err.message === 'WebGazer CDN failed' || err instanceof TypeError);
+                if (isNetworkErr) {
+                    showToast(t('eye.gaze_no_internet') || 'Mirada necesita internet la primera vez. Conéctate e inténtalo de nuevo.');
+                } else {
+                    showToast(t('eye.gaze_error') || 'No se pudo activar la cámara. Permite el acceso en ajustes del navegador.');
+                }
             } finally {
                 gazeBtn.disabled = false;
                 if (span) span.textContent = t('eye.gaze_btn') || 'Mirada';
