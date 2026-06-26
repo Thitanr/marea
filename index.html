@@ -355,7 +355,7 @@
                         <textarea id="aac-speech-text" class="aac-speech-text" placeholder="Toca los botones para hablar o escribe aquí..." aria-label="Texto a decir en voz alta" data-i18n-placeholder="aac.output_placeholder"></textarea>
                         <div class="aac-output-controls">
                             <button id="btn-aac-clear" class="btn-secondary" aria-label="Borrar texto" data-i18n="aac.clear_btn">Borrar</button>
-                            <button id="eye-gaze-btn" class="btn-secondary eye-mode-btn" aria-label="Escritura con mirada" data-i18n-aria="eye.gaze_btn" title="Escribir con los ojos (webcam)">
+                            <button id="eye-gaze-btn" class="btn-secondary eye-mode-btn" data-i18n-aria="eye.gaze_btn" title="Teclado de escaneo">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
                                     <circle cx="12" cy="12" r="3"></circle>
                                     <circle cx="12" cy="12" r="7" stroke-opacity="0.45"></circle>
@@ -879,35 +879,19 @@
         </nav>
     </div>
 
-    <!-- Eye Gaze Keyboard (full-screen fixed overlay, activated by eye-gaze-btn) -->
-    <div id="eye-gaze-keyboard" class="eye-gaze-kb hidden" role="dialog" aria-modal="true" aria-labelledby="eye-calib-title">
-        <!-- Gaze cursor: follows predicted eye position -->
-        <div id="eye-gaze-cursor" class="eye-gaze-cursor" aria-hidden="true"></div>
-
-        <!-- Phase 1: Calibration -->
-        <div id="eye-phase-calib" class="eye-phase">
-            <div class="eye-calib-header">
-                <h2 id="eye-calib-title" class="eye-calib-title" data-i18n="eye.gaze_calib_title">Calibración de mirada</h2>
-                <p class="eye-calib-hint" data-i18n="eye.gaze_calib_hint">El cuidador clica cada punto mientras el usuario lo mira</p>
-                <p id="eye-calib-status" class="eye-calib-status">0 / 9</p>
-            </div>
-            <div id="eye-calib-dots" class="eye-calib-dots" aria-label="Puntos de calibración"></div>
-            <div class="eye-calib-actions">
-                <button id="eye-skip-calib" class="btn-secondary" data-i18n="eye.gaze_skip">Omitir calibración</button>
-            </div>
-        </div>
-
-        <!-- Phase 2: Typing -->
-        <div id="eye-phase-type" class="eye-phase hidden">
+    <!-- Scan Keyboard (full-screen fixed overlay, activated by eye-gaze-btn) -->
+    <div id="eye-gaze-keyboard" class="eye-gaze-kb hidden" role="dialog" aria-modal="true" data-i18n-aria="eye.gaze_btn">
+        <!-- Scanning / typing phase -->
+        <div id="eye-phase-type" class="eye-phase">
             <div class="eye-type-header">
                 <div id="eye-word-display" class="eye-word-display" aria-live="polite"></div>
-                <button id="eye-recalib-btn" class="btn-secondary eye-sm-btn" data-i18n="eye.gaze_recalib">↺ Recalibrar</button>
+                <button id="eye-recalib-btn" class="btn-secondary eye-sm-btn" aria-label="Velocidad de escaneo">▶</button>
             </div>
-            <div id="eye-letter-grid" class="eye-letter-grid" role="group" aria-label="Teclado ocular"></div>
+            <div id="eye-letter-grid" class="eye-letter-grid" role="group" aria-label="Teclado de escaneo"></div>
         </div>
 
         <!-- Close -->
-        <button id="eye-gaze-close" class="eye-gaze-close-btn" data-i18n="eye.gaze_close">✕ Cerrar cámara</button>
+        <button id="eye-gaze-close" class="eye-gaze-close-btn" data-i18n="eye.gaze_close">✕ Cerrar</button>
     </div>
 
     <!-- SW Update Banner -->
