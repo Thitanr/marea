@@ -57,7 +57,7 @@ Marea is a low-intensity sensory holding space. **It is not a medical device and
 
 ## 📄 License & Integrity Protection
 
-**Copyright (C) 2024–2026 Lana Technologies · Humberto Gil Valero**
+**Copyright (C) 2024–2026 Lana Technologies · Humberto Gil Valera**
 Licensed under the [GNU Affero General Public License v3.0](./LICENSE) (AGPL-3.0-only).
 
 The AGPL-3.0 means:
