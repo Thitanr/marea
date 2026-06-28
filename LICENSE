@@ -1,0 +1,38 @@
+SPDX-License-Identifier: AGPL-3.0-only
+
+Marea — Sostén & Dignidad
+Copyright (C) 2024–2026  Lana Technologies · Humberto Gil Valero
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, version 3 of the License only.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+The full license text is available at:
+https://www.gnu.org/licenses/agpl-3.0.html
+
+--------------------------------------------------------------------------------
+PHILOSOPHY COVENANT
+
+Any use, fork, or derivative of Marea must preserve the following principles
+that are inseparable from the spirit of this software:
+
+  1. ABSOLUTE PRIVACY — No user data may ever leave the user's device.
+     No analytics, telemetry, tracking pixels, or external API calls
+     that process personal information are permitted.
+
+  2. NO MONETIZATION OF VULNERABILITY — Marea must never be used as a
+     vehicle to profit from people in crisis, sensory overload, or
+     neurological distress. No paywalls on core therapeutic features.
+
+  3. ACCESSIBILITY FIRST — The WCAG 2.1 AA minimum standard is a floor,
+     not a ceiling. Any derivative must maintain or improve accessibility.
+
+  4. OPEN SOURCE FOREVER — Any modified version distributed publicly or
+     run as a network service must publish its source code under AGPL-3.0.
+
+Violations of this covenant constitute a breach of the license terms.
+--------------------------------------------------------------------------------
