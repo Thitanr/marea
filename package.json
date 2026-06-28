@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Marea — Sostén & Dignidad. World-class PWA for sensory regulation and radical validation.",
+  "author": "Humberto Gil Valero <humbertogilv@gmail.com> (Lana Technologies)",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://marea.lanatech.tech",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

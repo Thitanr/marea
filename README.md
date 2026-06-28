@@ -57,9 +57,19 @@ Marea is a low-intensity sensory holding space. **It is not a medical device and
 
 ## 📄 License & Integrity Protection
 
-**All rights reserved.**
+**Copyright (C) 2024–2026 Lana Technologies · Humberto Gil Valero**
+Licensed under the [GNU Affero General Public License v3.0](./LICENSE) (AGPL-3.0-only).
 
-To guarantee the security, privacy, and absolute integrity of Marea for its users:
-*   **No Unauthorised Redistribution or Modification**: You may not copy, modify, redistribute, publish, or package this software under other names.
-*   **Security Auditing Allowed**: The codebase is source-available solely for transparency, academic auditing, and privacy verification.
-*   **Official Releases Only**: Only Lana Technologies (Thitanr) is authorised to publish official versions, updates, and compile native builds of Marea. This is strictly enforced to prevent third parties from injecting spyware, trackers, advertisements, or data-collection mechanisms into the application.
+The AGPL-3.0 means:
+- Anyone can read, audit, and verify the source code — transparency is non-negotiable.
+- Any modified version distributed publicly or run as a network service **must** publish its full source code under the same license.
+- **You cannot take Marea proprietary.** If you build on it, you build in the open.
+
+Additionally, any use or fork must honour the **Philosophy Covenant** (see [`LICENSE`](./LICENSE)):
+- **Absolute Privacy** — no user data may leave the device, ever.
+- **No monetisation of vulnerability** — no paywalls on core features for people in crisis.
+- **Accessibility first** — WCAG 2.1 AA is the floor, not the ceiling.
+- **Open source forever** — modifications must remain open.
+
+Official releases are published exclusively by **Lana Technologies** at [marea.lanatech.tech](https://marea.lanatech.tech).
+Unofficial forks that remove privacy protections, add trackers, or misrepresent the official app violate both the license and the covenant.
