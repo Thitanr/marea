@@ -6,10 +6,29 @@
 
 import type { AppState, Lang, Theme, HandMode, FontSize, AacCategory } from './types.js';
 
+// ---- Device language detection (first-install only) ----
+const SUPPORTED_LANGS: readonly string[] = ['es', 'en', 'it', 'fr', 'de', 'zh', 'pt', 'ja'];
+
+function detectDeviceLang(): Lang {
+  try {
+    const nav: string = (navigator.language as string | undefined) ?? 'en';
+    const code: string = nav.toLowerCase().split('-')[0] ?? 'en'; // 'ja-JP' → 'ja'
+    return (SUPPORTED_LANGS.includes(code) ? code : 'en') as Lang;
+  } catch {
+    return 'en';
+  }
+}
+
 // ---- Persisted settings ----
 function loadPersisted(): Pick<AppState, 'lang' | 'theme' | 'handMode' | 'sensoryMode' | 'fontSize' | 'reduceMotion'> {
+  const storedLang = localStorage.getItem('marea_lang') as Lang | null;
+  const lang: Lang = storedLang ?? (() => {
+    const detected = detectDeviceLang();
+    localStorage.setItem('marea_lang', detected); // persist on first detection
+    return detected;
+  })();
   return {
-    lang: (localStorage.getItem('marea_lang') as Lang) || 'es',
+    lang,
     theme: (localStorage.getItem('marea_theme') as Theme) || 'deep-sea',
     handMode: (localStorage.getItem('marea_hand') as HandMode) || 'right',
     sensoryMode: localStorage.getItem('marea_sensory') === 'true',
