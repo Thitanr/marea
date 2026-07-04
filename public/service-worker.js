@@ -1,10 +1,17 @@
 /* ==========================================================================
-   MAREA - SERVICE WORKER v13
+   MAREA - SERVICE WORKER v14
    Network-first with cache fallback. Always serves freshest content.
-   v13: Scan keyboard onboarding, fixed SEND key (speaks + closes), always slow scan.
+   v14: Face Control + Facial Neurofeedback (KAI perception). The MediaPipe
+   wasm runtime and face model are large and immutable → cache-first, so
+   after the first use they work offline forever without re-downloading.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v13';
+const CACHE_NAME = 'marea-cache-v14';
+
+// Immutable heavy assets (face model + wasm runtime) — cache-first, stored
+// in a separate cache that SURVIVES app updates (no 15MB re-download per release)
+const STATIC_CACHE = 'marea-static-v1';
+const CACHE_FIRST_PATHS = ['/models/', '/mediapipe/'];
 
 // Install — do NOT auto-skipWaiting so the app can show an update popup.
 // On first install there is no controller, so the app sends SKIP_WAITING immediately.
@@ -25,7 +32,7 @@ self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
-                keys.filter((key) => key !== CACHE_NAME)
+                keys.filter((key) => key !== CACHE_NAME && key !== STATIC_CACHE)
                     .map((key) => {
                         console.log('[SW v13] Removing old cache:', key);
                         return caches.delete(key);
@@ -48,6 +55,23 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(e.request.url);
     if (url.origin !== self.location.origin) return;
+
+    // Cache-first for immutable heavy assets (face model / wasm runtime)
+    if (CACHE_FIRST_PATHS.some((p) => url.pathname.startsWith(p))) {
+        e.respondWith(
+            (async () => {
+                const cached = await caches.match(e.request);
+                if (cached) return cached;
+                const response = await fetch(e.request);
+                if (isCacheable(response)) {
+                    const cache = await caches.open(STATIC_CACHE);
+                    cache.put(e.request, response.clone());
+                }
+                return response;
+            })()
+        );
+        return;
+    }
 
     e.respondWith(
         (async () => {

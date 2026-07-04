@@ -2888,3 +2888,114 @@ textarea.safe-input {
     }
 }
 
+
+/* ==========================================================================
+   FACE CONTROL (KAI perception, 100% on-device)
+   Scanning highlight + status indicator pill
+   ========================================================================== */
+.face-scan-active {
+    outline: 3px solid var(--accent, #4db896) !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 18px rgba(77, 184, 150, 0.55) !important;
+    position: relative;
+    z-index: 5;
+}
+.face-scan-selected {
+    outline: 3px solid #ffd166 !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 22px rgba(255, 209, 102, 0.65) !important;
+}
+
+.face-indicator {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle, rgba(77, 184, 150, 0.25));
+    background: var(--bg-card-solid, #0c1117);
+    color: var(--text-muted, #7aa394);
+    font-size: 0.78rem;
+    z-index: 1200;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease;
+}
+.face-indicator-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent, #4db896);
+    box-shadow: 0 0 8px var(--accent, #4db896);
+    animation: face-dot-breathe 2.4s ease-in-out infinite;
+}
+.face-indicator-noface .face-indicator-dot {
+    background: #ffd166;
+    box-shadow: 0 0 8px #ffd166;
+    animation: none;
+}
+.face-indicator-pulse {
+    transform: translateX(-50%) scale(1.12);
+}
+@keyframes face-dot-breathe {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+}
+.reduce-motion .face-indicator-dot { animation: none; }
+
+/* ==========================================================================
+   FACIAL NEUROFEEDBACK — "Calma Facial"
+   ========================================================================== */
+.neuro-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.85rem;
+    padding: 1rem 0.75rem 1.5rem;
+}
+.neuro-desc {
+    max-width: 34rem;
+    color: var(--text-muted, #7aa394);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+.neuro-ring-wrapper {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.5rem 0;
+}
+.neuro-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--border-subtle, rgba(77, 184, 150, 0.25));
+    background: radial-gradient(circle, rgba(77, 184, 150, 0.12) 0%, rgba(77, 184, 150, 0.03) 70%);
+    transform: scale(0.7);
+    transition: transform 0.6s ease, background 0.6s ease, box-shadow 0.6s ease;
+}
+.reduce-motion .neuro-ring { transition: none; }
+.neuro-ring-value {
+    position: relative;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent, #4db896);
+    text-shadow: 0 0 12px rgba(77, 184, 150, 0.4);
+}
+.neuro-status {
+    min-height: 1.4rem;
+    font-size: 0.95rem;
+    color: var(--text-muted, #7aa394);
+}
+.neuro-controls {
+    display: flex;
+    gap: 0.75rem;
+}

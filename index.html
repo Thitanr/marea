@@ -295,6 +295,7 @@
                         <button class="anchor-subtab-btn active" id="btn-subtab-breathe" data-i18n="anchor.breathe_tab">Respirar</button>
                         <button class="anchor-subtab-btn" id="btn-subtab-grounding" data-i18n="anchor.grounding_tab">Grounding (54321)</button>
                         <button class="anchor-subtab-btn" id="btn-subtab-tipp" data-i18n="anchor.tipp_tab">Agua Fría (TIPP)</button>
+                        <button class="anchor-subtab-btn" id="btn-subtab-neuro" data-i18n="neuro.tab">Calma Facial</button>
                     </div>
 
                     <div class="anchor-content">
@@ -343,6 +344,23 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Facial Neurofeedback (camera on-device, KAI perception) -->
+                        <div id="subtab-neuro" class="anchor-subpanel">
+                            <div class="neuro-container">
+                                <h3 data-i18n="neuro.title">Neurofeedback de calma</h3>
+                                <p class="neuro-desc" data-i18n="neuro.desc">Tu cara es el sensor: la cámara detecta la tensión en cejas, ojos y mandíbula, y el anillo crece cuando te sueltas. Todo se procesa dentro de tu dispositivo.</p>
+                                <div class="neuro-ring-wrapper">
+                                    <div id="neuro-ring" class="neuro-ring" aria-hidden="true"></div>
+                                    <div id="neuro-ring-value" class="neuro-ring-value">–</div>
+                                </div>
+                                <p id="neuro-status" class="neuro-status" aria-live="polite" data-i18n="neuro.ready">Cuando quieras, empezamos. Solo tienes que mirar a la pantalla.</p>
+                                <div class="neuro-controls">
+                                    <button id="btn-neuro-start" class="btn-primary" data-i18n="neuro.start">Empezar sesión</button>
+                                    <button id="btn-neuro-stop" class="btn-secondary hidden" data-i18n="neuro.stop">Terminar</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -355,6 +373,13 @@
                         <textarea id="aac-speech-text" class="aac-speech-text" placeholder="Toca los botones para hablar o escribe aquí..." aria-label="Texto a decir en voz alta" data-i18n-placeholder="aac.output_placeholder"></textarea>
                         <div class="aac-output-controls">
                             <button id="btn-aac-clear" class="btn-secondary" aria-label="Borrar texto" data-i18n="aac.clear_btn">Borrar</button>
+                            <button id="eye-mode-btn" class="btn-secondary eye-mode-btn" data-i18n-aria="eye.btn_label" title="Teclado deslizante">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+                                    <path d="M4 17c3-6 5-6 8 0s5 6 8 0"></path>
+                                    <circle cx="4" cy="17" r="1.6" fill="currentColor" stroke="none"></circle>
+                                </svg>
+                                <span data-i18n="eye.btn_text">Deslizar</span>
+                            </button>
                             <button id="eye-gaze-btn" class="btn-secondary eye-mode-btn" data-i18n-aria="eye.gaze_btn" title="Teclado de escaneo">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
                                     <circle cx="12" cy="12" r="3"></circle>
@@ -383,6 +408,18 @@
                         </div>
                         <!-- Grid content -->
                         <div class="aac-grid-container" id="aac-grid"></div>
+                    </div>
+
+                    <!-- Swipe Keyboard (slide-to-type, replaces the board while open) -->
+                    <div id="swipe-keyboard" class="swipe-keyboard hidden" role="group" data-i18n-aria="eye.btn_label" aria-label="Teclado deslizante">
+                        <div class="swipe-kb-header">
+                            <div class="swipe-kb-display">
+                                <span id="swipe-kb-word" class="swipe-kb-word" aria-live="polite"></span>
+                                <span id="swipe-kb-hint" class="swipe-kb-hint" data-i18n="swipe.hint">Desliza el dedo por las letras para escribir palabras</span>
+                            </div>
+                            <button id="swipe-kb-close" class="swipe-kb-close-btn" data-i18n-aria="eye.btn_stop" aria-label="Cerrar teclado">✕</button>
+                        </div>
+                        <div id="swipe-kb-rows" class="swipe-kb-rows"></div>
                     </div>
 
                 </div>
@@ -656,6 +693,30 @@
                                 <span class="toggle-slider"></span>
                                 <span class="toggle-label" data-i18n="settings.motion_toggle">Eliminar animaciones</span>
                             </label>
+                        </div>
+
+                        <!-- Control Facial (KAI perception, 100% local) -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.face_title">Control Facial (Manos Libres)</strong>
+                                <span data-i18n="settings.face_desc">Navega toda la app sin manos: un foco recorre los botones y los seleccionas con un gesto facial. La cámara se procesa 100% en tu dispositivo — nada sale de tu teléfono.</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" id="setting-face-control">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label" data-i18n="settings.face_toggle">Activar control facial</span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.face_gesture_title">Gesto de Selección</strong>
+                                <span data-i18n="settings.face_gesture_desc">Elige el gesto que mejor puedas hacer para "pulsar" con la cara.</span>
+                            </div>
+                            <select id="setting-face-gesture" class="settings-select">
+                                <option value="blink" data-i18n="face.gesture_blink">Parpadeo largo</option>
+                                <option value="mouth" data-i18n="face.gesture_mouth">Abrir la boca</option>
+                                <option value="brows" data-i18n="face.gesture_brows">Levantar las cejas</option>
+                            </select>
                         </div>
 
                         <!-- Backup con Supabase -->

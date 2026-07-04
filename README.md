@@ -29,6 +29,12 @@ Specifically designed for **stroke (ictus) survivors** with speech difficulties 
 *   **One-Handed Sweep Layout**: Positions and clusters all main buttons on the lower-left or lower-right of the screen (selectable in settings) so everything sits within the natural sweep of a single thumb.
 *   **Speech Soundboards**: Large, high-contrast cards representing basic needs, social interaction (*“My brain works perfectly, but I struggle to speak. Please have patience with me”*), and emotional states. Tapping a card reads it aloud using the native offline text-to-speech engine (TTS).
 
+### 👁️ 3b. Face Control & Facial Neurofeedback (KAI Perception)
+Powered by the same on-device perception engine as **CIL/KAI** (MediaPipe FaceLandmarker, 478 landmarks + blendshapes), bundled locally — no CDN, no cloud, frames never leave the device:
+*   **Face Control (Hands-Free)**: an auto-scanning focus walks through every interactive element of the app; the user selects with a configurable facial gesture (long blink, open mouth, or raised brows). Includes the scan keyboard, so a user with no motor control of their hands can navigate and *speak* using only their face.
+*   **Facial Neurofeedback ("Calma Facial")**: the face replaces electrodes. Brow-knit, eye-squint and jaw tension — calibrated against the user's own resting face — drive a live bioluminescent ring that grows as the user physically lets go. Sessions are logged locally.
+*   **Swipe-to-Write**: slide-to-type keyboard for fast one-handed AAC input.
+
 ### 📝 4. Safety Anchors
 A personalized crisis plan based on the Stanley-Brown safety model. Users can register their safe person, stabilizing song, and peaceful memory during calm periods, allowing quick retrieval when "the water rises".
 

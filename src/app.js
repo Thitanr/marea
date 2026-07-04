@@ -10,6 +10,8 @@ import { svgIcons } from './data/svg-icons.js';
 import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode, persistFontSize, persistReduceMotion } from './state.js';
 import { showToast } from './core/toast.js';
 import { t, translateDOM, tLang } from './core/i18n.js';
+import { initFaceControl } from './face/face-switch.js';
+import { initNeuro, stopNeuroSession } from './face/face-neuro.js';
 
 /* ----- Module-compatible init (Phase 1a) ----- */
 function boot() {
@@ -113,6 +115,7 @@ function boot() {
 
     // 3. i18n Translation Engine
     function translateApp() {
+        document.documentElement.lang = state.lang;
         translateDOM();
         renderAACBoard();
         loadQuickResponses();
@@ -147,6 +150,7 @@ function boot() {
             }
         } else {
             stopBreathingGuide();
+            stopNeuroSession();
         }
 
         if (tabId === "diario") {
@@ -174,6 +178,9 @@ function boot() {
             startBreathingGuide();
         } else {
             stopBreathingGuide();
+        }
+        if (subtabId !== "neuro") {
+            stopNeuroSession();
         }
 
         if (subtabId === "grounding") {
@@ -844,7 +851,13 @@ function boot() {
 
         // Grounding Stepper navigation buttons
         elements.groundingNextBtn.addEventListener("click", () => {
-            state.groundingStep++;
+            // On the "done" card the button restarts the wizard instead of
+            // incrementing forever
+            if (state.groundingStep > 4) {
+                state.groundingStep = 0;
+            } else {
+                state.groundingStep++;
+            }
             renderGroundingStep();
         });
 
@@ -1152,15 +1165,6 @@ function boot() {
         const ONBOARDING_KEY = 'marea_onboarded';
         let selectedCondition = localStorage.getItem('marea_condition') || 'other';
 
-        if (localStorage.getItem(ONBOARDING_KEY) === '1') {
-            elements.onboardingOverlay.classList.add('hidden');
-            return;
-        }
-
-        elements.onboardingOverlay.classList.remove('hidden');
-        translateDOM();
-        showOnboardingStep(0);
-
         function showOnboardingStep(stepIndex) {
             const cards = [elements.onbStep0, elements.onbStep1, elements.onbStep2, elements.onbStep3];
             cards.forEach((card, i) => {
@@ -1223,6 +1227,18 @@ function boot() {
                 }, 380);
             });
         }
+
+        // Handlers are wired unconditionally above so that "Restart guide"
+        // (settings) works even when onboarding was already completed —
+        // an unwired overlay would trap the user behind a dead modal.
+        if (localStorage.getItem(ONBOARDING_KEY) === '1') {
+            elements.onboardingOverlay.classList.add('hidden');
+            return;
+        }
+
+        elements.onboardingOverlay.classList.remove('hidden');
+        translateDOM();
+        showOnboardingStep(0);
     }
 
     // Apply sensible defaults for each condition profile
@@ -1787,7 +1803,6 @@ function boot() {
         const wordDisplay= document.getElementById('eye-word-display');
         const letterGrid = document.getElementById('eye-letter-grid');
         const closeBtn   = document.getElementById('eye-gaze-close');
-        const speedBtn   = document.getElementById('eye-recalib-btn');
         if (!scanBtn || !scanKb) return;
 
         // Row definitions — determines scanning order and groupings
@@ -2001,6 +2016,8 @@ function boot() {
     initNotebook();
     initSwipeKeyboard();
     initScanKeyboard();
+    initNeuro();
+    initFaceControl();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {
