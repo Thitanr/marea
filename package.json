@@ -19,6 +19,7 @@
     "@axe-core/playwright": "^4.10.0",
     "@playwright/test": "^1.52.0",
     "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^26.1.0",
     "jsdom": "^29.1.1",
     "typescript": "^5.7.0",
     "vite": "^6.3.0",
