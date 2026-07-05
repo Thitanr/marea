@@ -1,0 +1,17 @@
+# Dependabot — automatic security & version updates
+# Marea is offline-first with zero runtime dependencies beyond MediaPipe,
+# so updates are few — but each one gets a PR that CI must pass first.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies"]
