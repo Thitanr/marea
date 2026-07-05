@@ -35,6 +35,8 @@ Powered by the same on-device perception engine as **CIL/KAI** (MediaPipe FaceLa
 *   **Facial Neurofeedback ("Calma Facial")**: the face replaces electrodes. Brow-knit, eye-squint and jaw tension — calibrated against the user's own resting face — drive a live bioluminescent ring that grows as the user physically lets go. Sessions are logged locally.
 *   **Swipe-to-Write**: slide-to-type keyboard for fast one-handed AAC input.
 
+Face perception is built on **Google MediaPipe FaceLandmarker** (Apache 2.0), bundled locally and running entirely on-device. Note: on iPhone, camera access works in Safari; iOS still limits camera permissions for *installed* home-screen web apps — an Apple platform restriction, not a Marea choice.
+
 ### 📝 4. Safety Anchors
 A personalized crisis plan based on the Stanley-Brown safety model. Users can register their safe person, stabilizing song, and peaceful memory during calm periods, allowing quick retrieval when "the water rises".
 
