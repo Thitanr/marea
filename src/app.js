@@ -746,7 +746,8 @@ function boot() {
         // Condition / profile selector in settings
         const selectCondition = document.getElementById('setting-condition');
         if (selectCondition) {
-            selectCondition.value = localStorage.getItem('marea_condition') || '';
+            // 'other' is the canonical "no specific profile" value (matches onboarding)
+            selectCondition.value = localStorage.getItem('marea_condition') || 'other';
             selectCondition.addEventListener('change', (e) => {
                 const cond = e.target.value;
                 localStorage.setItem('marea_condition', cond);
