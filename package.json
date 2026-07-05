@@ -16,7 +16,7 @@
     "test:a11y": "playwright test"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.0",
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.52.0",
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26.1.0",
