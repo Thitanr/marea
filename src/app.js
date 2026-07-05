@@ -1512,12 +1512,13 @@ function boot() {
 
         let active = false;
         let isSwiping = false;
-        let lastKey = null;
         let builtText = '';
         let trailCanvas = null;
         let ctx = null;
         let trailPoints = [];
         let pointerHandled = false;  // suppress click after pointer interaction
+        let path = [];               // {x, y, key} samples of the current swipe
+        let startKeyEl = null;
 
         function buildKeyboard() {
             rowsEl.innerHTML = '';
@@ -1624,11 +1625,20 @@ function boot() {
 
         function handleSpecial(k) {
             if (k === '⌫') {
-                const aacText = getAACText();
                 if (builtText.length > 0) {
-                    builtText = builtText.slice(0, -1);
-                } else if (aacText && aacText.value.length > 0) {
-                    aacText.value = aacText.value.slice(0, -1);
+                    if (builtText.endsWith(' ')) {
+                        // Swiped words arrive whole — delete the whole last word
+                        const trimmed = builtText.replace(/\s+$/, '');
+                        const cut = trimmed.lastIndexOf(' ');
+                        builtText = cut >= 0 ? trimmed.slice(0, cut + 1) : '';
+                    } else {
+                        builtText = builtText.slice(0, -1);
+                    }
+                } else {
+                    const aacText = getAACText();
+                    if (aacText && aacText.value.length > 0) {
+                        aacText.value = aacText.value.replace(/\s+$/, '').slice(0, -1);
+                    }
                 }
                 wordEl.textContent = builtText;
                 return true;
@@ -1646,6 +1656,166 @@ function boot() {
             return false;
         }
 
+        // ── Swipe decoding ────────────────────────────────────────────────
+        // A real swipe keyboard doesn't take every key the finger crosses —
+        // only the *anchor points* of the gesture: where it starts, where it
+        // ends, and where it turns. "hola" = start on H, corner on O, corner
+        // on L, lift on A. Everything crossed in between is ignored.
+        // A small lexicon built from the AAC board (already curated and
+        // translated per language) then corrects the geometric guess: it can
+        // recover letters that lie on a straight segment ("frio") and restore
+        // accents the QWERTY grid cannot type ("baño", "días").
+
+        let lexicon = new Map(); // normalized -> original (with accents)
+
+        // Core conversational words the AAC board doesn't carry (greetings,
+        // courtesy) — per language, feeding the same lexicon.
+        const CORE_WORDS = {
+            es: ['hola', 'adiós', 'gracias', 'por', 'favor', 'perdón', 'bien', 'mal', 'casa', 'quiero', 'necesito', 'ahora'],
+            en: ['hello', 'hi', 'goodbye', 'thanks', 'thank', 'you', 'please', 'sorry', 'good', 'bad', 'home', 'want', 'need', 'now'],
+            it: ['ciao', 'arrivederci', 'grazie', 'per', 'favore', 'scusa', 'bene', 'male', 'casa', 'voglio', 'adesso'],
+            fr: ['bonjour', 'salut', 'merci', 'pardon', 'bien', 'mal', 'maison', 'veux', 'maintenant'],
+            de: ['hallo', 'danke', 'bitte', 'entschuldigung', 'gut', 'schlecht', 'hause', 'will', 'jetzt'],
+            zh: [],
+            pt: ['olá', 'adeus', 'obrigado', 'obrigada', 'por', 'favor', 'desculpa', 'bem', 'mal', 'casa', 'quero', 'agora'],
+            ja: [],
+        };
+
+        function normWord(s) {
+            return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        }
+
+        function buildLexicon() {
+            lexicon = new Map();
+            for (const w of (CORE_WORDS[state.lang] || [])) {
+                const norm = normWord(w);
+                if (/^[a-z]+$/.test(norm) && !lexicon.has(norm)) lexicon.set(norm, w);
+            }
+            const data = aacBoardData[state.lang] || {};
+            for (const cat of Object.values(data)) {
+                for (const item of cat) {
+                    for (const field of [item.text, item.spoken]) {
+                        for (const raw of String(field || '').split(/[^A-Za-zÀ-ÿ]+/)) {
+                            if (raw.length < 2) continue;
+                            const norm = normWord(raw);
+                            if (!/^[a-z]+$/.test(norm)) continue;
+                            if (!lexicon.has(norm)) lexicon.set(norm, raw.toLowerCase());
+                        }
+                    }
+                }
+            }
+        }
+
+        function isSubsequence(word, seq) {
+            let i = 0;
+            for (const c of seq) {
+                if (c === word[i]) i++;
+                if (i === word.length) return true;
+            }
+            return false;
+        }
+
+        function dictionaryCorrect(anchorWord, traversal) {
+            if (anchorWord.length < 2) return anchorWord;
+            const first = anchorWord[0], last = anchorWord[anchorWord.length - 1];
+            let best = null, bestScore = -Infinity;
+            for (const [norm, original] of lexicon) {
+                // A swipe can never produce double letters — compare against
+                // the squeezed form (hello → helo) and return the original
+                const sq = norm.replace(/(.)\1+/g, '$1');
+                if (sq[0] !== first || sq[sq.length - 1] !== last) continue;
+                if (!isSubsequence(sq, traversal)) continue;
+                let score = 10 - Math.abs(sq.length - anchorWord.length);
+                if (isSubsequence(anchorWord, sq)) score += 4;
+                if (sq === anchorWord) score += 6;
+                if (score > bestScore) { bestScore = score; best = original; }
+            }
+            return best || anchorWord;
+        }
+        function maxExcursion() {
+            if (path.length < 2) return 0;
+            const a = path[0];
+            let max = 0;
+            for (const p of path) {
+                const d = Math.hypot(p.x - a.x, p.y - a.y);
+                if (d > max) max = d;
+            }
+            return max;
+        }
+
+        function decodeSwipe() {
+            if (path.length < 2) return '';
+            // 1. Resample every ~10px to remove jitter
+            const rs = [path[0]];
+            for (const p of path) {
+                const last = rs[rs.length - 1];
+                if (Math.hypot(p.x - last.x, p.y - last.y) >= 10) rs.push(p);
+            }
+            if (rs[rs.length - 1] !== path[path.length - 1]) rs.push(path[path.length - 1]);
+
+            // 2. Corner samples (turns > 26°), clustered — each turn keeps
+            // only its sharpest sample so wide curves don't spray letters
+            const COS_LIMIT = Math.cos(26 * Math.PI / 180);
+            const corners = [];
+            for (let i = 2; i < rs.length - 2; i++) {
+                const v1x = rs[i].x - rs[i - 2].x, v1y = rs[i].y - rs[i - 2].y;
+                const v2x = rs[i + 2].x - rs[i].x, v2y = rs[i + 2].y - rs[i].y;
+                const mag = Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y);
+                if (mag > 0) {
+                    const cosv = (v1x * v2x + v1y * v2y) / mag;
+                    if (cosv < COS_LIMIT) corners.push({ idx: i, cosv });
+                }
+            }
+            const anchors = [{ idx: 0 }];
+            let cluster = [];
+            const flushCluster = () => {
+                if (!cluster.length) return;
+                let sharpest = cluster[0];
+                for (const c of cluster) if (c.cosv < sharpest.cosv) sharpest = c;
+                anchors.push({ idx: sharpest.idx });
+                cluster = [];
+            };
+            for (const c of corners) {
+                const prev = cluster[cluster.length - 1];
+                // New cluster when samples separate OR the key underneath
+                // changes — two sharp turns on adjacent keys are two letters
+                if (prev && (c.idx - prev.idx > 2 || (rs[c.idx].key && rs[prev.idx].key && rs[c.idx].key !== rs[prev.idx].key))) {
+                    flushCluster();
+                }
+                cluster.push(c);
+            }
+            flushCluster();
+            anchors.push({ idx: rs.length - 1 });
+
+            // 3. Anchors → letters. If an anchor landed in the 3px gap
+            // between keys (key: null), borrow the nearest sampled key.
+            const letterAt = (idx) => {
+                for (let d = 0; d < 3; d++) {
+                    for (const j of [idx - d, idx + d]) {
+                        const k = rs[j] && rs[j].key;
+                        if (k && k.length === 1) return k.toLowerCase();
+                    }
+                }
+                return null;
+            };
+            let word = '';
+            for (const a of anchors) {
+                const c = letterAt(a.idx);
+                if (c && word[word.length - 1] !== c) word += c;
+            }
+
+            // 4. Lexicon correction over the full key traversal — recovers
+            // letters on straight segments and restores accents/ñ
+            let traversal = '';
+            for (const p of rs) {
+                if (p.key && p.key.length === 1) {
+                    const c = p.key.toLowerCase();
+                    if (traversal[traversal.length - 1] !== c) traversal += c;
+                }
+            }
+            return dictionaryCorrect(word, traversal);
+        }
+
         // Pointer events — work for mouse, touch, and stylus
         function onPointerDown(e) {
             if (!active) return;
@@ -1653,52 +1823,59 @@ function boot() {
             const keyEl = getKeyAt(e.clientX, e.clientY);
             if (!keyEl) return;
             e.preventDefault();
-            keyboard.setPointerCapture(e.pointerId);
+            try { keyboard.setPointerCapture(e.pointerId); } catch (_) {}
             pointerHandled = true;
             isSwiping = true;
-            lastKey = null;
+            startKeyEl = keyEl;
             clearTrail();
+            path = [];
             const kRect = rowsEl.getBoundingClientRect();
-            trailPoints.push({ x: e.clientX - kRect.left, y: e.clientY - kRect.top });
-            const k = keyEl.dataset.key;
-            if (!handleSpecial(k)) {
-                builtText += k.toLowerCase();
-                lastKey = k;
-                wordEl.textContent = builtText;
-                if (hintEl) hintEl.style.display = 'none';
-                highlightKey(keyEl);
-            }
+            const x = e.clientX - kRect.left, y = e.clientY - kRect.top;
+            path.push({ x, y, key: keyEl.dataset.key });
+            trailPoints.push({ x, y });
+            highlightKey(keyEl);
         }
 
         function onPointerMove(e) {
             if (!isSwiping || !active) return;
             e.preventDefault();
             const kRect = rowsEl.getBoundingClientRect();
-            trailPoints.push({ x: e.clientX - kRect.left, y: e.clientY - kRect.top });
+            const x = e.clientX - kRect.left, y = e.clientY - kRect.top;
+            trailPoints.push({ x, y });
             drawTrail();
             const keyEl = getKeyAt(e.clientX, e.clientY);
-            if (!keyEl) return;
-            const k = keyEl.dataset.key;
-            if (k !== lastKey && k !== '⌫' && k !== 'SPACE' && k !== 'SEND') {
-                builtText += k.toLowerCase();
-                lastKey = k;
-                wordEl.textContent = builtText;
-                highlightKey(keyEl);
-            }
+            path.push({ x, y, key: keyEl ? keyEl.dataset.key : null });
+            if (keyEl) highlightKey(keyEl);
         }
 
         function onPointerUp() {
             if (!isSwiping) return;
             isSwiping = false;
             highlightKey(null);
-            if (builtText && !builtText.endsWith(' ')) builtText += ' ';
+            const isTap = maxExcursion() < 18; // px — finger didn't travel: it's a tap
+            if (isTap) {
+                const k = startKeyEl && startKeyEl.dataset.key;
+                if (k && !handleSpecial(k)) {
+                    builtText += k.toLowerCase();
+                }
+            } else {
+                const word = decodeSwipe();
+                if (word) {
+                    builtText += (builtText && !builtText.endsWith(' ') ? ' ' : '') + word + ' ';
+                }
+            }
             wordEl.textContent = builtText;
+            if (hintEl) hintEl.style.display = builtText ? 'none' : '';
+            startKeyEl = null;
+            path = [];
             setTimeout(clearTrail, 400);
         }
 
         function onPointerCancel() {
             isSwiping = false;
             pointerHandled = false;
+            startKeyEl = null;
+            path = [];
             highlightKey(null);
             clearTrail();
         }
@@ -1726,6 +1903,7 @@ function boot() {
                 swipeBtn.classList.add('active');
                 builtText = '';
                 wordEl.textContent = '';
+                buildLexicon(); // vocabulary for the active language
                 buildKeyboard();
                 keyboard.addEventListener('pointerdown', onPointerDown, { passive: false });
                 keyboard.addEventListener('pointermove', onPointerMove, { passive: false });
