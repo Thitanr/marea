@@ -11,6 +11,7 @@ import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode, 
 import { showToast } from './core/toast.js';
 import { t, translateDOM, tLang } from './core/i18n.js';
 import { initFaceControl } from './face/face-switch.js';
+import { initFaceHeaderButton } from './face/face-setup.js';
 import { initNeuro, stopNeuroSession } from './face/face-neuro.js';
 
 /* ----- Module-compatible init (Phase 1a) ----- */
@@ -2197,6 +2198,7 @@ function boot() {
     initScanKeyboard();
     initNeuro();
     initFaceControl();
+    initFaceHeaderButton();
 
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {

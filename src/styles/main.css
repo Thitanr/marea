@@ -2999,3 +2999,59 @@ textarea.safe-input {
     display: flex;
     gap: 0.75rem;
 }
+
+/* ==========================================================================
+   FACE CONTROL — header button + guided gesture setup
+   ========================================================================== */
+.face-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid var(--border-subtle, rgba(77, 184, 150, 0.25));
+    color: var(--text-muted, #7aa394);
+    border-radius: 8px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.face-toggle-btn.active {
+    color: var(--accent, #4db896);
+    border-color: var(--accent, #4db896);
+    box-shadow: 0 0 12px rgba(77, 184, 150, 0.4);
+}
+.reduce-motion .face-toggle-btn { transition: none; }
+
+.face-setup-card { text-align: center; }
+.face-setup-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+    color: var(--accent, #4db896);
+}
+.face-setup-title {
+    font-size: 1.15rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-primary, #eafff5);
+}
+.face-setup-gestures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    margin: 0.75rem 0;
+}
+.face-setup-chip {
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle, rgba(77, 184, 150, 0.25));
+    color: var(--text-muted, #7aa394);
+    font-size: 0.8rem;
+}
+.face-setup-chip--active {
+    color: var(--accent, #4db896);
+    border-color: var(--accent, #4db896);
+    box-shadow: 0 0 10px rgba(77, 184, 150, 0.45);
+}

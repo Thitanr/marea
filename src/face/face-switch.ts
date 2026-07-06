@@ -79,6 +79,7 @@ class FaceSwitch {
     this.unsubscribe = faceEngine.onFrame(this.onFrame);
     this.startScanning();
     showToast(t('face.on'));
+    document.dispatchEvent(new CustomEvent('marea:face-state', { detail: { on: true } }));
     return true;
   }
 
@@ -94,6 +95,7 @@ class FaceSwitch {
     this.indicatorText = null;
     faceEngine.release();
     showToast(t('face.off'));
+    document.dispatchEvent(new CustomEvent('marea:face-state', { detail: { on: false } }));
   }
 
   /* ---- Frame handling ------------------------------------------------- */
@@ -279,6 +281,11 @@ export function initFaceControl(): void {
 
   if (toggle) {
     toggle.checked = localStorage.getItem(KEY_ON) === '1';
+    // Keep the settings toggle honest when the header button or the
+    // indicator pill changes the state
+    document.addEventListener('marea:face-state', e => {
+      toggle.checked = (e as CustomEvent).detail.on;
+    });
     toggle.addEventListener('change', async () => {
       if (toggle.checked) {
         const ok = await faceSwitch.enable();
