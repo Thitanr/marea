@@ -1,5 +1,9 @@
 /* ==========================================================================
    MAREA — Face Control guided setup
+   SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (C) 2026 LANA Technologies — Humberto Gil Valera
+
+   Concept: "drive an entire app with your face" — Humberto Gil Valera.
    LANA philosophy: the technology adapts to the human, never the reverse.
    Nobody configures a gesture in a dropdown — the app watches and the first
    gesture the person can perform twice BECOMES their gesture. Done.
@@ -23,7 +27,10 @@ const GESTURE_LABEL_KEY: Record<FaceGesture, string> = {
 };
 
 export function isSetupDone(): boolean {
-  return localStorage.getItem(KEY_SETUP_DONE) === '1';
+  // A gesture chosen through Settings counts too — don't re-run the wizard
+  // on someone who already has their gesture.
+  return localStorage.getItem(KEY_SETUP_DONE) === '1'
+    || localStorage.getItem(KEY_GESTURE) !== null;
 }
 
 /**

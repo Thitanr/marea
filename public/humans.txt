@@ -1,0 +1,16 @@
+/* TEAM */
+Creator: Humberto Gil Valera
+Company: LANA Technologies
+Location: Madrid, Spain
+Concept: Drive an entire app with your face — technology that adapts
+to the human, never the reverse. For the people technology forgets.
+
+/* THANKS */
+Google MediaPipe (Apache 2.0) — on-device face perception.
+Claude (Anthropic) — engineering pair.
+
+/* SITE */
+Standards: HTML5, offline-first PWA, WCAG 2.1 AA
+Privacy: 100% on-device. No servers. No trackers. Ever.
+License: AGPL-3.0-only
+Languages: es / en / it / fr / de / zh / pt / ja

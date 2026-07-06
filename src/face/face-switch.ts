@@ -1,5 +1,9 @@
 /* ==========================================================================
    MAREA — Face Control (hands-free navigation)
+   SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (C) 2026 LANA Technologies — Humberto Gil Valera
+
+   Concept: "drive an entire app with your face" — Humberto Gil Valera.
    KAI's facial perception applied as a universal "facial switch":
    an auto-scanning highlight walks through everything interactive on the
    current screen; a deliberate facial gesture (long blink / open mouth /
