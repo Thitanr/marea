@@ -39,6 +39,32 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#060913">
 
+    <!-- Structured data for search engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Marea — Sostén & Dignidad",
+      "url": "https://marea.lanatech.tech/",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Any (PWA — Android, iOS, Windows, macOS, Linux)",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "description": "App gratuita de comunicación aumentativa (CAA) y regulación sensorial para afasia, autismo y Alzheimer. Control facial manos libres, neurofeedback facial sin electrodos, teclados accesibles. 100% privada y offline: ningún dato sale del dispositivo.",
+      "inLanguage": ["es", "en", "it", "fr", "de", "zh", "pt", "ja"],
+      "accessibilityFeature": ["alternativeText", "highContrastDisplay", "largePrint", "displayTransformability", "synthesizedSpeech", "fullSwitchControl", "reducedMotion"],
+      "accessibilityControl": ["fullTouchControl", "fullSwitchControl", "fullVideoControl"],
+      "accessibilityHazard": "none",
+      "isAccessibleForFree": true,
+      "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+      "author": {
+        "@type": "Organization",
+        "name": "LANA Technologies",
+        "url": "https://lanatech.tech/",
+        "founder": { "@type": "Person", "name": "Humberto Gil Valera" }
+      }
+    }
+    </script>
+
     <!-- System fonts — no external requests, full offline privacy -->
 
     <!-- App Stylesheet -->
