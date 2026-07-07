@@ -28,6 +28,7 @@ const OVERLAY_SCOPES = [
   '#scan-onboard-overlay',
   '.stt-overlay',
   '.show-fullscreen',
+  '.refuge-overlay',
   '#ios-install-modal',
   '#onboarding-overlay',
 ];

@@ -143,7 +143,85 @@ class OceanSynth {
     }
 }
 
-// Global instance
-const oceanSynth = new OceanSynth();
+/* ==========================================================================
+   BROWN NOISE — steady sound masking for autistic self-regulation.
+   Deeper and softer than white noise (energy falls 6dB/octave), it masks
+   unpredictable environmental sound without adding harshness of its own.
+   Generated with a leaky integrator over white noise, 100% offline.
+   ========================================================================== */
+class BrownNoise {
+    constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.source = null;
+        this.gainNode = null;
+    }
 
-export { oceanSynth, OceanSynth };
+    createBuffer() {
+        const bufferSize = 5 * this.ctx.sampleRate; // 5s seamless loop
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        let last = 0;
+        for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            last = (last + 0.02 * white) / 1.02; // leaky integrator → brown
+            data[i] = last * 3.5;                // normalise loudness
+        }
+        return buffer;
+    }
+
+    start() {
+        if (this.isPlaying) return;
+        if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+            document.addEventListener('visibilitychange', () => {
+                if (!this.ctx) return;
+                if (document.hidden) this.ctx.suspend();
+                else if (this.isPlaying) this.ctx.resume();
+            });
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        this.isPlaying = true;
+        this.source = this.ctx.createBufferSource();
+        this.source.buffer = this.createBuffer();
+        this.source.loop = true;
+        this.gainNode = this.ctx.createGain();
+        this.gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
+        this.gainNode.gain.linearRampToValueAtTime(0.35, this.ctx.currentTime + 1.5);
+        this.source.connect(this.gainNode);
+        this.gainNode.connect(this.ctx.destination);
+        this.source.start(0);
+    }
+
+    stop() {
+        if (!this.isPlaying) return;
+        const fade = 1.0;
+        if (this.gainNode && this.ctx) {
+            this.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
+            this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, this.ctx.currentTime);
+            this.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + fade);
+        }
+        setTimeout(() => {
+            if (this.source) {
+                try { this.source.stop(); } catch (e) {}
+                this.source.disconnect();
+            }
+            if (this.gainNode) this.gainNode.disconnect();
+            this.isPlaying = false;
+        }, fade * 1000);
+    }
+
+    toggle() {
+        if (this.isPlaying) { this.stop(); return false; }
+        this.start();
+        return true;
+    }
+}
+
+// Global instances
+const oceanSynth = new OceanSynth();
+const brownNoise = new BrownNoise();
+
+export { oceanSynth, OceanSynth, brownNoise, BrownNoise };

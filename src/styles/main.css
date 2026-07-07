@@ -3123,3 +3123,113 @@ textarea.safe-input {
     border-color: var(--accent, #4db896);
     box-shadow: 0 0 10px rgba(77, 184, 150, 0.35);
 }
+
+/* ==========================================================================
+   SINTONÍA — instant refuge + daily energy battery + brown noise
+   ========================================================================== */
+.refuge-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.9rem 1rem;
+    margin: 0.25rem 0 1.1rem;
+    background: #05070c;
+    border: 1px solid var(--border-subtle, rgba(77, 184, 150, 0.3));
+    color: var(--text-muted, #7aa394);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+.refuge-btn:active { transform: scale(0.99); }
+
+.refuge-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1600;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.refuge-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(77, 184, 150, 0.35);
+    box-shadow: 0 0 24px rgba(77, 184, 150, 0.25);
+    animation: refuge-breathe 8s ease-in-out infinite;
+}
+@keyframes refuge-breathe {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.6); opacity: 0.75; }
+}
+.reduce-motion .refuge-dot { animation: none; opacity: 0.5; }
+.refuge-controls {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 1.4rem);
+    display: flex;
+    gap: 0.8rem;
+}
+.refuge-ctrl {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.45);
+    border-radius: 10px;
+    padding: 0.55rem 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.energy-battery {
+    display: flex;
+    gap: 6px;
+    max-width: 22rem;
+}
+.energy-seg {
+    flex: 1;
+    height: 42px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border-subtle, rgba(77, 184, 150, 0.35));
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+.reduce-motion .energy-seg { transition: none; }
+.energy-seg--on {
+    background: linear-gradient(180deg, rgba(77, 184, 150, 0.65), rgba(77, 184, 150, 0.35));
+    box-shadow: 0 0 10px rgba(77, 184, 150, 0.35);
+}
+.energy-msg {
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-muted, #7aa394);
+    min-height: 1.2rem;
+}
+
+.reg-noise-btn {
+    margin-top: 0.7rem;
+    margin-right: 0.6rem;
+    background: transparent;
+    border: 1px solid var(--border-subtle, rgba(77, 184, 150, 0.3));
+    color: var(--accent, #4db896);
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.reg-noise-btn[aria-pressed="true"] {
+    border-color: var(--accent, #4db896);
+    box-shadow: 0 0 10px rgba(77, 184, 150, 0.35);
+}
+
+.manifesto-pledge {
+    margin-top: 0.9rem;
+    padding: 0.7rem 0.9rem;
+    border-left: 3px solid var(--accent, #4db896);
+    background: rgba(77, 184, 150, 0.06);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.88rem;
+    color: var(--text-primary, #eafff5);
+}

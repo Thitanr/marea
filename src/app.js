@@ -5,7 +5,7 @@
    ========================================================================== */
 
 import { aacBoardData } from './data/aac-board.js';
-import { oceanSynth } from './sound.js';
+import { oceanSynth, brownNoise } from './sound.js';
 import { svgIcons } from './data/svg-icons.js';
 import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode, persistFontSize, persistReduceMotion } from './state.js';
 import { showToast } from './core/toast.js';
@@ -1024,11 +1024,24 @@ function boot() {
                     card.classList.add('active');
                     regDetail.classList.remove('hidden');
                     const isFav = regFavs.has(key);
+                    // The "sound" technique carries its own tool: a brown
+                    // noise generator (steady masking, fully offline)
+                    const noiseBtn = key === 'sound'
+                        ? `<button class="reg-noise-btn" aria-pressed="${brownNoise.isPlaying}">${brownNoise.isPlaying ? '■ ' + t('sintonia.noise_stop') : '▶ ' + t('sintonia.noise_play')}</button>`
+                        : '';
                     regDetail.innerHTML = `
                         <p class="state-detail-what">${t('sintonia.reg.' + key + '_detail')}</p>
+                        ${noiseBtn}
                         <button class="reg-fav-btn" aria-pressed="${isFav}">
                             ${isFav ? '★' : '☆'} ${t('sintonia.fav_btn')}
                         </button>`;
+                    regDetail.querySelector('.reg-noise-btn')?.addEventListener('click', (e) => {
+                        const playing = brownNoise.toggle();
+                        e.currentTarget.setAttribute('aria-pressed', String(playing));
+                        e.currentTarget.textContent = playing
+                            ? '■ ' + t('sintonia.noise_stop')
+                            : '▶ ' + t('sintonia.noise_play');
+                    });
                     regDetail.querySelector('.reg-fav-btn').addEventListener('click', (e) => {
                         const btn = e.currentTarget;
                         if (regFavs.has(key)) {
@@ -1072,6 +1085,82 @@ function boot() {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFullscreen(); }
             });
         });
+
+        // Instant refuge — one tap and the world goes dark: black screen,
+        // one dim breathing light, optional brown noise. For the moments
+        // when even Marea itself is too much input.
+        const refugeBtn = document.getElementById('refuge-btn');
+        if (refugeBtn) {
+            refugeBtn.addEventListener('click', () => {
+                const ov = document.createElement('div');
+                ov.className = 'refuge-overlay';
+                ov.setAttribute('role', 'dialog');
+                ov.setAttribute('aria-modal', 'true');
+                ov.setAttribute('aria-label', t('sintonia.refuge'));
+                ov.innerHTML = `
+                    <div class="refuge-dot" aria-hidden="true"></div>
+                    <div class="refuge-controls">
+                        <button id="refuge-noise" class="refuge-ctrl" aria-pressed="${brownNoise.isPlaying}">${brownNoise.isPlaying ? '■ ' + t('sintonia.noise_stop') : '▶ ' + t('sintonia.noise_play')}</button>
+                        <button id="refuge-exit" class="refuge-ctrl">${t('sintonia.refuge_exit')}</button>
+                    </div>`;
+                ov.querySelector('#refuge-noise').addEventListener('click', (e) => {
+                    const playing = brownNoise.toggle();
+                    e.currentTarget.setAttribute('aria-pressed', String(playing));
+                    e.currentTarget.textContent = playing
+                        ? '■ ' + t('sintonia.noise_stop')
+                        : '▶ ' + t('sintonia.noise_play');
+                });
+                ov.querySelector('#refuge-exit').addEventListener('click', () => {
+                    brownNoise.stop(); // leaving the refuge leaves silence — predictable
+                    ov.remove();
+                });
+                document.body.appendChild(ov);
+            });
+        }
+
+        // Daily energy check-in (spoon theory) — knowing your level BEFORE
+        // the crash is how autistic burnout gets prevented, not managed.
+        const ENERGY_KEY = 'marea_energy';
+        const ENERGY_LOG_KEY = 'marea_energy_logs';
+        const battery = document.getElementById('energy-battery');
+        const energyMsg = document.getElementById('energy-msg');
+
+        function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+        function renderEnergy(level) {
+            if (!battery) return;
+            battery.querySelectorAll('.energy-seg').forEach(seg => {
+                const n = parseInt(seg.getAttribute('data-level'));
+                seg.classList.toggle('energy-seg--on', level > 0 && n <= level);
+                seg.setAttribute('aria-checked', String(n === level));
+            });
+            if (energyMsg) {
+                energyMsg.textContent = level === 0 ? ''
+                    : level <= 2 ? t('sintonia.energy_low')
+                    : level === 3 ? t('sintonia.energy_mid')
+                    : t('sintonia.energy_high');
+            }
+        }
+
+        if (battery) {
+            let saved = { date: '', level: 0 };
+            try { saved = JSON.parse(localStorage.getItem(ENERGY_KEY) || '{}'); } catch (_) {}
+            renderEnergy(saved.date === todayStr() ? saved.level : 0);
+
+            battery.querySelectorAll('.energy-seg').forEach(seg => {
+                seg.addEventListener('click', () => {
+                    const level = parseInt(seg.getAttribute('data-level'));
+                    localStorage.setItem(ENERGY_KEY, JSON.stringify({ date: todayStr(), level }));
+                    let logs;
+                    try { logs = JSON.parse(localStorage.getItem(ENERGY_LOG_KEY) || '[]'); }
+                    catch (_) { logs = []; }
+                    logs = logs.filter(l => l.date !== todayStr());
+                    logs.push({ date: todayStr(), level });
+                    try { localStorage.setItem(ENERGY_LOG_KEY, JSON.stringify(logs)); } catch (_) {}
+                    renderEnergy(level);
+                });
+            });
+        }
     }
 
     // 13c. Speech-to-Text — native device microphone, no AI

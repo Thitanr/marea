@@ -809,6 +809,7 @@
                                 <li><strong data-i18n="manifesto.p4_title">Auto-Limitación.</strong> <span data-i18n="manifesto.p4_desc">Si un ejercicio no resuena, tienes derecho a saltarlo. Marea nunca fuerza una interacción. La inhabilidad de traducir no autoriza la acción.</span></li>
                                 <li><strong data-i18n="manifesto.p5_title">Principio de Incompletitud.</strong> <span data-i18n="manifesto.p5_desc">Reconocemos formalmente que ninguna herramienta es completa ni neutral. Marea es un punto de apoyo, no una solución total. Tu soberanía es el ancla.</span></li>
                             </ol>
+                            <p class="manifesto-pledge" data-i18n="manifesto.free">Marea es gratuita y lo será siempre. Nadie puede cobrar por ella ni lucrarse con la vulnerabilidad de quien la necesita — está protegido por su licencia (AGPL-3.0 + Covenant).</p>
                             <p class="manifesto-signature">🌊 LANA Technologies — Madrid, 2026</p>
                         </div>
                     </details>
@@ -821,6 +822,26 @@
                     <div class="sintonia-header">
                         <h2 class="sintonia-title" data-i18n="sintonia.title">Sintonía</h2>
                         <p class="sintonia-subtitle" data-i18n="sintonia.subtitle">Este espacio es para tu cerebro tal como es.</p>
+                    </div>
+
+                    <!-- Refugio instantáneo: un toque → oscuridad total -->
+                    <button id="refuge-btn" class="refuge-btn">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <span data-i18n="sintonia.refuge">Refugio — oscuridad ya</span>
+                    </button>
+
+                    <!-- Energía de hoy (prevención de burnout) -->
+                    <div class="sintonia-section">
+                        <h3 class="sintonia-section-title" data-i18n="sintonia.energy_title">Mi energía hoy</h3>
+                        <p class="sintonia-hint" data-i18n="sintonia.energy_hint">Conocer tu nivel a tiempo previene el agotamiento. Sin juicio.</p>
+                        <div id="energy-battery" class="energy-battery" role="radiogroup" aria-label="Nivel de energía">
+                            <button class="energy-seg" data-level="1" role="radio" aria-checked="false" aria-label="1/5"></button>
+                            <button class="energy-seg" data-level="2" role="radio" aria-checked="false" aria-label="2/5"></button>
+                            <button class="energy-seg" data-level="3" role="radio" aria-checked="false" aria-label="3/5"></button>
+                            <button class="energy-seg" data-level="4" role="radio" aria-checked="false" aria-label="4/5"></button>
+                            <button class="energy-seg" data-level="5" role="radio" aria-checked="false" aria-label="5/5"></button>
+                        </div>
+                        <p id="energy-msg" class="energy-msg" aria-live="polite"></p>
                     </div>
 
                     <!-- Estado actual -->
