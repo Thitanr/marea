@@ -1,0 +1,11 @@
+# Explicit binary — never touched by line-ending or diff conversion on any
+# platform, regardless of a contributor's core.autocrlf setting. Git already
+# auto-detects these correctly today; this makes it guaranteed, not guessed.
+*.png binary
+*.svg binary
+*.task binary
+*.wasm binary
+*.onnx binary
+*.jpg binary
+*.jpeg binary
+*.mov binary
