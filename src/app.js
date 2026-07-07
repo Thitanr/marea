@@ -975,6 +975,37 @@ function boot() {
             });
         });
 
+        // Personal regulation kit — every autistic nervous system is
+        // different. Techniques the user marks as "this works for me" float
+        // to the front, so in a crisis their own tools come first.
+        const FAV_KEY = 'marea_sintonia_favs';
+        let regFavs;
+        try { regFavs = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]')); }
+        catch (_) { regFavs = new Set(); }
+
+        const regGrid = document.querySelector('.reg-grid');
+
+        function refreshRegOrder() {
+            if (!regGrid) return;
+            const cards = [...regGrid.querySelectorAll('.reg-card')];
+            cards.sort((a, b) =>
+                (regFavs.has(b.getAttribute('data-reg')) ? 1 : 0) -
+                (regFavs.has(a.getAttribute('data-reg')) ? 1 : 0)
+            );
+            cards.forEach(c => {
+                c.querySelector('.reg-fav-badge')?.remove();
+                if (regFavs.has(c.getAttribute('data-reg'))) {
+                    const badge = document.createElement('span');
+                    badge.className = 'reg-fav-badge';
+                    badge.setAttribute('aria-hidden', 'true');
+                    badge.textContent = '★';
+                    c.appendChild(badge);
+                }
+                regGrid.appendChild(c);
+            });
+        }
+        refreshRegOrder();
+
         document.querySelectorAll('.reg-card').forEach(card => {
             card.addEventListener('click', () => {
                 const key = card.getAttribute('data-reg');
@@ -992,9 +1023,53 @@ function boot() {
                 } else {
                     card.classList.add('active');
                     regDetail.classList.remove('hidden');
-                    regDetail.innerHTML = `<p class="state-detail-what">${t('sintonia.reg.' + key + '_detail')}</p>`;
+                    const isFav = regFavs.has(key);
+                    regDetail.innerHTML = `
+                        <p class="state-detail-what">${t('sintonia.reg.' + key + '_detail')}</p>
+                        <button class="reg-fav-btn" aria-pressed="${isFav}">
+                            ${isFav ? '★' : '☆'} ${t('sintonia.fav_btn')}
+                        </button>`;
+                    regDetail.querySelector('.reg-fav-btn').addEventListener('click', (e) => {
+                        const btn = e.currentTarget;
+                        if (regFavs.has(key)) {
+                            regFavs.delete(key);
+                        } else {
+                            regFavs.add(key);
+                            showToast(t('sintonia.fav_on'));
+                        }
+                        localStorage.setItem(FAV_KEY, JSON.stringify([...regFavs]));
+                        btn.setAttribute('aria-pressed', String(regFavs.has(key)));
+                        btn.innerHTML = `${regFavs.has(key) ? '★' : '☆'} ${t('sintonia.fav_btn')}`;
+                        refreshRegOrder();
+                    });
                     regDetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
+            });
+        });
+
+        // "Say it without words" — in a real shutdown you need to show the
+        // phone across a room. Tapping a card opens it fullscreen with giant
+        // high-contrast text. Tap anywhere to close.
+        document.querySelectorAll('.show-card').forEach(card => {
+            card.setAttribute('role', 'button');
+            card.setAttribute('tabindex', '0');
+            const openFullscreen = () => {
+                const text = card.querySelector('span')?.textContent || '';
+                const ov = document.createElement('div');
+                ov.className = 'show-fullscreen';
+                ov.setAttribute('role', 'dialog');
+                ov.setAttribute('aria-modal', 'true');
+                ov.innerHTML = `
+                    <button class="show-fullscreen-close" aria-label="✕">✕</button>
+                    <p class="show-fullscreen-text"></p>
+                    <p class="show-fullscreen-hint">${t('sintonia.show_fullscreen_hint')}</p>`;
+                ov.querySelector('.show-fullscreen-text').textContent = text;
+                ov.addEventListener('click', () => ov.remove());
+                document.body.appendChild(ov);
+            };
+            card.addEventListener('click', openFullscreen);
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFullscreen(); }
             });
         });
     }

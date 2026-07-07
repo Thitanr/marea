@@ -27,6 +27,7 @@ const POST_SELECT_PAUSE_MS = 900; // let the user see what their selection did
 const OVERLAY_SCOPES = [
   '#scan-onboard-overlay',
   '.stt-overlay',
+  '.show-fullscreen',
   '#ios-install-modal',
   '#onboarding-overlay',
 ];

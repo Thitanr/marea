@@ -3055,3 +3055,71 @@ textarea.safe-input {
     border-color: var(--accent, #4db896);
     box-shadow: 0 0 10px rgba(77, 184, 150, 0.45);
 }
+
+/* ==========================================================================
+   SINTONÍA — fullscreen show-cards + personal regulation favourites
+   ========================================================================== */
+.show-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    cursor: pointer;
+}
+.show-fullscreen-text {
+    color: #fff;
+    font-size: clamp(2rem, 9vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    max-width: 14ch;
+}
+.show-fullscreen-hint {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 1.2rem);
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.85rem;
+}
+.show-fullscreen-close {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 0.8rem);
+    right: 0.9rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.show-card { cursor: pointer; }
+
+.reg-card { position: relative; }
+.reg-fav-badge {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    color: var(--accent, #4db896);
+    font-size: 0.85rem;
+    text-shadow: 0 0 8px rgba(77, 184, 150, 0.6);
+}
+.reg-fav-btn {
+    margin-top: 0.7rem;
+    background: transparent;
+    border: 1px solid var(--border-subtle, rgba(77, 184, 150, 0.3));
+    color: var(--accent, #4db896);
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.reg-fav-btn[aria-pressed="true"] {
+    border-color: var(--accent, #4db896);
+    box-shadow: 0 0 10px rgba(77, 184, 150, 0.35);
+}
