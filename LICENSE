@@ -37,5 +37,24 @@ that are inseparable from the spirit of this software:
   4. OPEN SOURCE FOREVER — Any modified version distributed publicly or
      run as a network service must publish its source code under AGPL-3.0.
 
+  5. NO WEAPONIZATION, NO HARM — Marea (including its facial-perception,
+     gesture-detection, and neurofeedback components) may never be used,
+     adapted, or integrated into:
+       - weapons, weapons targeting, or any military or paramilitary
+         application, offensive or defensive;
+       - mass surveillance, biometric tracking, or any system designed
+         to identify, profile, or locate people without their free and
+         informed consent;
+       - any product, robot, or autonomous system whose purpose or
+         foreseeable effect is to physically or psychologically harm,
+         coerce, or endanger a human being;
+       - any system designed to cause harm between humans and robots,
+         or between robots themselves, including autonomous systems
+         built to injure, disable, or destroy one another where doing
+         so risks human safety.
+     This technology was built to hold the most vulnerable — it may
+     never be turned into an instrument of harm against anyone, human
+     or machine acting on behalf of humans.
+
 Violations of this covenant constitute a breach of the license terms.
 --------------------------------------------------------------------------------
