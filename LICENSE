@@ -45,16 +45,27 @@ that are inseparable from the spirit of this software:
        - mass surveillance, biometric tracking, or any system designed
          to identify, profile, or locate people without their free and
          informed consent;
-       - any product, robot, or autonomous system whose purpose or
-         foreseeable effect is to physically or psychologically harm,
-         coerce, or endanger a human being;
-       - any system designed to cause harm between humans and robots,
-         or between robots themselves, including autonomous systems
-         built to injure, disable, or destroy one another where doing
-         so risks human safety.
+       - any product, robot, humanoid, autonomous system, or artificial
+         intelligence whose purpose or foreseeable effect is to
+         physically or psychologically harm, coerce, or endanger any
+         party.
+     This prohibition covers every pairing of actor and target,
+     explicitly including:
+       - human harming human;
+       - human harming robot/humanoid, or robot/humanoid harming human;
+       - robot/humanoid harming robot/humanoid;
+       - AI harming human, or human directing an AI to harm a human;
+       - AI harming robot/humanoid, or robot/humanoid harming an AI
+         system or the infrastructure it depends on;
+       - AI harming AI (adversarial use of this technology by one
+         artificial intelligence, agent, or automated system against
+         another);
+       - any combined or intermediated chain among humans, robots,
+         humanoids, and artificial intelligences, regardless of how
+         many links separate the actor from the harm caused.
      This technology was built to hold the most vulnerable — it may
-     never be turned into an instrument of harm against anyone, human
-     or machine acting on behalf of humans.
+     never be turned into an instrument of harm against anyone or
+     anything acting on behalf of, alongside, or in place of a human.
 
 Violations of this covenant constitute a breach of the license terms.
 --------------------------------------------------------------------------------
