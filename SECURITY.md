@@ -25,6 +25,16 @@ we will credit you in the fix unless you prefer otherwise.
 - Marea stores **all user data in `localStorage` on the device** and makes
   **no network requests to third parties** (the CSP allows `'self'` only).
   Reports proving any data leaving the device are the highest severity.
+- **One deliberate, user-initiated exception**: the Trusted Contact SOS
+  feature (Safety Plan tab) hands a short, user-edited message to the
+  device's own share sheet or `sms:` handler so the person can text a
+  contact of their choosing. Marea itself never makes that request — no
+  `fetch`, no `XHR`, no background trigger — and it never sends anything
+  until the user explicitly taps Send. Once handed off, normal OS-level
+  messaging behaviour applies (the message leaves the device via the
+  user's own messaging app, same as if they'd typed it there directly).
+  This is expected behaviour, not a leak — please report only if you can
+  show Marea's own code transmits data without that explicit tap.
 - The camera (Face Control / Facial Calm) is processed entirely on-device
   with Google MediaPipe (bundled locally). Any finding that camera frames
   or derived data can leave the device is critical.

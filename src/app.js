@@ -615,7 +615,16 @@ function boot() {
         elements.inputSosMessage.focus();
     }
 
+    // Plain in-memory flags, not the DOM `disabled` property, guard against a
+    // double-tap: sendToContact's sms: fallback path never actually awaits
+    // anything, so a disabled→re-enabled DOM round trip can complete inside
+    // a single microtask — too fast to reliably block a second synthetic
+    // click. A synchronous boolean checked before either handler yields does.
+    let sosSendInFlight = false;
+    let sosCopyInFlight = false;
+
     async function handleSendSos() {
+        if (sosSendInFlight) return;
         const phone = elements.inputTrustedPhone.value.trim();
         if (!phone) return; // button is disabled in this state; guard only
         const message = elements.inputSosMessage.value.trim();
@@ -623,21 +632,39 @@ function boot() {
             showToast(t("safety.message_required_toast"));
             return;
         }
+        sosSendInFlight = true;
+        elements.btnSendSos.disabled = true; // visual affordance; sosSendInFlight is the real guard
         const contact = { name: elements.inputTrustedName.value.trim(), phone };
-        const result = await sendToContact(contact, message);
-        if (!result.cancelled) {
-            showToast(t("safety.opening_toast"));
+        try {
+            const result = await sendToContact(contact, message);
+            if (!result.cancelled) {
+                showToast(t("safety.opening_toast"));
+            }
+        } catch {
+            showToast(t("safety.send_failed_toast"));
+        } finally {
+            sosSendInFlight = false;
+            updateSosSendState(); // re-enables the button only if a phone is still saved
         }
     }
 
     async function handleCopySos() {
+        if (sosCopyInFlight) return;
         const message = elements.inputSosMessage.value.trim();
         if (!message) {
             showToast(t("safety.message_required_toast"));
             return;
         }
-        const ok = await copyMessage(message);
-        if (ok) showToast(t("safety.copy_toast"));
+        sosCopyInFlight = true;
+        elements.btnCopySos.disabled = true;
+        try {
+            const ok = await copyMessage(message);
+            if (ok) showToast(t("safety.copy_toast"));
+            else showToast(t("safety.copy_failed_toast"));
+        } finally {
+            sosCopyInFlight = false;
+            elements.btnCopySos.disabled = false;
+        }
     }
 
     // 11. Diario Perceptivo & Dynamic Canvas

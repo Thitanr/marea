@@ -59,7 +59,19 @@ export async function sendToContact(contact: TrustedContact, message: string): P
       return { method: 'share', cancelled };
     }
   }
-  window.location.href = buildSmsUri(contact.phone, message);
+  // Same technique as the existing tel: helpline links: a real anchor click
+  // hands off to the OS/app registered for the scheme without putting the
+  // document itself through a (failed, on desktop) top-level navigation.
+  // The anchor must actually be attached to the document — a detached
+  // element's click doesn't reliably reach the browser's protocol-handler
+  // dispatch for a custom scheme like sms:.
+  const link = document.createElement('a');
+  link.href = buildSmsUri(contact.phone, message);
+  link.rel = 'noopener';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
   return { method: 'sms', cancelled: false };
 }
 

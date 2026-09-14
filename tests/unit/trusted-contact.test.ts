@@ -70,15 +70,25 @@ describe('trusted contact SOS handoff', () => {
       expect(result).toEqual({ method: 'share', cancelled: true });
     });
 
-    it('falls back to an sms: link when the Web Share API is unavailable', async () => {
-      Object.defineProperty(window, 'location', {
-        value: { href: '' },
-        writable: true,
-        configurable: true,
+    it('falls back to clicking an sms: link when the Web Share API is unavailable', async () => {
+      // Same technique as the existing tel: helpline links — a real anchor
+      // click, not a window.location.href assignment (which, on a desktop
+      // browser with no sms: handler registered, puts the document through
+      // an ambiguous failed top-level navigation instead of a clean handoff).
+      let clickedHref = '';
+      let wasConnectedAtClickTime = false;
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+        clickedHref = this.href;
+        wasConnectedAtClickTime = this.isConnected;
       });
       const result = await sendToContact(contact, 'mensaje');
       expect(result).toEqual({ method: 'sms', cancelled: false });
-      expect(window.location.href).toBe(buildSmsUri(contact.phone, 'mensaje'));
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(clickedHref).toBe(buildSmsUri(contact.phone, 'mensaje'));
+      // Must be attached to the document at click time — a detached anchor's
+      // click doesn't reliably reach the browser's protocol-handler dispatch.
+      expect(wasConnectedAtClickTime).toBe(true);
+      clickSpy.mockRestore();
     });
   });
 
