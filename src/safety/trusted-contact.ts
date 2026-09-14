@@ -37,7 +37,10 @@ function canUseWebShare(): boolean {
 }
 
 export function buildSmsUri(phone: string, message: string): string {
-  const cleanPhone = phone.replace(/[^\d+]/g, '');
+  const trimmed = phone.trim();
+  const hasLeadingPlus = trimmed.startsWith('+');
+  const digitsOnly = trimmed.replace(/\D/g, '');
+  const cleanPhone = (hasLeadingPlus ? '+' : '') + digitsOnly;
   return `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
 }
 

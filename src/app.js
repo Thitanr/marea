@@ -617,8 +617,12 @@ function boot() {
 
     async function handleSendSos() {
         const phone = elements.inputTrustedPhone.value.trim();
+        if (!phone) return; // button is disabled in this state; guard only
         const message = elements.inputSosMessage.value.trim();
-        if (!phone || !message) return;
+        if (!message) {
+            showToast(t("safety.message_required_toast"));
+            return;
+        }
         const contact = { name: elements.inputTrustedName.value.trim(), phone };
         const result = await sendToContact(contact, message);
         if (!result.cancelled) {
@@ -628,7 +632,10 @@ function boot() {
 
     async function handleCopySos() {
         const message = elements.inputSosMessage.value.trim();
-        if (!message) return;
+        if (!message) {
+            showToast(t("safety.message_required_toast"));
+            return;
+        }
         const ok = await copyMessage(message);
         if (ok) showToast(t("safety.copy_toast"));
     }

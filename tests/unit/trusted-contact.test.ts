@@ -28,6 +28,11 @@ describe('trusted contact SOS handoff', () => {
     expect(uri).toContain(encodeURIComponent('Hola, ¿me llamas?'));
   });
 
+  it('keeps at most one leading + and drops any other non-digit noise', () => {
+    expect(buildSmsUri('34+600 111-222', 'x')).toBe('sms:34600111222?body=x');
+    expect(buildSmsUri('+34+600+111+222', 'x')).toBe('sms:+34600111222?body=x');
+  });
+
   describe('sendToContact', () => {
     const contact = { name: 'Ana', phone: '+34600111222' };
 
