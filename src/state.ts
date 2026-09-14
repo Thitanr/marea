@@ -4,7 +4,7 @@
    Persisted fields hydrate from localStorage on import.
    ========================================================================== */
 
-import type { AppState, Lang, Theme, HandMode, FontSize, AacCategory } from './types.js';
+import type { AppState, Lang, Theme, HandMode, FontSize, AacCategory, TrustedContact } from './types.js';
 
 // ---- Device language detection (first-install only) ----
 const SUPPORTED_LANGS: readonly string[] = ['es', 'en', 'it', 'fr', 'de', 'zh', 'pt', 'ja'];
@@ -37,6 +37,13 @@ function loadPersisted(): Pick<AppState, 'lang' | 'theme' | 'handMode' | 'sensor
   };
 }
 
+function loadTrustedContact(): TrustedContact | null {
+  const name = localStorage.getItem('marea_trusted_contact_name') || '';
+  const phone = localStorage.getItem('marea_trusted_contact_phone') || '';
+  if (!name && !phone) return null;
+  return { name, phone };
+}
+
 const persisted = loadPersisted();
 
 // ---- Singleton state ----
@@ -66,6 +73,9 @@ const state: AppState = {
 
   // AAC
   aacActiveCategory: 'needs' as AacCategory,
+
+  // Trusted Contact
+  trustedContact: loadTrustedContact(),
 };
 
 // ---- Named persist helpers (call after mutation) ----
@@ -91,6 +101,11 @@ export function persistFontSize(size: FontSize): void {
 
 export function persistReduceMotion(enabled: boolean): void {
   localStorage.setItem('marea_reduce_motion', String(enabled));
+}
+
+export function persistTrustedContact(contact: TrustedContact | null): void {
+  localStorage.setItem('marea_trusted_contact_name', contact?.name ?? '');
+  localStorage.setItem('marea_trusted_contact_phone', contact?.phone ?? '');
 }
 
 export { state };

@@ -927,6 +927,60 @@ textarea.safe-input {
     margin-bottom: 14px;
 }
 
+.field-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin: 0;
+}
+
+.card-trusted-contact > .field-hint {
+    margin-bottom: 16px;
+}
+
+.sos-templates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.sos-template-chip {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border-glow);
+    color: var(--text-primary);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.sos-template-chip:hover,
+.sos-template-chip:focus-visible {
+    background: var(--bg-card-hover);
+    border-color: var(--border-glow-focus);
+}
+
+.sos-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary:disabled:hover {
+    opacity: 0.45;
+    transform: none;
+}
+
 .helpline-list {
     display: flex;
     flex-direction: column;

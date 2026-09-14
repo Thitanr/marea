@@ -79,6 +79,15 @@ export interface AppState {
 
   // AAC
   aacActiveCategory: AacCategory;
+
+  // Trusted Contact (SOS handoff — never transmitted by Marea itself)
+  trustedContact: TrustedContact | null;
+}
+
+// ===== Trusted Contact =====
+export interface TrustedContact {
+  name: string;
+  phone: string;
 }
 
 // ===== Data dictionaries =====

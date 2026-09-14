@@ -488,6 +488,38 @@
                             <button id="btn-save-safety" class="btn-primary" data-i18n="safety.save_btn">Guardar Anclajes</button>
                         </div>
 
+                        <!-- Trusted Contact SOS -->
+                        <div class="safety-card card-trusted-contact">
+                            <h3 data-i18n="safety.trusted_title">Contacto de confianza</h3>
+                            <p class="field-hint" data-i18n="safety.trusted_hint">No se envía nada hasta que tú lo decidas en tu propia app de mensajes.</p>
+
+                            <div class="anchor-field">
+                                <label for="input-trusted-name" data-i18n="safety.trusted_name_label">Nombre:</label>
+                                <input type="text" id="input-trusted-name" class="safe-input" autocomplete="off">
+                            </div>
+                            <div class="anchor-field">
+                                <label for="input-trusted-phone" data-i18n="safety.trusted_phone_label">Teléfono:</label>
+                                <input type="tel" id="input-trusted-phone" class="safe-input" autocomplete="off">
+                                <span class="field-hint" data-i18n="safety.trusted_phone_hint">Se guarda solo en este dispositivo. Nunca sale de aquí.</span>
+                            </div>
+
+                            <div class="sos-templates" role="group" aria-label="Plantillas de mensaje SOS">
+                                <button type="button" class="sos-template-chip" id="btn-template-using-anchor" data-i18n="safety.template_using_anchor">Estoy usando mi ancla ahora mismo.</button>
+                                <button type="button" class="sos-template-chip" id="btn-template-call-me" data-i18n="safety.template_call_me">Podría venirme bien que me llames.</button>
+                            </div>
+
+                            <div class="anchor-field">
+                                <label for="input-sos-message" data-i18n="safety.message_label">Mensaje (puedes editarlo antes de enviar):</label>
+                                <textarea id="input-sos-message" class="safe-input" rows="3"></textarea>
+                            </div>
+
+                            <div class="sos-actions">
+                                <button id="btn-send-sos" class="btn-primary" disabled aria-describedby="sos-disabled-hint" data-i18n="safety.send_btn">Enviar</button>
+                                <button id="btn-copy-sos" class="btn-secondary" data-i18n="safety.copy_btn">Copiar mensaje</button>
+                            </div>
+                            <span id="sos-disabled-hint" class="field-hint" data-i18n="safety.send_disabled_hint">Añade un teléfono arriba para poder enviar.</span>
+                        </div>
+
                         <!-- Helplines Directory -->
                         <div class="safety-card card-helplines">
                             <h3 data-i18n="safety.helplines_title">Líneas de Ayuda Directa</h3>

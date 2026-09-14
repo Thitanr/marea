@@ -1,12 +1,14 @@
 /* ==========================================================================
-   MAREA - SERVICE WORKER v14
+   MAREA - SERVICE WORKER v15
    Network-first with cache fallback. Always serves freshest content.
    v14: Face Control + Facial Neurofeedback (KAI perception). The MediaPipe
    wasm runtime and face model are large and immutable → cache-first, so
    after the first use they work offline forever without re-downloading.
+   v15: Trusted Contact SOS — user-initiated handoff to the device's own
+   messaging app, never sent by Marea itself.
    ========================================================================== */
 
-const CACHE_NAME = 'marea-cache-v14';
+const CACHE_NAME = 'marea-cache-v15';
 
 // Immutable heavy assets (face model + wasm runtime) — cache-first, stored
 // in a separate cache that SURVIVES app updates (no 15MB re-download per release)

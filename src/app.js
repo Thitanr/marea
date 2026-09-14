@@ -7,9 +7,10 @@
 import { aacBoardData } from './data/aac-board.js';
 import { oceanSynth, brownNoise } from './sound.js';
 import { svgIcons } from './data/svg-icons.js';
-import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode, persistFontSize, persistReduceMotion } from './state.js';
+import { state, persistLang, persistTheme, persistHandMode, persistSensoryMode, persistFontSize, persistReduceMotion, persistTrustedContact } from './state.js';
 import { showToast } from './core/toast.js';
 import { t, translateDOM, tLang } from './core/i18n.js';
+import { buildMessage, sendToContact, copyMessage } from './safety/trusted-contact.js';
 import { initFaceControl } from './face/face-switch.js';
 import { initFaceHeaderButton } from './face/face-setup.js';
 import { initNeuro, stopNeuroSession } from './face/face-neuro.js';
@@ -76,7 +77,17 @@ function boot() {
         inputSafetySong: document.getElementById("input-anchor-song"),
         inputSafetyMemory: document.getElementById("input-anchor-memory"),
         btnSaveSafety: document.getElementById("btn-save-safety"),
-        
+
+        // Trusted Contact SOS
+        inputTrustedName: document.getElementById("input-trusted-name"),
+        inputTrustedPhone: document.getElementById("input-trusted-phone"),
+        btnTemplateUsingAnchor: document.getElementById("btn-template-using-anchor"),
+        btnTemplateCallMe: document.getElementById("btn-template-call-me"),
+        inputSosMessage: document.getElementById("input-sos-message"),
+        btnSendSos: document.getElementById("btn-send-sos"),
+        btnCopySos: document.getElementById("btn-copy-sos"),
+        sosDisabledHint: document.getElementById("sos-disabled-hint"),
+
         // Diario
         sliderLight: document.getElementById("slider-light"),
         sliderSound: document.getElementById("slider-sound"),
@@ -575,6 +586,53 @@ function boot() {
         showToast(t("safety.saved_toast"));
     }
 
+    // 10b. Trusted Contact SOS — Marea only ever prepares this message.
+    // Sending it happens in the user's own messaging app, never here.
+    function loadTrustedContact() {
+        const contact = state.trustedContact;
+        elements.inputTrustedName.value = contact?.name || "";
+        elements.inputTrustedPhone.value = contact?.phone || "";
+        updateSosSendState();
+    }
+
+    function persistTrustedContactFromInputs() {
+        const name = elements.inputTrustedName.value.trim();
+        const phone = elements.inputTrustedPhone.value.trim();
+        const contact = (name || phone) ? { name, phone } : null;
+        state.trustedContact = contact;
+        persistTrustedContact(contact);
+        updateSosSendState();
+    }
+
+    function updateSosSendState() {
+        const hasPhone = !!elements.inputTrustedPhone.value.trim();
+        elements.btnSendSos.disabled = !hasPhone;
+        elements.sosDisabledHint.classList.toggle("hidden", hasPhone);
+    }
+
+    function applySosTemplate(templateKey) {
+        elements.inputSosMessage.value = buildMessage(templateKey);
+        elements.inputSosMessage.focus();
+    }
+
+    async function handleSendSos() {
+        const phone = elements.inputTrustedPhone.value.trim();
+        const message = elements.inputSosMessage.value.trim();
+        if (!phone || !message) return;
+        const contact = { name: elements.inputTrustedName.value.trim(), phone };
+        const result = await sendToContact(contact, message);
+        if (!result.cancelled) {
+            showToast(t("safety.opening_toast"));
+        }
+    }
+
+    async function handleCopySos() {
+        const message = elements.inputSosMessage.value.trim();
+        if (!message) return;
+        const ok = await copyMessage(message);
+        if (ok) showToast(t("safety.copy_toast"));
+    }
+
     // 11. Diario Perceptivo & Dynamic Canvas
     function drawSensoryCanvas() {
         const canvas = elements.sensorCanvas;
@@ -919,6 +977,14 @@ function boot() {
 
         // Safety Plan Save
         elements.btnSaveSafety.addEventListener("click", saveSafetyPlan);
+
+        // Trusted Contact SOS
+        elements.inputTrustedName.addEventListener("input", persistTrustedContactFromInputs);
+        elements.inputTrustedPhone.addEventListener("input", persistTrustedContactFromInputs);
+        elements.btnTemplateUsingAnchor.addEventListener("click", () => applySosTemplate("using_anchor"));
+        elements.btnTemplateCallMe.addEventListener("click", () => applySosTemplate("call_me"));
+        elements.btnSendSos.addEventListener("click", handleSendSos);
+        elements.btnCopySos.addEventListener("click", handleCopySos);
 
         // Journal Live sliders draw updates
         [elements.sliderLight, elements.sliderSound, elements.sliderPressure, elements.sliderPain, elements.sliderRumination].forEach(s => {
@@ -2354,6 +2420,7 @@ function boot() {
     initChat();
     initAlzheimerBoard();
     loadSafetyPlan();
+    loadTrustedContact();
     initSintonia();
     initSpeechRecognition();
     initPwaInstall();
