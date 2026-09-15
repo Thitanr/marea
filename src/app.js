@@ -76,7 +76,11 @@ function boot() {
         inputSafetySong: document.getElementById("input-anchor-song"),
         inputSafetyMemory: document.getElementById("input-anchor-memory"),
         btnSaveSafety: document.getElementById("btn-save-safety"),
-        
+        inputAnchorPhone: document.getElementById("input-anchor-phone"),
+        selectContactMessage: document.getElementById("select-contact-message"),
+        inputContactMessage: document.getElementById("input-contact-message"),
+        btnReachContact: document.getElementById("btn-reach-contact"),
+
         // Diario
         sliderLight: document.getElementById("slider-light"),
         sliderSound: document.getElementById("slider-sound"),
@@ -566,13 +570,63 @@ function boot() {
         elements.inputSafetyPerson.value = localStorage.getItem("marea_safety_person") || "";
         elements.inputSafetySong.value = localStorage.getItem("marea_safety_song") || "";
         elements.inputSafetyMemory.value = localStorage.getItem("marea_safety_memory") || "";
+        elements.inputAnchorPhone.value = localStorage.getItem("marea_contact_phone") || "";
+        elements.selectContactMessage.value = localStorage.getItem("marea_contact_message_choice") || "template_anchor";
+        elements.inputContactMessage.value = localStorage.getItem("marea_contact_message_custom") || "";
+        syncCustomMessageVisibility();
+        updateReachButton();
     }
 
     function saveSafetyPlan() {
         localStorage.setItem("marea_safety_person", elements.inputSafetyPerson.value);
         localStorage.setItem("marea_safety_song", elements.inputSafetySong.value);
         localStorage.setItem("marea_safety_memory", elements.inputSafetyMemory.value);
+        localStorage.setItem("marea_contact_phone", elements.inputAnchorPhone.value);
+        localStorage.setItem("marea_contact_message_choice", elements.selectContactMessage.value);
+        localStorage.setItem("marea_contact_message_custom", elements.inputContactMessage.value);
         showToast(t("safety.saved_toast"));
+    }
+
+    // 10b. Trusted Contact — always user-initiated. Marea never sends anything
+    // itself: this only ever builds an sms: link that opens the user's own
+    // messaging app with the message pre-filled, exactly like the tel: links
+    // used by the crisis helplines below. The user still has to hit send
+    // there, and Marea has no way to know — or record — whether they did.
+    function syncCustomMessageVisibility() {
+        elements.inputContactMessage.hidden = elements.selectContactMessage.value !== "custom";
+    }
+
+    function resolveContactMessage() {
+        const choice = elements.selectContactMessage.value;
+        if (choice === "custom") return elements.inputContactMessage.value.trim();
+        if (choice === "template_call") return t("safety.message_option_call");
+        return t("safety.message_option_anchor");
+    }
+
+    function updateReachButton() {
+        const phone = elements.inputAnchorPhone.value.replace(/[^\d+]/g, "");
+        const message = resolveContactMessage();
+        const ready = phone.length > 0 && message.length > 0;
+        elements.btnReachContact.setAttribute("aria-disabled", ready ? "false" : "true");
+        elements.btnReachContact.classList.toggle("is-disabled", !ready);
+        elements.btnReachContact.href = ready
+            ? `sms:${phone}?&body=${encodeURIComponent(message)}`
+            : "#";
+    }
+
+    function initTrustedContact() {
+        elements.selectContactMessage.addEventListener("change", () => {
+            syncCustomMessageVisibility();
+            updateReachButton();
+        });
+        elements.inputAnchorPhone.addEventListener("input", updateReachButton);
+        elements.inputContactMessage.addEventListener("input", updateReachButton);
+        elements.btnReachContact.addEventListener("click", (e) => {
+            if (elements.btnReachContact.getAttribute("aria-disabled") === "true") {
+                e.preventDefault();
+                showToast(t("safety.reach_missing_phone"));
+            }
+        });
     }
 
     // 11. Diario Perceptivo & Dynamic Canvas
@@ -919,6 +973,7 @@ function boot() {
 
         // Safety Plan Save
         elements.btnSaveSafety.addEventListener("click", saveSafetyPlan);
+        initTrustedContact();
 
         // Journal Live sliders draw updates
         [elements.sliderLight, elements.sliderSound, elements.sliderPressure, elements.sliderPain, elements.sliderRumination].forEach(s => {
