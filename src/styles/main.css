@@ -952,6 +952,23 @@ textarea.safe-input {
     margin-bottom: 14px;
 }
 
+.helpline-subtitle {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 16px 0 8px;
+}
+
+.helpline-subtitle:first-of-type {
+    margin-top: 0;
+}
+
+.helpline-subtitle-emergency {
+    color: var(--danger);
+}
+
 .helpline-list {
     display: flex;
     flex-direction: column;

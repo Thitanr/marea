@@ -506,7 +506,7 @@
                                 </select>
                                 <textarea id="input-contact-message" class="safe-input" data-i18n-placeholder="safety.message_placeholder" placeholder="Escribe tu mensaje..." hidden></textarea>
                             </div>
-                            <a id="btn-reach-contact" class="btn-primary reach-btn" data-i18n="safety.reach_btn" href="#" aria-disabled="true">Avisar ahora</a>
+                            <a id="btn-reach-contact" class="btn-primary reach-btn" data-i18n="safety.reach_btn" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">Avisar ahora</a>
                             <p class="reach-note" data-i18n="safety.reach_note">No se envía nada hasta que tú lo confirmes en tu propia app de mensajes.</p>
                         </div>
 
@@ -514,6 +514,33 @@
                         <div class="safety-card card-helplines">
                             <h3 data-i18n="safety.helplines_title">Líneas de Ayuda Directa</h3>
                             <p data-i18n="safety.helplines_note">Apoyo profesional, gratuito y 100% confidencial.</p>
+
+                            <h4 class="helpline-subtitle helpline-subtitle-emergency" data-i18n="safety.emergency_title">Emergencia vital (Policía, Ambulancia, Bomberos)</h4>
+                            <div class="helpline-list">
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>112</strong>
+                                        <span data-i18n="safety.emergency_eu">Emergencias generales (España y UE)</span>
+                                    </div>
+                                    <a href="tel:112" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>911</strong>
+                                        <span data-i18n="safety.emergency_us">Emergencias generales (EE.UU. y Canadá)</span>
+                                    </div>
+                                    <a href="tel:911" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>911</strong>
+                                        <span data-i18n="safety.emergency_mx">Emergencias generales (México)</span>
+                                    </div>
+                                    <a href="tel:911" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                            </div>
+
+                            <h4 class="helpline-subtitle" data-i18n="safety.crisis_title">Líneas de crisis y salud mental</h4>
                             <div class="helpline-list">
                                 <div class="helpline-item">
                                     <div class="helpline-info">

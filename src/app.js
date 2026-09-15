@@ -604,13 +604,18 @@ function boot() {
     }
 
     function updateReachButton() {
-        const phone = elements.inputAnchorPhone.value.replace(/[^\d+]/g, "");
+        // WhatsApp (wa.me), not sms: — an SMS today reads as spam/phishing to
+        // most people, wa.me works over minimal data (relevant in low-connectivity
+        // regions), and it's the same "opens the user's own app, user still hits
+        // send" pattern either way. wa.me needs the full number with country code
+        // and no leading zeros or symbols.
+        const phone = elements.inputAnchorPhone.value.replace(/\D/g, "");
         const message = resolveContactMessage();
-        const ready = phone.length > 0 && message.length > 0;
+        const ready = phone.length >= 8 && message.length > 0;
         elements.btnReachContact.setAttribute("aria-disabled", ready ? "false" : "true");
         elements.btnReachContact.classList.toggle("is-disabled", !ready);
         elements.btnReachContact.href = ready
-            ? `sms:${phone}?&body=${encodeURIComponent(message)}`
+            ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
             : "#";
     }
 
