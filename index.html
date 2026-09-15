@@ -188,6 +188,7 @@
                     <button class="onb-condition-btn" data-condition="autism" data-i18n="onboarding.condition_autism">Autismo / Neurodiversidad</button>
                     <button class="onb-condition-btn" data-condition="aphasia" data-i18n="onboarding.condition_aphasia">Afasia / Comunicación</button>
                     <button class="onb-condition-btn" data-condition="anxiety" data-i18n="onboarding.condition_anxiety">Ansiedad / Crisis emocional</button>
+                    <button class="onb-condition-btn" data-condition="ptsd" data-i18n="onboarding.condition_ptsd">TEPT / Trauma</button>
                     <button class="onb-condition-btn" data-condition="caregiver" data-i18n="onboarding.condition_caregiver">Soy cuidador/a</button>
                     <button class="onb-condition-btn onb-condition-btn--selected" data-condition="other" data-i18n="onboarding.condition_other">Otro / Prefiero no decir</button>
                 </div>
@@ -488,10 +489,75 @@
                             <button id="btn-save-safety" class="btn-primary" data-i18n="safety.save_btn">Guardar Anclajes</button>
                         </div>
 
+                        <!-- Trusted Contact: user-initiated only, nothing sent until the user
+                             confirms in their own messaging app (same sms: pattern as the
+                             helplines' tel: links below). -->
+                        <div class="safety-card card-contact">
+                            <h3 data-i18n="safety.contact_title">Avisar a mi persona de confianza</h3>
+                            <div class="contact-privacy-notice" id="contact-privacy-notice" hidden>
+                                <p data-i18n="safety.privacy_notice_text">A diferencia del resto de Marea, esto sí puede enviar datos fuera de tu dispositivo: si pulsas "Avisar ahora", tu teléfono y tu mensaje se abren en WhatsApp para que decidas tú si enviarlo. WhatsApp cifra el contenido, pero Meta puede ver que contactaste con ese número. Tu ubicación, si la activas, nunca se guarda — solo se lee en ese momento.</p>
+                                <button type="button" class="btn-secondary" id="btn-dismiss-privacy-notice" data-i18n="safety.privacy_notice_dismiss">Entendido</button>
+                            </div>
+                            <div class="anchor-field">
+                                <label for="input-anchor-phone" data-i18n="safety.phone_label">Teléfono de tu persona de confianza (opcional):</label>
+                                <input type="tel" id="input-anchor-phone" class="safe-input" data-i18n-placeholder="safety.phone_placeholder" placeholder="+34 600 000 000">
+                            </div>
+                            <div class="anchor-field">
+                                <label for="select-contact-message" data-i18n="safety.message_label">Mensaje a enviar:</label>
+                                <select id="select-contact-message" class="settings-select">
+                                    <option value="template_anchor" data-i18n="safety.message_option_anchor">Estoy usando mi ancla ahora mismo.</option>
+                                    <option value="template_call" data-i18n="safety.message_option_call">Podría venirme bien que me llames.</option>
+                                    <option value="custom" data-i18n="safety.message_option_custom">Escribir mi propio mensaje</option>
+                                </select>
+                                <textarea id="input-contact-message" class="safe-input" data-i18n-placeholder="safety.message_placeholder" placeholder="Escribe tu mensaje..." hidden></textarea>
+                            </div>
+                            <label class="settings-toggle contact-location-toggle">
+                                <input type="checkbox" id="chk-contact-location">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label" data-i18n="safety.location_label">Incluir mi ubicación (GPS)</span>
+                            </label>
+                            <a id="btn-reach-contact" class="btn-primary reach-btn" data-i18n="safety.reach_btn" href="#" aria-disabled="true" target="_blank" rel="noopener noreferrer">Avisar ahora</a>
+                            <p class="reach-note" data-i18n="safety.reach_note">No se envía nada hasta que tú lo confirmes en tu propia app de mensajes.</p>
+                        </div>
+
                         <!-- Helplines Directory -->
                         <div class="safety-card card-helplines">
                             <h3 data-i18n="safety.helplines_title">Líneas de Ayuda Directa</h3>
                             <p data-i18n="safety.helplines_note">Apoyo profesional, gratuito y 100% confidencial.</p>
+
+                            <h4 class="helpline-subtitle helpline-subtitle-emergency" data-i18n="safety.emergency_title">Emergencia vital (Policía, Ambulancia, Bomberos)</h4>
+                            <div class="helpline-list">
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>112</strong>
+                                        <span data-i18n="safety.emergency_eu">Emergencias generales (España y UE)</span>
+                                    </div>
+                                    <a href="tel:112" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>911</strong>
+                                        <span data-i18n="safety.emergency_us">Emergencias generales (EE.UU. y Canadá)</span>
+                                    </div>
+                                    <a href="tel:911" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>911</strong>
+                                        <span data-i18n="safety.emergency_mx">Emergencias generales (México)</span>
+                                    </div>
+                                    <a href="tel:911" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item">
+                                    <div class="helpline-info">
+                                        <strong>101</strong>
+                                        <span data-i18n="safety.emergency_ps">Ambulancia — Media Luna Roja Palestina (Gaza y Cisjordania)</span>
+                                    </div>
+                                    <a href="tel:101" class="btn-secondary call-btn">Llamar</a>
+                                </div>
+                            </div>
+
+                            <h4 class="helpline-subtitle" data-i18n="safety.crisis_title">Líneas de crisis y salud mental</h4>
                             <div class="helpline-list">
                                 <div class="helpline-item">
                                     <div class="helpline-info">
@@ -639,6 +705,7 @@
                                 <option value="autism" data-i18n="onboarding.condition_autism">Autismo / Neurodiversidad</option>
                                 <option value="aphasia" data-i18n="onboarding.condition_aphasia">Afasia / Comunicación</option>
                                 <option value="anxiety" data-i18n="onboarding.condition_anxiety">Ansiedad / Crisis emocional</option>
+                                <option value="ptsd" data-i18n="onboarding.condition_ptsd">TEPT / Trauma</option>
                                 <option value="caregiver" data-i18n="onboarding.condition_caregiver">Soy cuidador/a</option>
                             </select>
                         </div>

@@ -76,7 +76,14 @@ function boot() {
         inputSafetySong: document.getElementById("input-anchor-song"),
         inputSafetyMemory: document.getElementById("input-anchor-memory"),
         btnSaveSafety: document.getElementById("btn-save-safety"),
-        
+        inputAnchorPhone: document.getElementById("input-anchor-phone"),
+        selectContactMessage: document.getElementById("select-contact-message"),
+        inputContactMessage: document.getElementById("input-contact-message"),
+        btnReachContact: document.getElementById("btn-reach-contact"),
+        chkContactLocation: document.getElementById("chk-contact-location"),
+        contactPrivacyNotice: document.getElementById("contact-privacy-notice"),
+        btnDismissPrivacyNotice: document.getElementById("btn-dismiss-privacy-notice"),
+
         // Diario
         sliderLight: document.getElementById("slider-light"),
         sliderSound: document.getElementById("slider-sound"),
@@ -566,13 +573,115 @@ function boot() {
         elements.inputSafetyPerson.value = localStorage.getItem("marea_safety_person") || "";
         elements.inputSafetySong.value = localStorage.getItem("marea_safety_song") || "";
         elements.inputSafetyMemory.value = localStorage.getItem("marea_safety_memory") || "";
+        elements.inputAnchorPhone.value = localStorage.getItem("marea_contact_phone") || "";
+        elements.selectContactMessage.value = localStorage.getItem("marea_contact_message_choice") || "template_anchor";
+        elements.inputContactMessage.value = localStorage.getItem("marea_contact_message_custom") || "";
+        elements.chkContactLocation.checked = localStorage.getItem("marea_contact_include_location") === "1";
+        syncCustomMessageVisibility();
+        updateReachButton();
     }
 
     function saveSafetyPlan() {
         localStorage.setItem("marea_safety_person", elements.inputSafetyPerson.value);
         localStorage.setItem("marea_safety_song", elements.inputSafetySong.value);
         localStorage.setItem("marea_safety_memory", elements.inputSafetyMemory.value);
+        localStorage.setItem("marea_contact_phone", elements.inputAnchorPhone.value);
+        localStorage.setItem("marea_contact_message_choice", elements.selectContactMessage.value);
+        localStorage.setItem("marea_contact_message_custom", elements.inputContactMessage.value);
+        localStorage.setItem("marea_contact_include_location", elements.chkContactLocation.checked ? "1" : "0");
         showToast(t("safety.saved_toast"));
+    }
+
+    // 10b. Trusted Contact — always user-initiated. Marea never sends anything
+    // itself: this only ever builds an sms: link that opens the user's own
+    // messaging app with the message pre-filled, exactly like the tel: links
+    // used by the crisis helplines below. The user still has to hit send
+    // there, and Marea has no way to know — or record — whether they did.
+    function syncCustomMessageVisibility() {
+        elements.inputContactMessage.hidden = elements.selectContactMessage.value !== "custom";
+    }
+
+    function resolveContactMessage() {
+        const choice = elements.selectContactMessage.value;
+        if (choice === "custom") return elements.inputContactMessage.value.trim();
+        if (choice === "template_call") return t("safety.message_option_call");
+        return t("safety.message_option_anchor");
+    }
+
+    function buildWhatsAppUrl(phone, message) {
+        return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    }
+
+    function updateReachButton() {
+        // WhatsApp (wa.me), not sms: — an SMS today reads as spam/phishing to
+        // most people, wa.me works over minimal data (relevant in low-connectivity
+        // regions), and it's the same "opens the user's own app, user still hits
+        // send" pattern either way. wa.me needs the full number with country code
+        // and no leading zeros or symbols.
+        const phone = elements.inputAnchorPhone.value.replace(/\D/g, "");
+        const message = resolveContactMessage();
+        const ready = phone.length >= 8 && message.length > 0;
+        elements.btnReachContact.setAttribute("aria-disabled", ready ? "false" : "true");
+        elements.btnReachContact.classList.toggle("is-disabled", !ready);
+        elements.btnReachContact.href = ready ? buildWhatsAppUrl(phone, message) : "#";
+    }
+
+    // GPS location is opt-in only (the checkbox), never read unless the user
+    // ticked it, and it's requested fresh on each tap rather than watched or
+    // cached — the device's GPS chip works with zero network/cell signal,
+    // which matters for someone reaching out from a place with neither.
+    function getLocationSuffix() {
+        return new Promise((resolve) => {
+            if (!("geolocation" in navigator)) return resolve("");
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    resolve(`\n\n📍 https://maps.google.com/?q=${latitude},${longitude}`);
+                },
+                () => resolve(null), // denied / unavailable / timeout — caller decides how to handle
+                { timeout: 8000, maximumAge: 60000 }
+            );
+        });
+    }
+
+    // Shown once, the first time this card is seen — "radical honesty" that
+    // the reach-out button is the one place in Marea where data can leave
+    // the device, and only because the user chose to send it.
+    function initContactPrivacyNotice() {
+        if (localStorage.getItem("marea_contact_notice_dismissed") !== "1") {
+            elements.contactPrivacyNotice.hidden = false;
+        }
+        elements.btnDismissPrivacyNotice.addEventListener("click", () => {
+            elements.contactPrivacyNotice.hidden = true;
+            localStorage.setItem("marea_contact_notice_dismissed", "1");
+        });
+    }
+
+    function initTrustedContact() {
+        initContactPrivacyNotice();
+        elements.selectContactMessage.addEventListener("change", () => {
+            syncCustomMessageVisibility();
+            updateReachButton();
+        });
+        elements.inputAnchorPhone.addEventListener("input", updateReachButton);
+        elements.inputContactMessage.addEventListener("input", updateReachButton);
+
+        elements.btnReachContact.addEventListener("click", (e) => {
+            if (elements.btnReachContact.getAttribute("aria-disabled") === "true") {
+                e.preventDefault();
+                showToast(t("safety.reach_missing_phone"));
+                return;
+            }
+            if (!elements.chkContactLocation.checked) return; // plain href navigation, nothing to intercept
+
+            e.preventDefault();
+            const phone = elements.inputAnchorPhone.value.replace(/\D/g, "");
+            const message = resolveContactMessage();
+            getLocationSuffix().then((suffix) => {
+                if (suffix === null) showToast(t("safety.location_unavailable"));
+                window.open(buildWhatsAppUrl(phone, message + (suffix || "")), "_blank", "noopener,noreferrer");
+            });
+        });
     }
 
     // 11. Diario Perceptivo & Dynamic Canvas
@@ -919,6 +1028,7 @@ function boot() {
 
         // Safety Plan Save
         elements.btnSaveSafety.addEventListener("click", saveSafetyPlan);
+        initTrustedContact();
 
         // Journal Live sliders draw updates
         [elements.sliderLight, elements.sliderSound, elements.sliderPressure, elements.sliderPain, elements.sliderRumination].forEach(s => {
@@ -1433,6 +1543,7 @@ function boot() {
                 switchTab('voz');
                 break;
             case 'anxiety':
+            case 'ptsd':
                 switchTab('refugio');
                 break;
             default:

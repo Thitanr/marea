@@ -888,6 +888,21 @@ body {
     color: var(--accent-primary);
 }
 
+.contact-privacy-notice {
+    background: rgba(77, 184, 150, 0.08);
+    border: 1px solid var(--border-glow-focus);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.contact-privacy-notice p {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+}
+
 .anchor-field {
     display: flex;
     flex-direction: column;
@@ -921,10 +936,52 @@ textarea.safe-input {
     resize: none;
 }
 
+.reach-btn {
+    display: flex;
+    width: 100%;
+    text-decoration: none;
+    margin-top: 4px;
+}
+
+.reach-btn.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.reach-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
+/* Defensive: some elements in this file set their own `display`, which can
+   override the browser's default [hidden] rule. Must stay last. */
+[hidden] {
+    display: none !important;
+}
+
 .card-helplines p {
     font-size: 0.78rem;
     color: var(--text-muted);
     margin-bottom: 14px;
+}
+
+.helpline-subtitle {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 16px 0 8px;
+}
+
+.helpline-subtitle:first-of-type {
+    margin-top: 0;
+}
+
+.helpline-subtitle-emergency {
+    color: var(--danger);
 }
 
 .helpline-list {
@@ -1346,6 +1403,10 @@ textarea.safe-input {
 .toggle-label {
     font-size: 0.85rem;
     color: var(--text-primary);
+}
+
+.contact-location-toggle {
+    margin-bottom: 12px;
 }
 
 /* ============================================================
