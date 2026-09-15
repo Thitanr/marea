@@ -1390,6 +1390,10 @@ textarea.safe-input {
     color: var(--text-primary);
 }
 
+.contact-location-toggle {
+    margin-bottom: 12px;
+}
+
 /* ============================================================
    SINTONÍA — Autism space
    ============================================================ */

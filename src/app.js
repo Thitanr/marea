@@ -80,6 +80,7 @@ function boot() {
         selectContactMessage: document.getElementById("select-contact-message"),
         inputContactMessage: document.getElementById("input-contact-message"),
         btnReachContact: document.getElementById("btn-reach-contact"),
+        chkContactLocation: document.getElementById("chk-contact-location"),
 
         // Diario
         sliderLight: document.getElementById("slider-light"),
@@ -573,6 +574,7 @@ function boot() {
         elements.inputAnchorPhone.value = localStorage.getItem("marea_contact_phone") || "";
         elements.selectContactMessage.value = localStorage.getItem("marea_contact_message_choice") || "template_anchor";
         elements.inputContactMessage.value = localStorage.getItem("marea_contact_message_custom") || "";
+        elements.chkContactLocation.checked = localStorage.getItem("marea_contact_include_location") === "1";
         syncCustomMessageVisibility();
         updateReachButton();
     }
@@ -584,6 +586,7 @@ function boot() {
         localStorage.setItem("marea_contact_phone", elements.inputAnchorPhone.value);
         localStorage.setItem("marea_contact_message_choice", elements.selectContactMessage.value);
         localStorage.setItem("marea_contact_message_custom", elements.inputContactMessage.value);
+        localStorage.setItem("marea_contact_include_location", elements.chkContactLocation.checked ? "1" : "0");
         showToast(t("safety.saved_toast"));
     }
 
@@ -603,6 +606,10 @@ function boot() {
         return t("safety.message_option_anchor");
     }
 
+    function buildWhatsAppUrl(phone, message) {
+        return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    }
+
     function updateReachButton() {
         // WhatsApp (wa.me), not sms: — an SMS today reads as spam/phishing to
         // most people, wa.me works over minimal data (relevant in low-connectivity
@@ -614,9 +621,25 @@ function boot() {
         const ready = phone.length >= 8 && message.length > 0;
         elements.btnReachContact.setAttribute("aria-disabled", ready ? "false" : "true");
         elements.btnReachContact.classList.toggle("is-disabled", !ready);
-        elements.btnReachContact.href = ready
-            ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-            : "#";
+        elements.btnReachContact.href = ready ? buildWhatsAppUrl(phone, message) : "#";
+    }
+
+    // GPS location is opt-in only (the checkbox), never read unless the user
+    // ticked it, and it's requested fresh on each tap rather than watched or
+    // cached — the device's GPS chip works with zero network/cell signal,
+    // which matters for someone reaching out from a place with neither.
+    function getLocationSuffix() {
+        return new Promise((resolve) => {
+            if (!("geolocation" in navigator)) return resolve("");
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    resolve(`\n\n📍 https://maps.google.com/?q=${latitude},${longitude}`);
+                },
+                () => resolve(null), // denied / unavailable / timeout — caller decides how to handle
+                { timeout: 8000, maximumAge: 60000 }
+            );
+        });
     }
 
     function initTrustedContact() {
@@ -626,11 +649,22 @@ function boot() {
         });
         elements.inputAnchorPhone.addEventListener("input", updateReachButton);
         elements.inputContactMessage.addEventListener("input", updateReachButton);
+
         elements.btnReachContact.addEventListener("click", (e) => {
             if (elements.btnReachContact.getAttribute("aria-disabled") === "true") {
                 e.preventDefault();
                 showToast(t("safety.reach_missing_phone"));
+                return;
             }
+            if (!elements.chkContactLocation.checked) return; // plain href navigation, nothing to intercept
+
+            e.preventDefault();
+            const phone = elements.inputAnchorPhone.value.replace(/\D/g, "");
+            const message = resolveContactMessage();
+            getLocationSuffix().then((suffix) => {
+                if (suffix === null) showToast(t("safety.location_unavailable"));
+                window.open(buildWhatsAppUrl(phone, message + (suffix || "")), "_blank", "noopener,noreferrer");
+            });
         });
     }
 
