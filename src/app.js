@@ -1493,6 +1493,7 @@ function boot() {
                 switchTab('voz');
                 break;
             case 'anxiety':
+            case 'ptsd':
                 switchTab('refugio');
                 break;
             default:
