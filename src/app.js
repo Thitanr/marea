@@ -81,6 +81,8 @@ function boot() {
         inputContactMessage: document.getElementById("input-contact-message"),
         btnReachContact: document.getElementById("btn-reach-contact"),
         chkContactLocation: document.getElementById("chk-contact-location"),
+        contactPrivacyNotice: document.getElementById("contact-privacy-notice"),
+        btnDismissPrivacyNotice: document.getElementById("btn-dismiss-privacy-notice"),
 
         // Diario
         sliderLight: document.getElementById("slider-light"),
@@ -642,7 +644,21 @@ function boot() {
         });
     }
 
+    // Shown once, the first time this card is seen — "radical honesty" that
+    // the reach-out button is the one place in Marea where data can leave
+    // the device, and only because the user chose to send it.
+    function initContactPrivacyNotice() {
+        if (localStorage.getItem("marea_contact_notice_dismissed") !== "1") {
+            elements.contactPrivacyNotice.hidden = false;
+        }
+        elements.btnDismissPrivacyNotice.addEventListener("click", () => {
+            elements.contactPrivacyNotice.hidden = true;
+            localStorage.setItem("marea_contact_notice_dismissed", "1");
+        });
+    }
+
     function initTrustedContact() {
+        initContactPrivacyNotice();
         elements.selectContactMessage.addEventListener("change", () => {
             syncCustomMessageVisibility();
             updateReachButton();

@@ -494,6 +494,10 @@
                              helplines' tel: links below). -->
                         <div class="safety-card card-contact">
                             <h3 data-i18n="safety.contact_title">Avisar a mi persona de confianza</h3>
+                            <div class="contact-privacy-notice" id="contact-privacy-notice" hidden>
+                                <p data-i18n="safety.privacy_notice_text">A diferencia del resto de Marea, esto sí puede enviar datos fuera de tu dispositivo: si pulsas "Avisar ahora", tu teléfono y tu mensaje se abren en WhatsApp para que decidas tú si enviarlo. WhatsApp cifra el contenido, pero Meta puede ver que contactaste con ese número. Tu ubicación, si la activas, nunca se guarda — solo se lee en ese momento.</p>
+                                <button type="button" class="btn-secondary" id="btn-dismiss-privacy-notice" data-i18n="safety.privacy_notice_dismiss">Entendido</button>
+                            </div>
                             <div class="anchor-field">
                                 <label for="input-anchor-phone" data-i18n="safety.phone_label">Teléfono de tu persona de confianza (opcional):</label>
                                 <input type="tel" id="input-anchor-phone" class="safe-input" data-i18n-placeholder="safety.phone_placeholder" placeholder="+34 600 000 000">

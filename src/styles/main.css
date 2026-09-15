@@ -888,6 +888,21 @@ body {
     color: var(--accent-primary);
 }
 
+.contact-privacy-notice {
+    background: rgba(77, 184, 150, 0.08);
+    border: 1px solid var(--border-glow-focus);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.contact-privacy-notice p {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+}
+
 .anchor-field {
     display: flex;
     flex-direction: column;
