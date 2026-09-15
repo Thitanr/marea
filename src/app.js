@@ -613,11 +613,10 @@ function boot() {
     }
 
     function updateReachButton() {
-        // WhatsApp (wa.me), not sms: — an SMS today reads as spam/phishing to
-        // most people, wa.me works over minimal data (relevant in low-connectivity
-        // regions), and it's the same "opens the user's own app, user still hits
-        // send" pattern either way. wa.me needs the full number with country code
-        // and no leading zeros or symbols.
+        // The href is a wa.me link — the fallback for browsers without Web
+        // Share (mostly desktop) and the only option once a GPS fix is in
+        // play (see the click handler below for why). It needs the full
+        // number with country code and no leading zeros or symbols.
         const phone = elements.inputAnchorPhone.value.replace(/\D/g, "");
         const message = resolveContactMessage();
         const ready = phone.length >= 8 && message.length > 0;
@@ -672,15 +671,36 @@ function boot() {
                 showToast(t("safety.reach_missing_phone"));
                 return;
             }
-            if (!elements.chkContactLocation.checked) return; // plain href navigation, nothing to intercept
 
-            e.preventDefault();
             const phone = elements.inputAnchorPhone.value.replace(/\D/g, "");
             const message = resolveContactMessage();
-            getLocationSuffix().then((suffix) => {
-                if (suffix === null) showToast(t("safety.location_unavailable"));
-                window.open(buildWhatsAppUrl(phone, message + (suffix || "")), "_blank", "noopener,noreferrer");
-            });
+
+            if (elements.chkContactLocation.checked) {
+                // navigator.share() requires a live user gesture ("transient
+                // activation") that doesn't reliably survive the async wait
+                // for a GPS fix, so this path always goes straight to WhatsApp
+                // rather than risk a silent failure once the fix comes back.
+                e.preventDefault();
+                getLocationSuffix().then((suffix) => {
+                    if (suffix === null) showToast(t("safety.location_unavailable"));
+                    window.open(buildWhatsAppUrl(phone, message + (suffix || "")), "_blank", "noopener,noreferrer");
+                });
+                return;
+            }
+
+            // No location involved: let the person's own device decide which
+            // app to use — WhatsApp, Telegram, SMS, whatever they actually
+            // have — instead of assuming everyone uses WhatsApp.
+            if (navigator.share) {
+                e.preventDefault();
+                navigator.share({ text: message }).catch((err) => {
+                    if (err && err.name === "AbortError") return; // they chose not to share — respect that
+                    window.open(buildWhatsAppUrl(phone, message), "_blank", "noopener,noreferrer");
+                });
+                return;
+            }
+            // No Web Share support (typically desktop browsers): fall through
+            // to the plain href, already set to the wa.me link above.
         });
     }
 
