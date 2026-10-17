@@ -42,5 +42,6 @@ jobs:
         run: |
           export CLOUDFLARE_API_TOKEN="${{ secrets.MAREA }}"
           export CLOUDFLARE_ACCOUNT_ID="5df89a67326725077c0c1e7a6d7c9328"
-          npx wrangler pages deploy dist/ --project-name=marea-tide --commit-dirty=true
+          # Pinned: an unpinned `npx wrangler` downloads whatever is newest at deploy time (supply-chain risk)
+          npx --yes wrangler@4.114.0 pages deploy dist/ --project-name=marea-tide --commit-dirty=true
 
