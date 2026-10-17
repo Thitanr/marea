@@ -26,14 +26,19 @@ An active-listening chat module that practices **radical validation**. It avoids
 
 ### 🗣️ 3. Marea Voice (AAC - Augmentative and Alternative Communication)
 Specifically designed for **stroke (ictus) survivors** with speech difficulties (aphasia/dysarthria) and unilateral motor limitations:
-*   **One-Handed Sweep Layout**: Positions and clusters all main buttons on the lower-left or lower-right of the screen (selectable in settings) so everything sits within the natural sweep of a single thumb.
-*   **Speech Soundboards**: Large, high-contrast cards representing basic needs, social interaction (*“My brain works perfectly, but I struggle to speak. Please have patience with me”*), and emotional states. Tapping a card reads it aloud using the native offline text-to-speech engine (TTS).
+*   **One board, one fixed order**: 24 large cards, most urgent first — yes / no, help, pain, feeling unwell, toilet, water, food, rest — then conversation repair (*“My brain works perfectly, but I struggle to speak. Please have patience with me”*, wait, slower, I don't understand), comfort, feelings and closeness. No categories to navigate and positions never change, so the hand learns where things are (motor planning). Wording is short, literal and gender-neutral; no metaphors. Tapping a card reads it aloud with the device's own text-to-speech.
+*   **Write it instead** (the text pad above the board is shared by all inputs; **Say** speaks it):
+    *   **Keyboard** — by default opens the **device's own keyboard** (already in the person's language, with accents, corrector, dictation). Marea's large keyboard is an opt-in alternative (*Settings → Typing keyboard*): in the person's language (ñ and accents included; AZERTY for French, QWERTZ for German), alphabetical **ABC** layout as an alternative, automatic capitals, and **word suggestions** that learn the words you really use (stored only on this device).
+    *   **Write** (handwriting) — write one capital letter at a time with finger, pencil or mouse. Recognition is local (a $P point-cloud matcher with built-in stroke templates, no model and no network); it shows the 3 best guesses, and **learns from your corrections**. A palm-rejection mode ignores the hand when a pen is used, and the pause before a letter is accepted is adjustable in Settings. Chinese and Japanese use the device's own keyboard/IME.
+    *   **Scan** — row/column switch scanning for people who can use a single switch or tap, including Face Control.
+*   **Voice**: speaks with the best voice actually installed on the device (on-device, natural/enhanced first), never a surprise. The person or a carer can pick another voice and the speed in *Settings → Voice*. "Online" voices (Edge/Chrome natural voices) send the text to a server, so they are **off by default** and opt-in.
+*   **Hand side**: *Right hand* puts the most urgent cards on the right edge (thumb side), *Left hand* on the left; *Motor* makes every button bigger. The Aphasia profile selects big buttons but never assumes which hand works.
 
 ### 👁️ 3b. Face Control & Facial Neurofeedback (KAI Perception)
 Powered by the same on-device perception engine as **CIL/KAI** (MediaPipe FaceLandmarker, 478 landmarks + blendshapes), bundled locally — no CDN, no cloud, frames never leave the device:
 *   **Face Control (Hands-Free)**: an auto-scanning focus walks through every interactive element of the app; the user selects with a configurable facial gesture (long blink, open mouth, or raised brows). Includes the scan keyboard, so a user with no motor control of their hands can navigate and *speak* using only their face.
 *   **Facial Neurofeedback ("Calma Facial")**: the face replaces electrodes. Brow-knit, eye-squint and jaw tension — calibrated against the user's own resting face — drive a live bioluminescent ring that grows as the user physically lets go. Sessions are logged locally.
-*   **Swipe-to-Write**: slide-to-type keyboard for fast one-handed AAC input.
+*   **Offline model**: the ~15 MB face model is stored the first time Face Control runs, or ahead of time from *Settings → Face Control offline*.
 
 Face perception is built on **Google MediaPipe FaceLandmarker** (Apache 2.0), bundled locally and running entirely on-device. Note: on iPhone, camera access works in Safari; iOS still limits camera permissions for *installed* home-screen web apps — an Apple platform restriction, not a Marea choice.
 

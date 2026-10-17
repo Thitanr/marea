@@ -109,7 +109,16 @@ class FaceEngine {
     video.srcObject = stream;
     video.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-10px;top:-10px;';
     document.body.appendChild(video);
-    await video.play();
+    try {
+      await video.play();
+    } catch (err) {
+      // play() can be refused (autoplay policy, page hidden). Never leave the
+      // camera lit with nothing using it: release everything we opened.
+      stream.getTracks().forEach(t => t.stop());
+      video.remove();
+      landmarker.close();
+      throw new FaceEngineException('camera', String(err));
+    }
 
     this.video = video;
     this.stream = stream;

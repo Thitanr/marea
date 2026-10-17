@@ -15,6 +15,8 @@ import { showToast } from '../core/toast.js';
 const LOG_KEY = 'marea_neuro_logs';
 
 let running = false;
+let starting = false;
+let cancelRequested = false;
 let meter: TensionMeter | null = null;
 let unsubscribe: (() => void) | null = null;
 let startedAt = 0;
@@ -70,18 +72,33 @@ function onFrame(f: SignalFrame): void {
 }
 
 export async function startNeuroSession(): Promise<void> {
-  if (running) return;
-  if (!(await ensureFaceConsent())) return;
-
-  showToast(t('face.loading'));
+  if (running || starting) return;
+  starting = true;
+  cancelRequested = false;
   try {
-    await faceEngine.acquire();
-  } catch (err) {
-    const code = err instanceof FaceEngineException ? err.code : 'assets';
-    showToast(t(code === 'camera' ? 'face.error_camera' : 'face.error_assets'));
-    return;
-  }
+    if (!(await ensureFaceConsent())) return;
 
+    showToast(t('face.loading'));
+    try {
+      await faceEngine.acquire();
+    } catch (err) {
+      const code = err instanceof FaceEngineException ? err.code : 'assets';
+      showToast(t(code === 'camera' ? 'face.error_camera' : 'face.error_assets'));
+      return;
+    }
+
+    // The person left this screen while the model was loading: don't keep the camera on in the background.
+    if (cancelRequested) {
+      faceEngine.release();
+      return;
+    }
+    beginSession();
+  } finally {
+    starting = false;
+  }
+}
+
+function beginSession(): void {
   running = true;
   meter = new TensionMeter();
   startedAt = Date.now();
@@ -96,7 +113,10 @@ export async function startNeuroSession(): Promise<void> {
 }
 
 export function stopNeuroSession(): void {
-  if (!running) return;
+  if (!running) {
+    if (starting) cancelRequested = true;
+    return;
+  }
   running = false;
   unsubscribe?.();
   unsubscribe = null;

@@ -13,21 +13,15 @@ import { t, translateDOM, tLang } from './core/i18n.js';
 import { initFaceControl } from './face/face-switch.js';
 import { initFaceHeaderButton } from './face/face-setup.js';
 import { initNeuro, stopNeuroSession } from './face/face-neuro.js';
+import { initInputPanels } from './input/panels.js';
+import { learnWords } from './input/predict.js';
+import { warmVoices, speak, stopSpeaking, initVoiceSettings, refreshVoiceSettings } from './core/speech.js';
 
 /* ----- Module-compatible init (Phase 1a) ----- */
 function boot() {
 
-    // 1b. Voice cache — pre-load TTS voices on boot for zero-delay speech
-    let _voiceCache = [];
-    function _warmVoices() {
-        _voiceCache = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-    }
-    if ('speechSynthesis' in window) {
-        _warmVoices();
-        if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
-            window.speechSynthesis.onvoiceschanged = _warmVoices;
-        }
-    }
+    // 1b. Voices load asynchronously: warm them on boot (see core/speech.ts)
+    warmVoices();
 
     // 2. DOM Elements
     const elements = {
@@ -36,13 +30,6 @@ function boot() {
         tabs: document.querySelectorAll(".nav-item"),
         panels: document.querySelectorAll(".tab-panel"),
         quickExitBtn: document.getElementById("quick-exit-btn"),
-        
-        // Refugio (Chat)
-        chatMessagesContainer: document.getElementById("chat-messages"),
-        chatInput: document.getElementById("chat-text-input"),
-        chatSendBtn: document.getElementById("chat-send-btn"),
-        chatQuickResponses: document.getElementById("chat-quick-responses"),
-        chatTypingIndicator: document.getElementById("chat-typing-indicator"),
         
         // Ancla Hub Subtabs
         subtabBtns: document.querySelectorAll(".anchor-subtab-btn"),
@@ -68,7 +55,6 @@ function boot() {
         aacSpeechText: document.getElementById("aac-speech-text"),
         btnAacClear: document.getElementById("btn-aac-clear"),
         btnAacSpeak: document.getElementById("btn-aac-speak"),
-        aacCatBtns: document.querySelectorAll(".aac-cat-btn"),
         aacGrid: document.getElementById("aac-grid"),
         
         // Safety Plan
@@ -98,7 +84,6 @@ function boot() {
         selectHandMode: document.getElementById("setting-hand-mode"),
         selectTheme: document.getElementById("setting-theme"),
         toggleSensoryMode: document.getElementById("setting-sensory-mode"),
-        btnSyncSupabase: document.getElementById("btn-sync-supabase"),
         btnResetData: document.getElementById("btn-reset-data"),
 
         // Onboarding
@@ -121,13 +106,26 @@ function boot() {
         notebookSize: document.getElementById("notebook-size")
     };
 
+    // Input panels (keyboard + handwriting) are created after the DOM is wired
+    let inputPanels = null;
+
     // 3. i18n Translation Engine
     function translateApp() {
         document.documentElement.lang = state.lang;
         translateDOM();
         renderAACBoard();
-        loadQuickResponses();
         drawSensoryCanvas();
+        if (inputPanels) inputPanels.refresh();
+        syncHelplines();
+        refreshVoiceSettings();
+    }
+
+    // Show the crisis lines that matter for the language in use (112/911 always)
+    function syncHelplines() {
+        document.querySelectorAll('[data-helpline-langs]').forEach(el => {
+            const langs = el.getAttribute('data-helpline-langs').split(' ');
+            el.classList.toggle('hidden', !langs.includes(state.lang));
+        });
     }
 
     // 4. Tab Routing Management
@@ -163,6 +161,7 @@ function boot() {
 
         if (tabId === "diario") {
             drawSensoryCanvas();
+            window.dispatchEvent(new Event('resize')); // size the notebook canvas now that it is visible
         }
     }
 
@@ -197,9 +196,7 @@ function boot() {
         }
     }
 
-    // 5. El Refugio — Alzheimer Crisis Board only (chat removed)
-    function addChatBubble() { /* chat removed */ }
-
+    // 5. El Refugio — Alzheimer Crisis Board only
     function updateAlzheimerMode() {
         // Board is always shown — no chat mode
         const navLabel = document.querySelector('#nav-refugio .nav-label');
@@ -211,133 +208,6 @@ function boot() {
 
     function initChat() {
         updateAlzheimerMode();
-    }
-
-    function loadQuickResponses() {
-        if (!elements.chatQuickResponses) return;
-        elements.chatQuickResponses.innerHTML = "";
-        const condition = localStorage.getItem('marea_condition') || '';
-
-        let keys, prefix;
-        if (condition === 'alzheimer') {
-            keys = ["lost", "confused", "home", "help", "family", "safe"];
-            prefix = "refugio.alzheimer.quick.";
-        } else {
-            keys = ["underwater", "cant_breathe", "want_cry", "rumination", "exhausted", "just_stay"];
-            prefix = "refugio.quick.";
-        }
-
-        keys.forEach(key => {
-            const btn = document.createElement("button");
-            btn.className = "quick-response-btn";
-            btn.textContent = t(`${prefix}${key}`);
-            btn.addEventListener("click", () => handleUserMsg(t(`${prefix}${key}`), key, condition));
-            elements.chatQuickResponses.appendChild(btn);
-        });
-    }
-
-    function handleUserMsg(text, key = "default", condition = null) {
-        if (!text.trim()) return;
-        if (!elements.chatMessagesContainer) return;
-        const activeCondition = condition || localStorage.getItem('marea_condition') || '';
-
-        // Add user msg
-        addChatBubble(text, "user");
-        elements.chatInput.value = "";
-        resetStillHereTimer();
-        
-        // Hide quick responses while processing
-        elements.chatQuickResponses.classList.add("hidden");
-        
-        // Show typing indicator
-        elements.chatTypingIndicator.classList.remove("hidden");
-        elements.chatMessagesContainer.scrollTop = elements.chatMessagesContainer.scrollHeight;
-        
-        // Match user intent if key is default
-        let matchedKey = key;
-        let replyLang = state.lang;
-        
-        if (key === "default") {
-            const cleanText = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // strip accents
-            
-            // Language auto-detection
-            const frenchWords = /\b(bonjour|salut|comment|faire|affronter|anxiete|panique|peur|parler|ecrire|aphasie|aide)\b/;
-            const germanWords = /\b(hallo|wie|bewaltigen|angst|panik|sprechen|schreiben|aphasie|hilfe)\b/;
-            const portugueseWords = /\b(ola|como|enfrentar|lidar|ansiedade|panico|medo|falar|escrever|afasia|ajuda)\b/;
-            const italianWords = /\b(ciao|come|affrontarlo|affrontare|ansia|paura|spaventato|parlare|colpo|scrivere|afasia|aiuto)\b/;
-            const spanishWords = /\b(hola|como|hago|hacer|enfrento|afronto|sobrevivo|sobrevivir|ansiedad|panico|miedo|ayuda|hablar|hablo|escribir|escribo|afasia)\b/;
-            const englishWords = /\b(hello|hi|how|cope|handle|face|survive|anxiety|panic|fear|scared|afraid|speak|aphasia|stroke|talk|writing|type|help)\b/;
-            
-            if (italianWords.test(cleanText)) {
-                replyLang = "it";
-            } else if (frenchWords.test(cleanText)) {
-                replyLang = "fr";
-            } else if (germanWords.test(cleanText)) {
-                replyLang = "de";
-            } else if (portugueseWords.test(cleanText)) {
-                replyLang = "pt";
-            } else if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) { // Japanese Hiragana/Katakana
-                replyLang = "ja";
-            } else if (/[\u4e00-\u9fa5]/.test(text)) { // Chinese / Japanese Kanji (default to Chinese)
-                replyLang = "zh";
-            } else if (englishWords.test(cleanText)) {
-                replyLang = "en";
-            } else if (spanishWords.test(cleanText)) {
-                replyLang = "es";
-            }
-            
-            // Intent classification (multi-language regex matching)
-            // 1. Intent: How / Afrontar
-            if (/\b(como|hago|hacer|enfrento|afronto|sobrevivo|sobrevivir|solucion|afrontarlo|how|cope|handle|face|survive|affrontarlo|affrontare|comment|faire|affronter|wie|bewaltigen|lidar|enfrentar|どう|対処|克服)\b/.test(cleanText) || /[\u5982\u4f55\u600e\u4e48\u529e]/.test(text)) {
-                matchedKey = "how";
-            }
-            // 2. Intent: Anxiety / Panic
-            else if (/\b(ansiedad|panico|miedo|asustado|asustada|temblor|palpitaciones|anxiety|panic|fear|scared|afraid|racing|ansia|paura|spaventato|anxiete|panique|peur|angst|panik|medo|不安|パニック|恐怖)\b/.test(cleanText) || /[\u7126\u8651\u6050\u614c\u5bb3\u6015]/.test(text)) {
-                matchedKey = "anxiety";
-            }
-            // 3. Intent: Speech / Afasia / Dysarthria
-            else if (/\b(hablar|afasia|ictus|hablo|escribir|escribo|speak|aphasia|stroke|talk|writing|type|parlare|colpo|scrivere|ecrire|aphasie|catastro|ictus|parler|sprechen|schreiben|falar|escrever|話|話す|喋|言葉)\b/.test(cleanText) || /[\u8bf4\u8bdd\u5199\u5b57\u5931\u8bed]/.test(text)) {
-                matchedKey = "speech";
-            }
-            // General conversation -> cycle default replies
-            else {
-                matchedKey = `default_${state.lastDefaultIndex}`;
-                state.lastDefaultIndex = (state.lastDefaultIndex + 1) % 5;
-            }
-        }
-
-        // Alzheimer profile: simple, calm, short replies — no complex intent matching needed
-        if (activeCondition === 'alzheimer') {
-            const alzKey = ['lost','confused','home','help','family','safe'].includes(key)
-                ? key : 'safe';
-            setTimeout(() => {
-                elements.chatTypingIndicator.classList.add("hidden");
-                elements.chatQuickResponses.classList.remove("hidden");
-                addChatBubble(t(`refugio.alzheimer.reply.${alzKey}`), "system");
-                resetStillHereTimer();
-            }, 800);
-            return;
-        }
-
-        // Simulate thoughtful reflection time
-        setTimeout(() => {
-            elements.chatTypingIndicator.classList.add("hidden");
-            elements.chatQuickResponses.classList.remove("hidden");
-
-            // Resolve reply using the target detected language
-            const reply = tLang(replyLang, `refugio.reply.${matchedKey}`);
-            addChatBubble(reply, "system");
-            resetStillHereTimer();
-        }, 1500);
-    }
-
-    function resetStillHereTimer() {
-        if (!elements.chatTypingIndicator) return;
-        clearTimeout(state.chatTimer);
-        elements.chatTypingIndicator.classList.add("hidden");
-        state.chatTimer = setTimeout(() => {
-            elements.chatTypingIndicator?.classList.remove("hidden");
-        }, 25000);
     }
 
     // 6. El Ancla - Box Breathing (4-4-4-4)
@@ -510,28 +380,27 @@ function boot() {
 
     function renderAACBoard() {
         elements.aacGrid.innerHTML = "";
-        
-        const categoryData = aacBoardData[state.lang][state.aacActiveCategory];
-        if (!categoryData) return;
 
-        categoryData.forEach(item => {
+        // One board, one fixed order (most urgent first): see data/aac-board.ts
+        const items = aacBoardData[state.lang] || aacBoardData.es;
+
+        items.forEach(item => {
             const card = document.createElement("button");
+            card.type = "button";
             card.className = "aac-card-btn";
+            card.dataset.kind = item.kind;
+            card.dataset.id = item.id;
             card.setAttribute("aria-label", `${item.text}. ${t('aac.tap_to_speak')}`);
-            
+
             card.innerHTML = `
                 <span class="aac-card-icon" aria-hidden="true">${getAacSvgIcon(item.icon)}</span>
-                <span class="aac-card-label">${item.text}</span>
+                <span class="aac-card-label"></span>
             `;
-            
+            card.querySelector(".aac-card-label").textContent = item.text;
+
             card.addEventListener("click", () => {
-                // Highlight button
-                card.style.borderColor = "var(--accent-glow)";
-                card.style.boxShadow = "0 0 15px var(--accent-glow)";
-                setTimeout(() => {
-                    card.style.borderColor = "";
-                    card.style.boxShadow = "";
-                }, 400);
+                card.classList.add("aac-card-flash");
+                setTimeout(() => card.classList.remove("aac-card-flash"), 400);
 
                 // Add to text pad
                 if (elements.aacSpeechText.value) {
@@ -539,7 +408,8 @@ function boot() {
                 } else {
                     elements.aacSpeechText.value = item.text;
                 }
-                
+                learnWords(item.text);
+
                 // Speak out loud
                 speakText(item.spoken);
             });
@@ -548,24 +418,9 @@ function boot() {
         });
     }
 
+    // One speech engine for the whole app: best installed voice, user's choice and speed
     function speakText(phrase) {
-        if (!phrase || !phrase.trim()) return;
-        if (!('speechSynthesis' in window)) return;
-
-        window.speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(phrase.trim());
-        const langMap = { es: "es-ES", en: "en-GB", it: "it-IT", fr: "fr-FR", de: "de-DE", zh: "zh-CN", pt: "pt-PT", ja: "ja-JP" };
-        utterance.lang = langMap[state.lang] || "en-GB";
-
-        // Use pre-warmed cache; fall back to live query if empty
-        const voices = (_voiceCache && _voiceCache.length) ? _voiceCache : window.speechSynthesis.getVoices();
-        const langPrefix = utterance.lang.substring(0, 2);
-        const voice = voices.find(v => v.lang === utterance.lang) || voices.find(v => v.lang.startsWith(langPrefix));
-        if (voice) utterance.voice = voice;
-
-        utterance.rate = 0.95;
-        window.speechSynthesis.speak(utterance);
+        speak(phrase, state.lang);
     }
 
     // 10. Safety Plan Anchors
@@ -619,10 +474,14 @@ function boot() {
         // number with country code and no leading zeros or symbols.
         const phone = elements.inputAnchorPhone.value.replace(/\D/g, "");
         const message = resolveContactMessage();
-        const ready = phone.length >= 8 && message.length > 0;
+        // The phone number is only needed for the wa.me link (desktop, or when GPS
+        // is attached). With the device share sheet the person picks the recipient.
+        const needsPhone = !navigator.share || elements.chkContactLocation.checked;
+        const phoneOk = phone.length >= 8;
+        const ready = message.length > 0 && (!needsPhone || phoneOk);
         elements.btnReachContact.setAttribute("aria-disabled", ready ? "false" : "true");
         elements.btnReachContact.classList.toggle("is-disabled", !ready);
-        elements.btnReachContact.href = ready ? buildWhatsAppUrl(phone, message) : "#";
+        elements.btnReachContact.href = ready && phoneOk ? buildWhatsAppUrl(phone, message) : "#";
     }
 
     // GPS location is opt-in only (the checkbox), never read unless the user
@@ -664,11 +523,12 @@ function boot() {
         });
         elements.inputAnchorPhone.addEventListener("input", updateReachButton);
         elements.inputContactMessage.addEventListener("input", updateReachButton);
+        elements.chkContactLocation.addEventListener("change", updateReachButton);
 
         elements.btnReachContact.addEventListener("click", (e) => {
             if (elements.btnReachContact.getAttribute("aria-disabled") === "true") {
                 e.preventDefault();
-                showToast(t("safety.reach_missing_phone"));
+                showToast(resolveContactMessage().length === 0 ? t("safety.message_placeholder") : t("safety.reach_missing_phone"));
                 return;
             }
 
@@ -859,10 +719,24 @@ function boot() {
             });
         }
 
-        // Sync (coming soon)
-        elements.btnSyncSupabase.addEventListener("click", () => {
-            showToast(t("settings.sync_coming"));
-        });
+        // Handwriting pause before a letter is committed (slower hands need longer)
+        const hwDelay = document.getElementById("setting-hw-delay");
+        if (hwDelay) {
+            const saved = localStorage.getItem("marea_hw_delay");
+            hwDelay.value = [...hwDelay.options].some(o => o.value === saved) ? saved : "1200";
+            hwDelay.addEventListener("change", (e) => localStorage.setItem("marea_hw_delay", e.target.value));
+        }
+
+        // Face Control works offline only once its ~15 MB model is stored
+        initFaceOfflineButton();
+
+        // Voice (best installed, choosable) and which keyboard "Keyboard" opens
+        initVoiceSettings();
+        const kbMode = document.getElementById("setting-kb-mode");
+        if (kbMode) {
+            kbMode.value = localStorage.getItem("marea_kb_mode") === "marea" ? "marea" : "device";
+            kbMode.addEventListener("change", (e) => localStorage.setItem("marea_kb_mode", e.target.value));
+        }
 
         // Wipe Data
         elements.btnResetData.addEventListener("click", () => {
@@ -881,9 +755,9 @@ function boot() {
             selectCondition.addEventListener('change', (e) => {
                 const cond = e.target.value;
                 localStorage.setItem('marea_condition', cond);
-                applyConditionPreset(cond);
+                applyConditionPreset(cond, false);
                 initChat();
-                showToast(t('settings.condition_title'));
+                showToast(t('settings.condition_saved'));
             });
         }
 
@@ -905,7 +779,8 @@ function boot() {
         );
         if (state.handMode.startsWith("motor-")) {
             const base = state.handMode.replace("motor-", "");
-            elements.body.classList.add(`mode-${base}-hand`, "mode-motor");
+            if (base === "center") elements.body.classList.add("mode-center", "mode-motor");
+            else elements.body.classList.add(`mode-${base}-hand`, "mode-motor");
         } else if (state.handMode === "center") {
             elements.body.classList.add("mode-center");
         } else {
@@ -922,9 +797,10 @@ function boot() {
     }
 
     function applyFontSize() {
-        elements.body.classList.remove("font-large", "font-xlarge");
-        if (state.fontSize === "large") elements.body.classList.add("font-large");
-        else if (state.fontSize === "xlarge") elements.body.classList.add("font-xlarge");
+        const root = document.documentElement;
+        root.classList.remove("font-large", "font-xlarge");
+        if (state.fontSize === "large") root.classList.add("font-large");
+        else if (state.fontSize === "xlarge") root.classList.add("font-xlarge");
     }
 
     function applyReduceMotion() {
@@ -969,15 +845,7 @@ function boot() {
 
         // Quick Exit button (navigates away to google.com instantly for safety/privacy)
         elements.quickExitBtn.addEventListener("click", () => {
-            window.location.href = "https://www.google.com";
-        });
-
-        // Chat send mechanisms (guarded — chat removed from refugio tab)
-        elements.chatSendBtn?.addEventListener("click", () => {
-            handleUserMsg(elements.chatInput?.value ?? '');
-        });
-        elements.chatInput?.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") handleUserMsg(elements.chatInput.value);
+            window.location.replace("https://www.google.com");
         });
 
         // Grounding Stepper navigation buttons
@@ -1028,22 +896,9 @@ function boot() {
             const text = elements.aacSpeechText.value.trim();
             if (!text) return;
             speakText(text);
+            learnWords(text);
             // Clear pad after speaking so the next request starts fresh
             setTimeout(() => { elements.aacSpeechText.value = ""; }, 300);
-        });
-
-        elements.aacCatBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                elements.aacCatBtns.forEach(b => {
-                    b.classList.remove("active");
-                    b.setAttribute("aria-selected", "false");
-                });
-                btn.classList.add("active");
-                btn.setAttribute("aria-selected", "true");
-                
-                state.aacActiveCategory = btn.getAttribute("data-category");
-                renderAACBoard();
-            });
         });
 
         // Safety Plan Save
@@ -1061,7 +916,7 @@ function boot() {
             try { dailyLogs = JSON.parse(localStorage.getItem("marea_journal_logs") || "[]"); }
             catch (_) { dailyLogs = []; }
             const entry = {
-                date: new Date().toISOString().split('T')[0],
+                date: localDateStr(),
                 light: elements.sliderLight.value,
                 sound: elements.sliderSound.value,
                 pressure: elements.sliderPressure.value,
@@ -1255,7 +1110,7 @@ function boot() {
         const battery = document.getElementById('energy-battery');
         const energyMsg = document.getElementById('energy-msg');
 
-        function todayStr() { return new Date().toISOString().split('T')[0]; }
+        function todayStr() { return localDateStr(); }
 
         function renderEnergy(level) {
             if (!battery) return;
@@ -1293,80 +1148,6 @@ function boot() {
         }
     }
 
-    // 13c. Speech-to-Text — native device microphone, no AI
-    function initSpeechRecognition() {
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const micBtn = document.getElementById('chat-mic-btn');
-        if (!micBtn) return;
-        if (!SR) { micBtn.style.display = 'none'; return; }
-
-        const LANG_MAP = { es: 'es-ES', en: 'en-US', it: 'it-IT', fr: 'fr-FR', de: 'de-DE', zh: 'zh-CN', pt: 'pt-BR', ja: 'ja-JP' };
-        let recognition = null;
-        let listening = false;
-
-        function startListening() {
-            // Abort any in-progress session before creating a new one
-            if (recognition) { try { recognition.abort(); } catch (_) {} }
-            recognition = new SR();
-            recognition.lang = LANG_MAP[state.lang] || 'es-ES';
-            recognition.continuous = false;
-            recognition.interimResults = false;
-
-            recognition.onstart = () => {
-                listening = true;
-                micBtn.classList.add('listening');
-                micBtn.setAttribute('aria-label', t('refugio.mic_stop'));
-            };
-            recognition.onresult = (e) => {
-                const text = e.results[0][0].transcript;
-                const input = elements.chatInput;
-                if (input) input.value = (input.value + ' ' + text).trim();
-                if (input) input.focus();
-            };
-            recognition.onend = () => {
-                listening = false;
-                micBtn.classList.remove('listening');
-                micBtn.setAttribute('aria-label', t('refugio.mic_start'));
-            };
-            recognition.onerror = (e) => {
-                listening = false;
-                micBtn.classList.remove('listening');
-                micBtn.setAttribute('aria-label', t('refugio.mic_start'));
-                if (e.error === 'not-allowed') {
-                    showToast(t('refugio.mic_denied') || 'Permiso de micrófono denegado');
-                }
-            };
-            recognition.start();
-        }
-
-        function showNotice() {
-            const overlay = document.createElement('div');
-            overlay.className = 'stt-overlay';
-            overlay.innerHTML = `
-                <div class="stt-notice" role="dialog" aria-modal="true">
-                    <p class="stt-notice-text">${t('stt.notice_text')}</p>
-                    <div class="stt-notice-actions">
-                        <button class="btn-secondary" id="stt-cancel">${t('stt.notice_cancel')}</button>
-                        <button class="btn-primary" id="stt-accept">${t('stt.notice_accept')}</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            document.getElementById('stt-accept').addEventListener('click', () => {
-                localStorage.setItem('marea_stt_ok', '1');
-                overlay.remove();
-                startListening();
-            });
-            document.getElementById('stt-cancel').addEventListener('click', () => overlay.remove());
-        }
-
-        micBtn.addEventListener('click', () => {
-            if (listening) { recognition && recognition.stop(); return; }
-            if (!localStorage.getItem('marea_stt_ok')) { showNotice(); return; }
-            startListening();
-        });
-    }
-
     // 13d. PWA Install prompt
     function initPwaInstall() {
         let deferredPrompt = null;
@@ -1392,7 +1173,7 @@ function boot() {
 
         // iOS: show banner on first visit (not already installed)
         if (isIOS && !isStandalone) {
-            if (pwaItem) pwaItem.style.display = '';
+            if (pwaItem) pwaItem.classList.remove('pwa-hidden');
             const iosHowBtn = document.getElementById('ios-banner-how');
             if (iosHowBtn) iosHowBtn.addEventListener('click', showIOSInstallModal);
             if (btnInstall) btnInstall.addEventListener('click', showIOSInstallModal);
@@ -1419,7 +1200,7 @@ function boot() {
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             deferredPrompt = null;
-            if (pwaItem) pwaItem.style.display = 'none';
+            if (pwaItem) pwaItem.classList.add('pwa-hidden');
             const banner = document.getElementById('ios-install-banner');
             if (banner) banner.classList.add('hidden');
             if (outcome === 'accepted') showToast(t('settings.pwa_installed'));
@@ -1428,7 +1209,7 @@ function boot() {
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (pwaItem) pwaItem.style.display = '';
+            if (pwaItem) pwaItem.classList.remove('pwa-hidden');
             // Show prominent install banner (same element, different behavior)
             if (!localStorage.getItem('marea_android_banner_shown')) {
                 setTimeout(() => {
@@ -1450,7 +1231,7 @@ function boot() {
 
         window.addEventListener('appinstalled', () => {
             deferredPrompt = null;
-            if (pwaItem) pwaItem.style.display = 'none';
+            if (pwaItem) pwaItem.classList.add('pwa-hidden');
         });
     }
 
@@ -1538,7 +1319,7 @@ function boot() {
     }
 
     // Apply sensible defaults for each condition profile
-    function applyConditionPreset(condition) {
+    function applyConditionPreset(condition, navigate = true) {
         const selectConditionEl = document.getElementById('setting-condition');
         if (selectConditionEl) selectConditionEl.value = condition;
 
@@ -1550,21 +1331,23 @@ function boot() {
                 if (document.getElementById('setting-font-size')) document.getElementById('setting-font-size').value = 'xlarge';
                 if (document.getElementById('setting-theme')) document.getElementById('setting-theme').value = 'warm-sand';
                 if (document.getElementById('setting-sensory-mode')) document.getElementById('setting-sensory-mode').checked = true;
-                switchTab('refugio');
+                if (navigate) switchTab('refugio');
                 break;
             case 'autism':
                 state.sensoryMode = true; persistSensoryMode(true); applySensoryMode();
                 if (document.getElementById('setting-sensory-mode')) document.getElementById('setting-sensory-mode').checked = true;
-                switchTab('sintonia');
+                if (navigate) switchTab('sintonia');
                 break;
             case 'aphasia':
-                state.handMode = 'motor-right'; persistHandMode('motor-right'); applyHandMode();
-                if (document.getElementById('setting-hand-mode')) document.getElementById('setting-hand-mode').value = 'motor-right';
-                switchTab('voz');
+                // Big buttons, but no assumption about WHICH hand works: the person (or
+                // a carer) chooses the side in Settings if one-handed use is needed.
+                state.handMode = 'motor-center'; persistHandMode('motor-center'); applyHandMode();
+                if (document.getElementById('setting-hand-mode')) document.getElementById('setting-hand-mode').value = 'motor-center';
+                if (navigate) switchTab('voz');
                 break;
             case 'anxiety':
             case 'ptsd':
-                switchTab('refugio');
+                if (navigate) switchTab('refugio');
                 break;
             default:
                 break;
@@ -1602,30 +1385,12 @@ function boot() {
         let isDrawing = false;
         let lastX = 0, lastY = 0;
 
-        function resizeCanvas() {
-            const rect = canvas.getBoundingClientRect();
-            const w = rect.width || 320;
-            const h = rect.height || 240;
-            // Preserve existing drawing
-            const tmpCanvas = document.createElement('canvas');
-            tmpCanvas.width = canvas.width;
-            tmpCanvas.height = canvas.height;
-            const tmpCtx = tmpCanvas.getContext('2d');
-            if (tmpCtx) tmpCtx.drawImage(canvas, 0, 0);
-            canvas.width = w * dpr;
-            canvas.height = h * dpr;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-            ctx.scale(dpr, dpr);
-            ctx.drawImage(tmpCanvas, 0, 0, w, h);
-        }
+        let sized = false;
+        let restored = false;
 
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // Restore saved drawing
-        const saved = localStorage.getItem('marea_notebook_canvas');
-        if (saved) {
+        function restoreSaved() {
+            const saved = localStorage.getItem('marea_notebook_canvas');
+            if (!saved) return;
             const img = new Image();
             img.onload = () => {
                 const rctx = canvas.getContext('2d');
@@ -1633,6 +1398,36 @@ function boot() {
             };
             img.src = saved;
         }
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            // Hidden tab (0x0): leave the bitmap alone. Sizing it to a guessed 320x240
+            // made the pen draw away from the finger once the tab became visible.
+            if (!rect.width || !rect.height) return;
+            const w = rect.width;
+            const h = rect.height;
+            if (sized && Math.abs(canvas.width - Math.round(w * dpr)) < 2 && Math.abs(canvas.height - Math.round(h * dpr)) < 2) return;
+            // Preserve existing drawing
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = canvas.width;
+            tmpCanvas.height = canvas.height;
+            const tmpCtx = tmpCanvas.getContext('2d');
+            if (tmpCtx && sized) tmpCtx.drawImage(canvas, 0, 0);
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+            ctx.scale(dpr, dpr);
+            if (sized) ctx.drawImage(tmpCanvas, 0, 0, w, h);
+            sized = true;
+            if (!restored) { restored = true; restoreSaved(); }
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        // Fires when the Diario tab is first shown (and on any later size change)
+        if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resizeCanvas).observe(canvas);
+
         if (elements.notebookText) {
             elements.notebookText.value = localStorage.getItem('marea_notebook_text') || '';
         }
@@ -1644,6 +1439,7 @@ function boot() {
         }
 
         function startDraw(e) {
+            resizeCanvas(); // never draw on a bitmap that does not match the visible size
             e.preventDefault();
             isDrawing = true;
             const pos = getPos(e);
@@ -1790,438 +1586,6 @@ function boot() {
         }
     }
 
-    // 13f. Swipe Keyboard — slide-to-type for fast/one-handed AAC input
-    function initSwipeKeyboard() {
-        const swipeBtn = document.getElementById('eye-mode-btn');
-        const keyboard = document.getElementById('swipe-keyboard');
-        const wordEl = document.getElementById('swipe-kb-word');
-        const hintEl = document.getElementById('swipe-kb-hint');
-        const closeBtn = document.getElementById('swipe-kb-close');
-        const rowsEl = document.getElementById('swipe-kb-rows');
-        if (!swipeBtn || !keyboard || !wordEl || !rowsEl) return;
-
-        const ROWS = [
-            ['Q','W','E','R','T','Y','U','I','O','P'],
-            ['A','S','D','F','G','H','J','K','L'],
-            ['Z','X','C','V','B','N','M','⌫'],
-        ];
-
-        let active = false;
-        let isSwiping = false;
-        let builtText = '';
-        let trailCanvas = null;
-        let ctx = null;
-        let trailPoints = [];
-        let pointerHandled = false;  // suppress click after pointer interaction
-        let path = [];               // {x, y, key} samples of the current swipe
-        let startKeyEl = null;
-
-        function buildKeyboard() {
-            rowsEl.innerHTML = '';
-            ROWS.forEach(row => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'swipe-kb-row';
-                row.forEach(letter => {
-                    const btn = document.createElement('button');
-                    btn.className = 'swipe-key' + (letter === '⌫' ? ' swipe-key-del' : '');
-                    btn.dataset.key = letter;
-                    btn.textContent = letter;
-                    btn.type = 'button';
-                    rowDiv.appendChild(btn);
-                });
-                rowsEl.appendChild(rowDiv);
-            });
-            const bottomRow = document.createElement('div');
-            bottomRow.className = 'swipe-kb-row swipe-kb-bottom';
-            const spaceBtn = document.createElement('button');
-            spaceBtn.className = 'swipe-key swipe-key-space';
-            spaceBtn.dataset.key = 'SPACE';
-            spaceBtn.textContent = t('swipe.space') || 'Espacio';
-            spaceBtn.type = 'button';
-            const sendBtn = document.createElement('button');
-            sendBtn.className = 'swipe-key swipe-key-send';
-            sendBtn.dataset.key = 'SEND';
-            sendBtn.textContent = t('swipe.send') || 'Añadir';
-            sendBtn.type = 'button';
-            bottomRow.appendChild(spaceBtn);
-            bottomRow.appendChild(sendBtn);
-            rowsEl.appendChild(bottomRow);
-
-            const existing = keyboard.querySelector('.swipe-trail-canvas');
-            if (existing) existing.remove();
-            trailCanvas = document.createElement('canvas');
-            trailCanvas.className = 'swipe-trail-canvas';
-            trailCanvas.setAttribute('aria-hidden', 'true');
-            keyboard.insertBefore(trailCanvas, rowsEl);
-            ctx = trailCanvas.getContext('2d');
-            setTimeout(resizeCanvas, 20);
-        }
-
-        function resizeCanvas() {
-            if (!trailCanvas || !rowsEl) return;
-            const rect = rowsEl.getBoundingClientRect();
-            trailCanvas.width = rect.width;
-            trailCanvas.height = rect.height;
-            trailCanvas.style.width = rect.width + 'px';
-            trailCanvas.style.height = rect.height + 'px';
-            trailCanvas.style.top = rowsEl.offsetTop + 'px';
-        }
-
-        function clearTrail() {
-            if (ctx && trailCanvas) ctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
-            trailPoints = [];
-        }
-
-        function drawTrail() {
-            if (!ctx || !trailCanvas || trailPoints.length < 2) return;
-            ctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
-            ctx.strokeStyle = 'rgba(77,184,150,0.65)';
-            ctx.lineWidth = 4;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = 'rgba(77,184,150,0.4)';
-            ctx.beginPath();
-            ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
-            for (let i = 1; i < trailPoints.length; i++) ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-            const last = trailPoints[trailPoints.length - 1];
-            ctx.fillStyle = 'rgba(77,184,150,0.9)';
-            ctx.beginPath();
-            ctx.arc(last.x, last.y, 7, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        function getKeyAt(cx, cy) {
-            const el = document.elementFromPoint(cx, cy);
-            if (!el) return null;
-            const k = el.closest('.swipe-key');
-            return k && k.closest('#swipe-kb-rows') ? k : null;
-        }
-
-        function highlightKey(el) {
-            rowsEl.querySelectorAll('.swipe-key.key-active').forEach(k => k.classList.remove('key-active'));
-            if (el) el.classList.add('key-active');
-        }
-
-        function getAACText() { return document.getElementById('aac-speech-text'); }
-
-        function sendToAAC() {
-            const aacText = getAACText();
-            const text = builtText.trim();
-            if (aacText && text) {
-                const existing = aacText.value;
-                aacText.value = existing + (existing && !existing.endsWith(' ') ? ' ' : '') + text;
-            }
-            builtText = '';
-            wordEl.textContent = '';
-            if (hintEl) hintEl.style.display = '';
-        }
-
-        function handleSpecial(k) {
-            if (k === '⌫') {
-                if (builtText.length > 0) {
-                    if (builtText.endsWith(' ')) {
-                        // Swiped words arrive whole — delete the whole last word
-                        const trimmed = builtText.replace(/\s+$/, '');
-                        const cut = trimmed.lastIndexOf(' ');
-                        builtText = cut >= 0 ? trimmed.slice(0, cut + 1) : '';
-                    } else {
-                        builtText = builtText.slice(0, -1);
-                    }
-                } else {
-                    const aacText = getAACText();
-                    if (aacText && aacText.value.length > 0) {
-                        aacText.value = aacText.value.replace(/\s+$/, '').slice(0, -1);
-                    }
-                }
-                wordEl.textContent = builtText;
-                return true;
-            }
-            if (k === 'SPACE') {
-                builtText += builtText && !builtText.endsWith(' ') ? ' ' : '';
-                wordEl.textContent = builtText;
-                return true;
-            }
-            if (k === 'SEND') {
-                sendToAAC();
-                toggleKeyboard(false);
-                return true;
-            }
-            return false;
-        }
-
-        // ── Swipe decoding ────────────────────────────────────────────────
-        // A real swipe keyboard doesn't take every key the finger crosses —
-        // only the *anchor points* of the gesture: where it starts, where it
-        // ends, and where it turns. "hola" = start on H, corner on O, corner
-        // on L, lift on A. Everything crossed in between is ignored.
-        // A small lexicon built from the AAC board (already curated and
-        // translated per language) then corrects the geometric guess: it can
-        // recover letters that lie on a straight segment ("frio") and restore
-        // accents the QWERTY grid cannot type ("baño", "días").
-
-        let lexicon = new Map(); // normalized -> original (with accents)
-
-        // Core conversational words the AAC board doesn't carry (greetings,
-        // courtesy) — per language, feeding the same lexicon.
-        const CORE_WORDS = {
-            es: ['hola', 'adiós', 'gracias', 'por', 'favor', 'perdón', 'bien', 'mal', 'casa', 'quiero', 'necesito', 'ahora'],
-            en: ['hello', 'hi', 'goodbye', 'thanks', 'thank', 'you', 'please', 'sorry', 'good', 'bad', 'home', 'want', 'need', 'now'],
-            it: ['ciao', 'arrivederci', 'grazie', 'per', 'favore', 'scusa', 'bene', 'male', 'casa', 'voglio', 'adesso'],
-            fr: ['bonjour', 'salut', 'merci', 'pardon', 'bien', 'mal', 'maison', 'veux', 'maintenant'],
-            de: ['hallo', 'danke', 'bitte', 'entschuldigung', 'gut', 'schlecht', 'hause', 'will', 'jetzt'],
-            zh: [],
-            pt: ['olá', 'adeus', 'obrigado', 'obrigada', 'por', 'favor', 'desculpa', 'bem', 'mal', 'casa', 'quero', 'agora'],
-            ja: [],
-        };
-
-        function normWord(s) {
-            return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-        }
-
-        function buildLexicon() {
-            lexicon = new Map();
-            for (const w of (CORE_WORDS[state.lang] || [])) {
-                const norm = normWord(w);
-                if (/^[a-z]+$/.test(norm) && !lexicon.has(norm)) lexicon.set(norm, w);
-            }
-            const data = aacBoardData[state.lang] || {};
-            for (const cat of Object.values(data)) {
-                for (const item of cat) {
-                    for (const field of [item.text, item.spoken]) {
-                        for (const raw of String(field || '').split(/[^A-Za-zÀ-ÿ]+/)) {
-                            if (raw.length < 2) continue;
-                            const norm = normWord(raw);
-                            if (!/^[a-z]+$/.test(norm)) continue;
-                            if (!lexicon.has(norm)) lexicon.set(norm, raw.toLowerCase());
-                        }
-                    }
-                }
-            }
-        }
-
-        function isSubsequence(word, seq) {
-            let i = 0;
-            for (const c of seq) {
-                if (c === word[i]) i++;
-                if (i === word.length) return true;
-            }
-            return false;
-        }
-
-        function dictionaryCorrect(anchorWord, traversal) {
-            if (anchorWord.length < 2) return anchorWord;
-            const first = anchorWord[0], last = anchorWord[anchorWord.length - 1];
-            let best = null, bestScore = -Infinity;
-            for (const [norm, original] of lexicon) {
-                // A swipe can never produce double letters — compare against
-                // the squeezed form (hello → helo) and return the original
-                const sq = norm.replace(/(.)\1+/g, '$1');
-                if (sq[0] !== first || sq[sq.length - 1] !== last) continue;
-                if (!isSubsequence(sq, traversal)) continue;
-                let score = 10 - Math.abs(sq.length - anchorWord.length);
-                if (isSubsequence(anchorWord, sq)) score += 4;
-                if (sq === anchorWord) score += 6;
-                if (score > bestScore) { bestScore = score; best = original; }
-            }
-            return best || anchorWord;
-        }
-        function maxExcursion() {
-            if (path.length < 2) return 0;
-            const a = path[0];
-            let max = 0;
-            for (const p of path) {
-                const d = Math.hypot(p.x - a.x, p.y - a.y);
-                if (d > max) max = d;
-            }
-            return max;
-        }
-
-        function decodeSwipe() {
-            if (path.length < 2) return '';
-            // 1. Resample every ~10px to remove jitter
-            const rs = [path[0]];
-            for (const p of path) {
-                const last = rs[rs.length - 1];
-                if (Math.hypot(p.x - last.x, p.y - last.y) >= 10) rs.push(p);
-            }
-            if (rs[rs.length - 1] !== path[path.length - 1]) rs.push(path[path.length - 1]);
-
-            // 2. Corner samples (turns > 26°), clustered — each turn keeps
-            // only its sharpest sample so wide curves don't spray letters
-            const COS_LIMIT = Math.cos(26 * Math.PI / 180);
-            const corners = [];
-            for (let i = 2; i < rs.length - 2; i++) {
-                const v1x = rs[i].x - rs[i - 2].x, v1y = rs[i].y - rs[i - 2].y;
-                const v2x = rs[i + 2].x - rs[i].x, v2y = rs[i + 2].y - rs[i].y;
-                const mag = Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y);
-                if (mag > 0) {
-                    const cosv = (v1x * v2x + v1y * v2y) / mag;
-                    if (cosv < COS_LIMIT) corners.push({ idx: i, cosv });
-                }
-            }
-            const anchors = [{ idx: 0 }];
-            let cluster = [];
-            const flushCluster = () => {
-                if (!cluster.length) return;
-                let sharpest = cluster[0];
-                for (const c of cluster) if (c.cosv < sharpest.cosv) sharpest = c;
-                anchors.push({ idx: sharpest.idx });
-                cluster = [];
-            };
-            for (const c of corners) {
-                const prev = cluster[cluster.length - 1];
-                // New cluster when samples separate OR the key underneath
-                // changes — two sharp turns on adjacent keys are two letters
-                if (prev && (c.idx - prev.idx > 2 || (rs[c.idx].key && rs[prev.idx].key && rs[c.idx].key !== rs[prev.idx].key))) {
-                    flushCluster();
-                }
-                cluster.push(c);
-            }
-            flushCluster();
-            anchors.push({ idx: rs.length - 1 });
-
-            // 3. Anchors → letters. If an anchor landed in the 3px gap
-            // between keys (key: null), borrow the nearest sampled key.
-            const letterAt = (idx) => {
-                for (let d = 0; d < 3; d++) {
-                    for (const j of [idx - d, idx + d]) {
-                        const k = rs[j] && rs[j].key;
-                        if (k && k.length === 1) return k.toLowerCase();
-                    }
-                }
-                return null;
-            };
-            let word = '';
-            for (const a of anchors) {
-                const c = letterAt(a.idx);
-                if (c && word[word.length - 1] !== c) word += c;
-            }
-
-            // 4. Lexicon correction over the full key traversal — recovers
-            // letters on straight segments and restores accents/ñ
-            let traversal = '';
-            for (const p of rs) {
-                if (p.key && p.key.length === 1) {
-                    const c = p.key.toLowerCase();
-                    if (traversal[traversal.length - 1] !== c) traversal += c;
-                }
-            }
-            return dictionaryCorrect(word, traversal);
-        }
-
-        // Pointer events — work for mouse, touch, and stylus
-        function onPointerDown(e) {
-            if (!active) return;
-            if (e.pointerType === 'mouse' && e.button !== 0) return;
-            const keyEl = getKeyAt(e.clientX, e.clientY);
-            if (!keyEl) return;
-            e.preventDefault();
-            try { keyboard.setPointerCapture(e.pointerId); } catch (_) {}
-            pointerHandled = true;
-            isSwiping = true;
-            startKeyEl = keyEl;
-            clearTrail();
-            path = [];
-            const kRect = rowsEl.getBoundingClientRect();
-            const x = e.clientX - kRect.left, y = e.clientY - kRect.top;
-            path.push({ x, y, key: keyEl.dataset.key });
-            trailPoints.push({ x, y });
-            highlightKey(keyEl);
-        }
-
-        function onPointerMove(e) {
-            if (!isSwiping || !active) return;
-            e.preventDefault();
-            const kRect = rowsEl.getBoundingClientRect();
-            const x = e.clientX - kRect.left, y = e.clientY - kRect.top;
-            trailPoints.push({ x, y });
-            drawTrail();
-            const keyEl = getKeyAt(e.clientX, e.clientY);
-            path.push({ x, y, key: keyEl ? keyEl.dataset.key : null });
-            if (keyEl) highlightKey(keyEl);
-        }
-
-        function onPointerUp() {
-            if (!isSwiping) return;
-            isSwiping = false;
-            highlightKey(null);
-            const isTap = maxExcursion() < 18; // px — finger didn't travel: it's a tap
-            if (isTap) {
-                const k = startKeyEl && startKeyEl.dataset.key;
-                if (k && !handleSpecial(k)) {
-                    builtText += k.toLowerCase();
-                }
-            } else {
-                const word = decodeSwipe();
-                if (word) {
-                    builtText += (builtText && !builtText.endsWith(' ') ? ' ' : '') + word + ' ';
-                }
-            }
-            wordEl.textContent = builtText;
-            if (hintEl) hintEl.style.display = builtText ? 'none' : '';
-            startKeyEl = null;
-            path = [];
-            setTimeout(clearTrail, 400);
-        }
-
-        function onPointerCancel() {
-            isSwiping = false;
-            pointerHandled = false;
-            startKeyEl = null;
-            path = [];
-            highlightKey(null);
-            clearTrail();
-        }
-
-        rowsEl.addEventListener('click', e => {
-            // Suppress click when pointer already handled the interaction
-            if (pointerHandled) { pointerHandled = false; return; }
-            const key = e.target.closest('.swipe-key');
-            if (!key) return;
-            const k = key.dataset.key;
-            if (handleSpecial(k)) return;
-            builtText += k.toLowerCase();
-            wordEl.textContent = builtText;
-            if (hintEl) hintEl.style.display = 'none';
-        });
-
-        function toggleKeyboard(show) {
-            active = show !== undefined ? show : !active;
-            const aacBoard = document.querySelector('.aac-board-wrapper');
-            const span = swipeBtn.querySelector('span');
-            if (active) {
-                keyboard.classList.remove('hidden');
-                aacBoard?.classList.add('hidden');
-                if (span) span.textContent = t('eye.btn_stop') || 'Cerrar';
-                swipeBtn.classList.add('active');
-                builtText = '';
-                wordEl.textContent = '';
-                buildLexicon(); // vocabulary for the active language
-                buildKeyboard();
-                keyboard.addEventListener('pointerdown', onPointerDown, { passive: false });
-                keyboard.addEventListener('pointermove', onPointerMove, { passive: false });
-                keyboard.addEventListener('pointerup', onPointerUp);
-                keyboard.addEventListener('pointercancel', onPointerCancel);
-            } else {
-                keyboard.classList.add('hidden');
-                aacBoard?.classList.remove('hidden');
-                if (span) span.textContent = t('eye.btn_text') || 'Deslizar';
-                swipeBtn.classList.remove('active');
-                keyboard.removeEventListener('pointerdown', onPointerDown);
-                keyboard.removeEventListener('pointermove', onPointerMove);
-                keyboard.removeEventListener('pointerup', onPointerUp);
-                keyboard.removeEventListener('pointercancel', onPointerCancel);
-                clearTrail();
-            }
-        }
-
-        swipeBtn.addEventListener('click', () => toggleKeyboard());
-        closeBtn?.addEventListener('click', () => { sendToAAC(); toggleKeyboard(false); });
-    }
-
     // 13g. Alzheimer Crisis Board — caregiver-operated crisis support
     function initAlzheimerBoard() {
         const board = document.getElementById('alzheimer-crisis-board');
@@ -2231,30 +1595,29 @@ function boot() {
         const backBtn = document.getElementById('alz-back-btn');
         if (!board) return;
 
-        const LANG_MAP = { es:'es-ES', en:'en-US', it:'it-IT', fr:'fr-FR', de:'de-DE', zh:'zh-CN', pt:'pt-PT', ja:'ja-JP' };
-
         function autoSpeak(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = LANG_MAP[state.lang] || 'es-ES';
-            u.rate = 0.82;
-            window.speechSynthesis.speak(u);
+            speak(text, state.lang, { speedFactor: 0.9 });
         }
 
-        function showResponse(text) {
+        const callRow = document.getElementById('alz-call-row');
+
+        function showResponse(text, key) {
             if (!responsePanel || !responseText) return;
             responseText.textContent = text;
             responsePanel.classList.remove('hidden');
             board.querySelector('.alz-grid')?.classList.add('hidden');
+            // Only the emergency card offers a real phone call (the app never calls by itself)
+            callRow?.classList.toggle('hidden', key !== 'emergency');
             autoSpeak(text);
         }
 
         board.querySelectorAll('.alz-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const key = btn.dataset.alzKey;
-                const reply = t(`alz.reply.${key}`) || t(`refugio.alzheimer.reply.${key}`) || t('alz.reply.lost');
-                showResponse(reply);
+                const replyKey = `alz.reply.${key}`;
+                const found = t(replyKey);
+                // t() returns the key itself when a string is missing — never speak that
+                showResponse(found !== replyKey ? found : t('alz.reply.lost'), key);
             });
         });
 
@@ -2265,9 +1628,10 @@ function boot() {
 
         backBtn?.addEventListener('click', () => {
             responsePanel?.classList.add('hidden');
+            callRow?.classList.add('hidden');
             if (responseText) responseText.textContent = '';
             board.querySelector('.alz-grid')?.classList.remove('hidden');
-            window.speechSynthesis?.cancel();
+            stopSpeaking();
         });
     }
 
@@ -2281,14 +1645,17 @@ function boot() {
         if (!scanBtn || !scanKb) return;
 
         // Row definitions — determines scanning order and groupings
-        const SCAN_ROWS = [
+        let SCAN_ROWS = [];
+        // Spanish needs Ñ ("año" is not "ano"); every language keeps the same grid otherwise.
+        const scanRowsFor = (lang) => [
             ['A','B','C','D','E'],
             ['F','G','H','I','J'],
             ['K','L','M','N','O'],
             ['P','Q','R','S','T'],
             ['U','V','W','X','Y'],
-            ['Z','DEL','SPACE','SEND'],
+            lang === 'es' ? ['Z','Ñ','DEL','SPACE','SEND'] : ['Z','DEL','SPACE','SEND'],
         ];
+        SCAN_ROWS = scanRowsFor(state.lang);
         // Always slow: 1600ms per step — AAC users need time to react
         const SCAN_SPEED = 1600;
 
@@ -2393,6 +1760,7 @@ function boot() {
                 const text  = builtText.trim();
                 if (text) {
                     speakText(text);
+                    learnWords(text);
                     if (aacEl) {
                         aacEl.value = aacEl.value
                             + (aacEl.value && !aacEl.value.endsWith(' ') ? ' ' : '')
@@ -2418,7 +1786,8 @@ function boot() {
             } else {
                 const k = SCAN_ROWS[rowIdx]?.[keyIdx];
                 if (k) selectKey(k);
-                startRowPhase();
+                // SEND closes the keyboard: restarting the scan here left a timer running forever
+                if (isOpen) startRowPhase();
             }
         }
 
@@ -2442,6 +1811,7 @@ function boot() {
         }
 
         function startScan() {
+            SCAN_ROWS = scanRowsFor(state.lang);
             buildGrid();
             updateDisplay();
             startRowPhase();
@@ -2449,6 +1819,7 @@ function boot() {
 
         // ── Open / Close ──────────────────────────────────────────────────
         function openScanKb() {
+            if (inputPanels) inputPanels.close();
             isOpen    = true;
             builtText = '';
             scanKb.classList.remove('hidden');
@@ -2477,6 +1848,78 @@ function boot() {
         scanKb.addEventListener('pointerdown', onTap);
     }
 
+    // "Today" for journals/energy must be the person's local day, not UTC
+    function localDateStr() {
+        const d = new Date();
+        const p = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+
+    // Motor mode: ignore an accidental second tap on the same button within 400 ms
+    // (tremor/spasticity). Done in JS: a CSS `pointer-events: none` on :active used to
+    // swallow every real click. Never blocks Face Control / assistive-tech clicks.
+    function initMotorGuard() {
+        let lastEl = null;
+        let lastAt = 0;
+        document.addEventListener('click', (e) => {
+            if (!e.isTrusted || !document.body.classList.contains('mode-motor')) return;
+            const btn = e.target.closest ? e.target.closest('button') : null;
+            if (!btn || btn.closest('.kb-rows') || btn.closest('.hw-actions')) return; // typing must repeat fast
+            const now = performance.now();
+            if (btn === lastEl && now - lastAt < 400) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                return;
+            }
+            lastEl = btn;
+            lastAt = now;
+        }, true);
+    }
+
+    // Escape closes whatever is on top (dialogs, panels) — keyboard users are never trapped
+    function initGlobalKeys() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const full = document.querySelector('.show-fullscreen');
+            if (full) { full.remove(); return; }
+            const refugeExit = document.getElementById('refuge-exit');
+            if (refugeExit) { refugeExit.click(); return; }
+            const consent = document.getElementById('face-consent-cancel') || document.getElementById('face-setup-cancel');
+            if (consent) { consent.click(); return; }
+            const ios = document.getElementById('ios-install-modal');
+            if (ios && !ios.classList.contains('hidden')) { ios.classList.add('hidden'); return; }
+            const scan = document.getElementById('eye-gaze-keyboard');
+            if (scan && !scan.classList.contains('hidden')) { document.getElementById('eye-gaze-close')?.click(); return; }
+            if (inputPanels && inputPanels.open) inputPanels.close();
+        });
+    }
+
+    // Face Control needs ~15 MB (model + runtime). It is cached the first time it is used;
+    // this button lets the person (or a carer) store it ahead of time, on purpose, on Wi-Fi.
+    function initFaceOfflineButton() {
+        const btn = document.getElementById('btn-face-offline');
+        const status = document.getElementById('face-offline-status');
+        if (!btn) return;
+        if (!('serviceWorker' in navigator)) { btn.closest('.settings-item')?.classList.add('hidden'); return; }
+        const setStatus = (key) => { if (status) status.textContent = t(key); };
+        navigator.serviceWorker.addEventListener('message', (e) => {
+            if (!e.data || e.data.type !== 'FACE_PREFETCH') return;
+            btn.disabled = false;
+            if (e.data.state === 'done') { setStatus('settings.face_offline_done'); showToast(t('settings.face_offline_done')); }
+            else if (e.data.state === 'error') { setStatus('settings.face_offline_fail'); showToast(t('settings.face_offline_fail')); }
+        });
+        btn.addEventListener('click', async () => {
+            const reg = await navigator.serviceWorker.ready;
+            if (!reg.active) { setStatus('settings.face_offline_fail'); return; }
+            btn.disabled = true;
+            setStatus('settings.face_offline_busy');
+            reg.active.postMessage({ type: 'PREFETCH_FACE' });
+        });
+        if (window.caches) {
+            caches.match('/models/face_landmarker.task').then(r => { if (r) setStatus('settings.face_offline_done'); }).catch(() => {});
+        }
+    }
+
     // 14. Initialize App Lifecycle
     translateApp();
     setupEventListeners();
@@ -2486,11 +1929,12 @@ function boot() {
     initAlzheimerBoard();
     loadSafetyPlan();
     initSintonia();
-    initSpeechRecognition();
     initPwaInstall();
     initNotebook();
-    initSwipeKeyboard();
+    inputPanels = initInputPanels();
     initScanKeyboard();
+    initMotorGuard();
+    initGlobalKeys();
     initNeuro();
     initFaceControl();
     initFaceHeaderButton();
@@ -2498,48 +1942,40 @@ function boot() {
     // 15. Service Worker Registration for Offline capability
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
+            let accepted = false;
+            let reloading = false;
+
+            const offerUpdate = (worker) => {
+                const banner = document.getElementById('sw-update-banner');
+                if (!banner) return;
+                banner.classList.remove('hidden');
+                document.getElementById('sw-update-btn')?.addEventListener('click', () => {
+                    accepted = true;
+                    banner.classList.add('hidden');
+                    worker.postMessage({ type: 'SKIP_WAITING' });
+                }, { once: true });
+                document.getElementById('sw-update-dismiss')?.addEventListener('click', () => {
+                    banner.classList.add('hidden');
+                }, { once: true });
+            };
+
             navigator.serviceWorker.register('/service-worker.js')
                 .then(reg => {
-                    console.log('[Service Worker] Registered:', reg.scope);
-
+                    if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
                     reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        if (!newWorker) return;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed') {
-                                if (!navigator.serviceWorker.controller) {
-                                    // First install — activate immediately
-                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                                } else {
-                                    // Update available — auto-apply and show brief notification
-                                    _reloadPending = true;
-                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                                    _showUpdateBanner();
-                                }
-                            }
+                        const nw = reg.installing;
+                        if (!nw) return;
+                        nw.addEventListener('statechange', () => {
+                            if (nw.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(nw);
                         });
                     });
                 })
                 .catch(err => console.error('[Service Worker] Registration failed:', err));
 
-            // After SKIP_WAITING the controller changes — reload to pick up new assets
-            let _reloadPending = false;
+            // Reload ONLY after the person pressed "Update now" — never mid-sentence or mid-crisis
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (_reloadPending) window.location.reload();
+                if (accepted && !reloading) { reloading = true; window.location.reload(); }
             });
-
-            function _showUpdateBanner() {
-                const banner = document.getElementById('sw-update-banner');
-                if (!banner) return;
-                banner.classList.remove('hidden');
-                // Update is already applied — page will reload via controllerchange
-                document.getElementById('sw-update-btn')?.addEventListener('click', () => {
-                    banner.classList.add('hidden');
-                }, { once: true });
-                document.getElementById('sw-update-dismiss')?.addEventListener('click', () => {
-                    banner.classList.add('hidden');
-                }, { once: true });
-            }
         });
     }
 }

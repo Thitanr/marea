@@ -4,7 +4,7 @@
    Persisted fields hydrate from localStorage on import.
    ========================================================================== */
 
-import type { AppState, Lang, Theme, HandMode, FontSize, AacCategory } from './types.js';
+import type { AppState, Lang, Theme, HandMode, FontSize } from './types.js';
 
 // ---- Device language detection (first-install only) ----
 const SUPPORTED_LANGS: readonly string[] = ['es', 'en', 'it', 'fr', 'de', 'zh', 'pt', 'ja'];
@@ -30,7 +30,7 @@ function loadPersisted(): Pick<AppState, 'lang' | 'theme' | 'handMode' | 'sensor
   return {
     lang,
     theme: (localStorage.getItem('marea_theme') as Theme) || 'deep-sea',
-    handMode: (localStorage.getItem('marea_hand') as HandMode) || 'right',
+    handMode: (localStorage.getItem('marea_hand') as HandMode) || 'center',
     sensoryMode: localStorage.getItem('marea_sensory') === 'true',
     fontSize: (localStorage.getItem('marea_fontsize') as FontSize) || 'normal',
     reduceMotion: localStorage.getItem('marea_reduce_motion') === 'true',
@@ -64,8 +64,6 @@ const state: AppState = {
   tippTimerInterval: null,
   tippTimeRemaining: 300, // 5 minutes
 
-  // AAC
-  aacActiveCategory: 'needs' as AacCategory,
 };
 
 // ---- Named persist helpers (call after mutation) ----

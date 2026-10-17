@@ -19,26 +19,59 @@
     --border-glow-focus: rgba(77, 184, 150, 0.5);
     
     --text-primary: #e8eaed;
-    --text-muted: #6b7280;
+    --text-muted: #8a94a3; /* was #6b7280 (3.9:1 on the dark canvas); now AA */
     --text-dark: #0a0f0d;
     
     --accent-glow: #4db896;
     --accent-primary: #4db896;
     --accent-rgb: 77 184 150;
-    --accent-gradient: linear-gradient(135deg, #4db896 0%, #2d6b58 100%);
+    --accent-gradient: linear-gradient(135deg, #4db896 0%, #2d6b58 100%); /* canonical LANA Sovereign Mint */
     --accent-secondary: #4db896;
     
-    --danger: #ef4444;
-    --danger-glow: rgba(239, 68, 68, 0.2);
+    --danger: #f87171;
+    --danger-glow: rgba(248, 113, 113, 0.2);
     
     --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
     --blur-glass: blur(16px);
     
     --lana-hairline: rgba(77, 184, 150, 0.06);
+
+    /* Secondary tokens — defined per theme so every component keeps AA contrast
+       (previously undefined, which silently forced dark fallbacks on light themes) */
+    --accent: #4db896;
+    --surface: #121a17;
+    --surface-alt: #1e2925;
+    --surface-secondary: #1a2820;
+    --surface-elevated: #1f2e28;
+    --border-subtle: rgba(77, 184, 150, 0.18);
+    --border: rgba(77, 184, 150, 0.15);
+    --text: #e8f0ed;
+    --text-secondary: #a8c4bb;
+    --bg-card-solid: #0c1117;
+    --on-accent: #0a0f0d;
+    --accent-fill: #4db896;
+    /* Buttons: the canonical mint, flat, so dark text is AA edge to edge */
+    --btn-bg: #4db896;
+    --btn-fg: #0a0f0d;
 }
 
 /* Theme: Warm Sand (Calming Light Mode) */
 .theme-warm-sand {
+    --accent: #b45309;
+    --surface: #f3eee5;
+    --surface-alt: #ece5d9;
+    --surface-secondary: #efe9df;
+    --surface-elevated: #e4dccf;
+    --border-subtle: rgba(120, 110, 90, 0.35);
+    --border: rgba(120, 110, 90, 0.3);
+    --text: #2d2a26;
+    --text-secondary: #55504a;
+    --bg-card-solid: #fffdf9;
+    --on-accent: #1f1300;
+    --accent-fill: #d97706;
+    --btn-bg: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    --btn-fg: #1f1300;
+
     --bg-app: #faf8f5;
     --bg-app-rgb: 250 248 245;
     --bg-card: rgba(255, 255, 255, 0.75);
@@ -47,13 +80,15 @@
     --border-glow-focus: rgba(120, 110, 90, 0.5);
     
     --text-primary: #2d2a26;
-    --text-muted: #6f6b64;
+    --text-muted: #5f5a53;
     --text-dark: #faf8f5;
     
     --accent-glow: #d97706;
-    --accent-primary: #d97706;
+    --accent-primary: #b45309; /* text/borders on the light canvas need the deeper amber for AA */
     --accent-rgb: 217 119 6;
     --accent-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    --danger: #b91c1c;
+    --danger-glow: rgba(185, 28, 28, 0.12);
     --accent-secondary: #8b5cf6;
     
     --shadow-premium: 0 8px 32px 0 rgba(120, 110, 90, 0.15);
@@ -62,6 +97,20 @@
 
 /* Theme: High Contrast */
 .theme-high-contrast {
+    --accent: #ffff00;
+    --surface: #000000;
+    --surface-alt: #0d0d0d;
+    --surface-secondary: #0d0d0d;
+    --surface-elevated: #1a1a1a;
+    --border-subtle: #ffffff;
+    --border: #ffffff;
+    --text: #ffffff;
+    --text-secondary: #eeeeee;
+    --bg-card-solid: #000000;
+    --on-accent: #000000;
+    --accent-fill: #ffff00;
+    --btn-bg: #ffff00;
+    --btn-fg: #000000;
     --bg-app: #000000;
     --bg-app-rgb: 0 0 0;
     --bg-card: #000000;
@@ -85,6 +134,20 @@
 
 /* Theme: Monochrome (Zero Color Stimulation) */
 .theme-monochrome {
+    --accent: #ffffff;
+    --surface: #141414;
+    --surface-alt: #1c1c1c;
+    --surface-secondary: #1a1a1a;
+    --surface-elevated: #242424;
+    --border-subtle: rgba(255, 255, 255, 0.25);
+    --border: rgba(255, 255, 255, 0.18);
+    --text: #f5f5f5;
+    --text-secondary: #c4c4c4;
+    --bg-card-solid: #0e0e0e;
+    --on-accent: #000000;
+    --accent-fill: #ffffff;
+    --btn-bg: #ffffff;
+    --btn-fg: #000000;
     --bg-app: #090909;
     --bg-app-rgb: 9 9 9;
     --bg-card: rgba(20, 20, 20, 0.8);
@@ -133,10 +196,12 @@
 }
 
 /* --- Accessibility Profile: Font Size Scaling --- */
-.font-large  { font-size: 1.18rem; }
-.font-xlarge { font-size: 1.38rem; }
-.font-large  .nav-label { font-size: 0.7rem; }
-.font-xlarge .nav-label { font-size: 0.72rem; }
+/* Scales the root so every rem-based size (cards, buttons, nav, pad) grows,
+   not just body text. Applied on <html> by applyFontSize(). */
+html.font-large  { font-size: 118%; }
+html.font-xlarge { font-size: 135%; }
+html.font-large  .nav-label { font-size: 10px; }
+html.font-xlarge .nav-label { font-size: 10.5px; }
 
 /* --- Accessibility Profile: Reduce Motion --- */
 .reduce-motion *,
@@ -167,12 +232,13 @@
 .mode-motor .quick-exit-btn {
     touch-action: manipulation;
 }
-.mode-motor .aac-card-btn { min-height: 56px; }
+.mode-motor .aac-card-btn { min-height: 104px; }
 .mode-motor .settings-select { min-height: 48px; font-size: 1rem; }
 .mode-motor .chat-input { min-height: 52px; font-size: 1rem; }
+/* Anti-double-tap for tremor/spasticity is done in JS (see initMotorGuard):
+   a CSS `pointer-events: none` on :active swallowed every real click. */
 .mode-motor button:active {
-    pointer-events: none;
-    transition: pointer-events 0s 0.4s;
+    transform: scale(0.97);
 }
 
 /* 2. Global Reset & Layout */
@@ -477,8 +543,8 @@ body {
 
 /* 7. Buttons & Generic Inputs */
 .btn-primary {
-    background: var(--accent-gradient);
-    color: var(--text-dark);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
     border: none;
     padding: 12px 20px;
     border-radius: 14px;
@@ -568,8 +634,8 @@ body {
 }
 
 .anchor-subtab-btn.active {
-    background: var(--accent-gradient);
-    color: var(--text-dark);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
 }
 
 .anchor-content {
@@ -756,10 +822,30 @@ body {
     outline: none;
 }
 
+/* Four tools share one row (each gets an equal quarter, label under icon) and
+   the main action gets its own full-width row: nothing can overflow the
+   screen at any phone width or language. */
 .aac-output-controls {
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
+}
+
+.aac-output-controls .aac-tool {
+    flex-direction: column;
+    gap: 4px;
+    min-height: 58px;
+    padding: 8px 4px;
+    font-size: 0.78rem;
+    line-height: 1.15;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.aac-output-controls .aac-speak {
+    grid-column: 1 / -1;
+    min-height: 60px;
+    font-size: 1.2rem;
 }
 
 .aac-board-wrapper {
@@ -767,39 +853,22 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
-    gap: 12px;
+    min-height: 0;
     overflow: hidden;
 }
 
-.aac-categories {
-    display: flex;
-    gap: 6px;
-}
-
-.aac-cat-btn {
-    flex: 1;
-    background: var(--bg-card);
-    border: 1px solid var(--border-glow);
-    color: var(--text-muted);
-    padding: 8px 0;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.82rem;
-    cursor: pointer;
-    transition: var(--transition-quick);
-}
-
-.aac-cat-btn.active {
-    background: rgba(var(--accent-rgb), 0.1);
-    border-color: var(--accent-primary);
-    color: var(--accent-primary);
-}
-
+/* One board, one fixed order (most urgent first). Positions never change, so
+   the hand learns where things are (motor planning). */
 .aac-grid-container {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* max-content, not minmax(…, auto): inside this fixed-height scroller an "auto"
+       track would be squashed to its minimum instead of fitting its card. */
+    grid-auto-rows: max-content;
+    align-content: start;
     gap: 10px;
     padding-bottom: 10px;
 }
@@ -808,7 +877,7 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border-glow);
     border-radius: 16px;
-    padding: 16px 10px;
+    padding: 14px 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -818,7 +887,21 @@ body {
     cursor: pointer;
     transition: var(--transition-quick);
     text-align: center;
+    overflow-wrap: anywhere;
+    min-height: 92px;
 }
+
+/* Meaning is never carried by colour alone (icon + text always present). */
+.aac-card-btn[data-kind="yes"],
+.aac-card-btn[data-kind="no"] {
+    min-height: 118px;
+    border-width: 2px;
+}
+.aac-card-btn[data-kind="yes"] { border-color: #2f9e6d; }
+.aac-card-btn[data-kind="no"] { border-color: #d6544a; }
+.aac-card-btn[data-kind="yes"] .aac-card-label,
+.aac-card-btn[data-kind="no"] .aac-card-label { font-size: 1.25rem; }
+.aac-card-btn[data-kind="urgent"] { border-color: #d98a1f; border-width: 2px; }
 
 .aac-card-btn:hover {
     background: var(--bg-card-hover);
@@ -846,8 +929,9 @@ body {
 }
 
 .aac-card-label {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 600;
+    line-height: 1.25;
 }
 
 /* 10. Safety Plan */
@@ -1165,28 +1249,18 @@ textarea.safe-input {
 
 /* 13. One-Handed Layout Modes */
 
-/* Left-handed Mode */
-.mode-left-hand .chat-controls,
-.mode-left-hand .aac-layout,
-.mode-left-hand .anchor-hub {
-    /* Shifting interactive control focus left-ward */
-}
-
-.mode-left-hand .aac-grid-container {
-    direction: rtl; /* Puts primary items on the left side of columns */
-}
-.mode-left-hand .aac-grid-container > * {
-    direction: ltr;
-}
-
-/* Right-handed Mode */
+/* The most urgent cards sit on the side of the thumb that is doing the work.
+   Right hand: each row fills from the right edge. Left hand / centred: from
+   the left edge. (Order of the board itself never changes.) */
 .mode-right-hand .aac-grid-container {
+    direction: rtl;
+}
+.mode-right-hand .aac-grid-container > * {
     direction: ltr;
 }
-
-/* Center Mode (Regular Grid) */
+.mode-left-hand .aac-grid-container,
 .mode-center .aac-grid-container {
-    grid-template-columns: repeat(2, 1fr);
+    direction: ltr;
 }
 
 @media (max-width: 380px) {
@@ -1212,8 +1286,7 @@ textarea.safe-input {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     width: 100%;
-    color: var(--text-muted);
-    opacity: 0.7;
+    color: #9ca3af; /* the strip is dark in every theme */
 }
 
 .lana-matrix-grid {
@@ -2026,7 +2099,7 @@ textarea.safe-input {
 }
 .notebook-tool-btn:hover { color: var(--text-primary); border-color: var(--accent-primary); }
 .notebook-tool-btn.active {
-    background: rgba(77, 184, 150, 0.15);
+    background: rgba(var(--accent-rgb), 0.15);
     color: var(--accent-primary);
     border-color: var(--accent-primary);
 }
@@ -2132,8 +2205,8 @@ textarea.safe-input {
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
-    background: var(--accent, #4db896);
-    color: #0a0f0d;
+    background: var(--accent-fill);
+    color: var(--on-accent);
     font-size: 0.875rem;
     font-weight: 600;
     box-shadow: 0 2px 12px rgba(77,184,150,0.4);
@@ -2155,7 +2228,7 @@ textarea.safe-input {
 .sw-update-dismiss {
     background: none;
     border: none;
-    color: #0a0f0d;
+    color: var(--on-accent);
     font-size: 1.1rem;
     cursor: pointer;
     padding: 0 0.25rem;
@@ -2300,8 +2373,8 @@ textarea.safe-input {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--accent, #4db896);
-    color: #0a0f0d;
+    background: var(--accent-fill);
+    color: var(--on-accent);
     font-weight: 700;
     font-size: 0.85rem;
     display: flex;
@@ -2320,7 +2393,7 @@ textarea.safe-input {
 }
 
 /* ==========================================================================
-   SWIPE / SLIDE KEYBOARD BUTTON
+   SECONDARY INPUT BUTTONS
    ========================================================================== */
 .eye-mode-btn {
     display: flex;
@@ -2330,146 +2403,218 @@ textarea.safe-input {
     font-size: 0.8rem;
 }
 .eye-mode-btn.active {
-    background: var(--accent, #4db896);
-    color: #0a0f0d;
+    background: var(--accent-fill);
+    color: var(--on-accent);
     border-color: var(--accent, #4db896);
 }
 
 /* ==========================================================================
-   SWIPE KEYBOARD
+   INPUT PANELS — on-screen keyboard + handwriting (replace the board while open)
+   Every colour comes from theme tokens so contrast holds in all 4 themes.
    ========================================================================== */
-.swipe-keyboard {
+.input-panel {
     flex: 1;
-    position: relative;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    background: var(--bg-card, #0f1a17);
+    gap: 8px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: auto;
+}
+.input-panel.hidden { display: none !important; }
+
+.input-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+}
+
+.panel-btn {
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
     border-radius: 12px;
-    overflow: hidden;
-    z-index: 10;
-    touch-action: none;
-}
-.swipe-keyboard.hidden { display: none; }
-
-.swipe-kb-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 0.75rem 0.4rem;
-    border-bottom: 1px solid var(--border-subtle, rgba(77,184,150,0.12));
-    flex-shrink: 0;
-}
-.swipe-kb-display {
-    flex: 1;
-    min-height: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    overflow: hidden;
-}
-.swipe-kb-word {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--accent, #4db896);
-    letter-spacing: 0.04em;
-    min-width: 4px;
-}
-.swipe-kb-hint {
-    font-size: 0.78rem;
-    color: var(--text-muted, #7aa394);
-    font-style: italic;
-}
-.swipe-kb-close-btn {
-    background: transparent;
-    border: 1px solid var(--border-subtle, rgba(77,184,150,0.2));
-    color: var(--text-muted, #7aa394);
-    border-radius: 6px;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-secondary);
+    color: var(--text);
+    font-family: var(--font-sans);
     font-size: 0.9rem;
-    flex-shrink: 0;
-    display: flex;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+}
+.panel-btn:active,
+.panel-btn[aria-pressed="true"] {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    border-color: var(--accent);
 }
 
-.swipe-trail-canvas {
-    position: absolute;
-    pointer-events: none;
-    z-index: 2;
-    left: 0;
-}
-
-.swipe-kb-rows {
+/* --- Keyboard ----------------------------------------------------------- */
+.kb-suggest {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    gap: 6px;
+}
+.kb-chip {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-secondary);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.kb-chip:empty { visibility: hidden; }
+
+.kb-rows {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    padding: 6px 4px 8px;
-    position: relative;
-    touch-action: none;
+    gap: 6px;
     user-select: none;
     -webkit-user-select: none;
 }
-.swipe-kb-row {
+.kb-row {
+    flex: 1 1 0;
+    min-height: 44px;
     display: flex;
-    justify-content: center;
-    gap: 3px;
+    gap: 5px;
 }
-.swipe-key {
-    flex: 1;
-    max-width: 40px;
-    height: 44px;
-    border-radius: 7px;
-    background: var(--surface-secondary, #1a2820);
-    border: 1px solid var(--border-subtle, rgba(77,184,150,0.12));
-    color: var(--text-primary, #e8f0ed);
-    font-size: 0.92rem;
+.kb-row--digits { flex: 0.8 1 0; min-height: 38px; }
+.kb-key {
+    flex: 1 1 0;
+    min-width: 0;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-secondary);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 1.15rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.08s, transform 0.08s;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: none;
-    position: relative;
-    z-index: 3;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.swipe-key:active,
-.swipe-key.key-active {
-    background: var(--accent, #4db896);
-    color: #0a0f0d;
-    transform: scale(1.12);
-    z-index: 4;
+.kb-key:active,
+.kb-key--on {
+    background: var(--accent-fill);
+    color: var(--on-accent);
+    border-color: var(--accent);
 }
-.swipe-key-del {
-    max-width: 52px;
-    background: var(--surface-elevated, #1f2e28);
-    font-size: 1rem;
+.kb-key--fn { background: var(--surface-elevated); }
+.kb-key--wide { flex: 1.8 1 0; }
+.kb-key--space { flex: 5 1 0; font-size: 0.85rem; font-weight: 500; }
+.kb-row--digits .kb-key { font-size: 0.95rem; }
+.kb-abc .kb-key { font-size: 1.35rem; }
+
+/* --- Handwriting -------------------------------------------------------- */
+.hw-hint {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    color: var(--text-secondary);
 }
-.swipe-kb-bottom {
-    margin-top: 1px;
+.hw-pad-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 150px;
+    border-radius: 14px;
+    border: 2px dashed var(--border-subtle);
+    background:
+        linear-gradient(to bottom, transparent 24%, var(--border-subtle) 24%, var(--border-subtle) calc(24% + 1px), transparent calc(24% + 1px),
+                                     transparent 76%, var(--border-subtle) 76%, var(--border-subtle) calc(76% + 1px), transparent calc(76% + 1px)),
+        var(--surface-alt);
+    color: var(--text);
+    overflow: hidden;
 }
-.swipe-key-space {
-    flex: 4;
-    max-width: 200px;
-    font-size: 0.75rem;
-    font-weight: 400;
-    letter-spacing: 0.03em;
+.hw-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
 }
-.swipe-key-send {
-    flex: 2;
-    max-width: 100px;
-    background: var(--accent, #4db896);
-    color: #0a0f0d;
+.hw-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 5px;
+    width: 0;
+    background: var(--accent-fill);
+    pointer-events: none;
+}
+.hw-candidates {
+    flex: none;
+    min-height: 58px;
+    text-align: center;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+.hw-cand {
+    min-width: 58px;
+    min-height: 58px;
+    border-radius: 12px;
+    border: 2px solid var(--border-subtle);
+    background: var(--surface-secondary);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 1.7rem;
     font-weight: 700;
-    font-size: 0.8rem;
-    border-color: var(--accent, #4db896);
+    cursor: pointer;
 }
-.swipe-key-send:active { opacity: 0.8; }
+.hw-cand:first-child { border-color: var(--accent); }
+.hw-msg { font-size: 0.85rem; color: var(--text-secondary); text-align: center; }
+@media (max-height: 780px) { .hw-note { display: none; } }
+.hw-actions {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+.hw-actions .panel-btn { min-height: 50px; font-size: 1.05rem; }
+.hw-note {
+    flex: none;
+    margin: 0;
+    font-size: 0.74rem;
+    line-height: 1.3;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* While a panel is open the pad stays visible and the controls shrink to
+   Clear + Say, so the panel gets the room. */
+.aac-layout.input-open .aac-output-controls { grid-template-columns: 1fr 2fr; }
+.aac-layout.input-open .aac-output-controls .aac-tool:not(#btn-aac-clear) { display: none; }
+.aac-layout.input-open .aac-output-controls .aac-speak { grid-column: auto; min-height: 52px; }
+.aac-layout.input-open .aac-output-controls .aac-tool { min-height: 52px; }
+
+.mode-motor .kb-key,
+.mode-motor .panel-btn { min-height: 54px; }
 
 /* ==========================================================================
    ALZHEIMER CRISIS BOARD
@@ -2616,7 +2761,7 @@ textarea.safe-input {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(8,14,11,0.97);
+    background: rgba(var(--bg-app-rgb), 0.97);
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -2737,7 +2882,7 @@ textarea.safe-input {
 .eye-word-display.eye-word-hint {
     font-size: 0.78rem;
     font-weight: 400;
-    color: var(--text-muted, #7aa394);
+    color: var(--text-secondary, #a8c4bb);
     font-style: italic;
 }
 .eye-sm-btn {
@@ -2781,8 +2926,8 @@ textarea.safe-input {
 /* Special keys span 2 columns */
 .eye-key-del   { grid-column: span 1; background: var(--surface-elevated, #1f2e28); }
 .eye-key-space { grid-column: span 2; }
-.eye-key-send  { grid-column: span 2; background: var(--accent, #4db896); }
-.eye-key-send .eye-key-label { color: #0a0f0d; font-size: 0.9rem; }
+.eye-key-send  { grid-column: span 2; background: var(--accent-fill); }
+.eye-key-send .eye-key-label { color: var(--on-accent); font-size: 0.9rem; }
 .eye-key-del .eye-key-label  { font-size: 1.3rem; }
 
 /* Dwell ring SVG — absolute overlay inside key */
@@ -2802,19 +2947,24 @@ textarea.safe-input {
 }
 
 /* States */
+/* Highlights are mixed with the key's own surface (never a fixed dark/mint tint),
+   so the label keeps its contrast on every theme. */
 .eye-key-dwelling {
     border-color: var(--accent, #4db896);
-    background: rgba(77,184,150,0.08);
+    background: var(--surface-elevated);
+    background: color-mix(in srgb, var(--accent-fill) 14%, var(--surface-secondary));
 }
 .eye-key-selected {
-    background: rgba(77,184,150,0.3) !important;
+    background: var(--surface-elevated) !important;
+    background: color-mix(in srgb, var(--accent-fill) 38%, var(--surface-secondary)) !important;
     border-color: var(--accent, #4db896) !important;
 }
 
 /* Switch scanning — row-level dim highlight */
 .eye-key-scan-row {
-    border-color: rgba(77,184,150,0.4);
-    background: rgba(77,184,150,0.07);
+    border-color: var(--accent);
+    background: var(--surface-elevated);
+    background: color-mix(in srgb, var(--accent-fill) 14%, var(--surface-secondary));
 }
 /* Switch scanning — active key: bright pulsing highlight */
 @keyframes scan-pulse {
@@ -2823,7 +2973,8 @@ textarea.safe-input {
 }
 .eye-key-scan-active {
     border-color: var(--accent, #4db896) !important;
-    background: rgba(77,184,150,0.22) !important;
+    background: var(--surface-elevated) !important;
+    background: color-mix(in srgb, var(--accent-fill) 30%, var(--surface-secondary)) !important;
     animation: scan-pulse 0.55s ease-in-out infinite;
 }
 
@@ -2896,7 +3047,7 @@ textarea.safe-input {
 }
 
 .scan-onboard-ok {
-    background: var(--accent, #4db896);
+    background: var(--accent-fill);
     color: #060913;
     border: none;
     border-radius: 10px;
@@ -2990,7 +3141,7 @@ textarea.safe-input {
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: var(--accent, #4db896);
+    background: var(--accent-fill);
     box-shadow: 0 0 8px var(--accent, #4db896);
     animation: face-dot-breathe 2.4s ease-in-out infinite;
 }
@@ -3198,7 +3349,7 @@ textarea.safe-input {
     margin: 0.25rem 0 1.1rem;
     background: #05070c;
     border: 1px solid var(--border-subtle, rgba(77, 184, 150, 0.3));
-    color: var(--text-muted, #7aa394);
+    color: #a8b3c0; /* always on a near-black button */
     border-radius: 12px;
     font-size: 0.95rem;
     cursor: pointer;
@@ -3294,3 +3445,63 @@ textarea.safe-input {
     font-size: 0.88rem;
     color: var(--text-primary, #eafff5);
 }
+
+/* ==========================================================================
+   AUDIT FIXES + REDESIGN ADDITIONS
+   ========================================================================== */
+.aac-card-btn.aac-card-flash {
+    border-color: var(--accent-glow);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* Safety note under the cold-water exercise */
+.tipp-caution {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid #d98a1f;
+    background: var(--surface-alt);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+/* Real phone calls from the Alzheimer emergency card */
+.alz-call-row {
+    display: flex;
+    gap: 10px;
+    margin: 14px 0 4px;
+}
+.alz-call-row.hidden { display: none !important; }
+.alz-call-btn {
+    flex: 1;
+    min-height: 56px;
+    font-size: 1.15rem;
+    text-decoration: none;
+    text-align: center;
+}
+
+.face-offline-status {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.face-offline-status:empty { display: none; }
+
+/* Inline style="" attributes were removed from the markup so the CSP can drop 'unsafe-inline' */
+.pwa-hidden { display: none; }
+.ios-share-icon { vertical-align: middle; margin: 0 3px; }
+
+/* Voice settings: three controls under the description */
+.settings-item--stack { flex-direction: column; align-items: stretch; gap: 10px; }
+.voice-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.voice-controls .settings-select { flex: 1 1 180px; min-width: 0; }
+.voice-note {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+.voice-note.hidden { display: none; }

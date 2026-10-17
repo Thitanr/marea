@@ -30,10 +30,13 @@ export interface GroundingStep {
 }
 
 // ===== AAC =====
-export type AacCategory = 'needs' | 'social' | 'emotions';
+/** Visual grouping only — never the sole carrier of meaning (icon + text always shown). */
+export type AacKind = 'yes' | 'no' | 'urgent' | 'need' | 'talk' | 'feel';
 
 export interface AacItem {
+  id: string;
   icon: string;
+  kind: AacKind;
   text: string;
   spoken: string;
 }
@@ -77,11 +80,10 @@ export interface AppState {
   tippTimerInterval: ReturnType<typeof setInterval> | null;
   tippTimeRemaining: number;
 
-  // AAC
-  aacActiveCategory: AacCategory;
 }
 
 // ===== Data dictionaries =====
 export type I18nDict = Record<Lang, Record<string, string>>;
-export type AacBoardDict = Record<Lang, Record<AacCategory, AacItem[]>>;
+/** One flat board per language, same ids in the same order everywhere. */
+export type AacBoardDict = Record<Lang, AacItem[]>;
 export type SvgIconMap = Record<string, string>;

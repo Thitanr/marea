@@ -203,6 +203,15 @@ class FaceSwitch {
         return this.interactiveIn(overlay);
       }
     }
+    // With the keyboard or handwriting open, scan only what the person needs to write:
+    // its own keys, then Clear and Say (not the whole tab and all seven navigation items).
+    const input = document.querySelector<HTMLElement>('#kb-panel:not(.hidden), #hw-panel:not(.hidden)');
+    if (input && isVisible(input)) {
+      const own = ['btn-aac-clear', 'btn-aac-speak']
+        .map(id => document.getElementById(id))
+        .filter((el): el is HTMLElement => !!el && isVisible(el));
+      return [...this.interactiveIn(input), ...own];
+    }
     const panel = document.querySelector<HTMLElement>('.tab-panel.active');
     const items = panel ? this.interactiveIn(panel) : [];
     // Navigation last — content first is almost always what the user wants

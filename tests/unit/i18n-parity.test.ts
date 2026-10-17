@@ -6,7 +6,7 @@
       index.html exists in the dictionary.
    4. CJK languages actually contain CJK text (catches copy-paste of Spanish
       into the zh/ja blocks); non-CJK languages contain no CJK.
-   5. AAC board: same categories and card counts across all languages.
+   5. AAC board: one flat board, identical ids/order/icons in all languages.
    ========================================================================== */
 
 import { describe, it, expect } from 'vitest';
@@ -15,10 +15,11 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { i18n } from '../../src/data/i18n-dict.js';
 import { aacBoardData } from '../../src/data/aac-board.js';
+import { svgIcons } from '../../src/data/svg-icons.js';
 
 const LANGS = ['es', 'en', 'it', 'fr', 'de', 'zh', 'pt', 'ja'] as const;
 const dict = i18n as Record<string, Record<string, string>>;
-const board = aacBoardData as Record<string, Record<string, Array<{ text: string; spoken: string; icon: string }>>>;
+const board = aacBoardData as unknown as Record<string, Array<{ id: string; kind: string; text: string; spoken: string; icon: string }>>;
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -80,23 +81,42 @@ describe('i18n dictionary parity', () => {
   });
 });
 
-describe('AAC board parity', () => {
-  it('all languages expose the same categories with the same number of cards', () => {
-    const es = board.es!;
-    const refCats = Object.keys(es).sort();
+describe('AAC board (single prioritised board)', () => {
+  const es = board.es!;
+
+  it('every language has the same cards, in the same fixed order (positions never change)', () => {
+    const refIds = es.map(c => c.id);
     for (const lang of LANGS) {
-      const langBoard = board[lang]!;
-      expect(Object.keys(langBoard).sort(), `${lang} categories differ`).toEqual(refCats);
-      for (const cat of refCats) {
-        const cards = langBoard[cat]!;
-        expect(cards.length, `${lang}.${cat} card count differs from es`)
-          .toBe(es[cat]!.length);
-        for (const card of cards) {
-          expect(card.text.trim()).not.toBe('');
-          expect(card.spoken.trim()).not.toBe('');
-          expect(card.icon.trim()).not.toBe('');
-        }
+      expect(board[lang]!.map(c => c.id), `${lang} order/ids differ from es`).toEqual(refIds);
+      expect(board[lang]!.map(c => c.kind), `${lang} kinds differ`).toEqual(es.map(c => c.kind));
+      expect(board[lang]!.map(c => c.icon), `${lang} icons differ`).toEqual(es.map(c => c.icon));
+    }
+    expect(new Set(refIds).size, 'duplicate card ids').toBe(refIds.length);
+  });
+
+  it('urgent items come first: yes, no, help, pain, feeling unwell, toilet', () => {
+    expect(es.slice(0, 6).map(c => c.id)).toEqual(['yes', 'no', 'help', 'pain', 'sick', 'bathroom']);
+    // Every "urgent" card sits before every purely emotional card
+    const lastUrgent = Math.max(...es.map((c, i) => (c.kind === 'urgent' ? i : -1)));
+    const firstFeel = es.findIndex(c => c.kind === 'feel');
+    expect(lastUrgent).toBeLessThan(firstFeel);
+  });
+
+  it('cards are short and concrete: no empty text, no unspeakable phrases, no duplicates per language', () => {
+    for (const lang of LANGS) {
+      const labels = new Set<string>();
+      for (const card of board[lang]!) {
+        expect(card.text.trim(), `${lang}.${card.id} text`).not.toBe('');
+        expect(card.spoken.trim(), `${lang}.${card.id} spoken`).not.toBe('');
+        expect(card.text.length, `${lang}.${card.id} label too long for a card`).toBeLessThanOrEqual(60);
+        expect(card.spoken.length, `${lang}.${card.id} phrase too long`).toBeLessThanOrEqual(190);
+        expect(labels.has(card.text), `${lang}: duplicate label ${card.text}`).toBe(false);
+        labels.add(card.text);
       }
     }
+  });
+
+  it('every card icon exists in the icon set', () => {
+    for (const card of es) expect(svgIcons[card.icon], `missing icon "${card.icon}" for ${card.id}`).toBeDefined();
   });
 });

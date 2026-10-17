@@ -24,7 +24,11 @@ const svgIcons: SvgIconMap = {
             trapped: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>',
             hug: '<path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2M12 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 14a2 2 0 0 1 2-2h3M22 14a2 2 0 0 0-2-2h-3"></path>',
             love: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>',
-            alone: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 11h-6"></path>'
+            alone: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 11h-6"></path>',
+            sick: '<circle cx="12" cy="12" r="10"></circle><path d="M8 16c1-1.6 2-1.6 3 0s2 1.6 3 0"></path><path d="M9 9h.01M15 9h.01"></path>',
+            repeat: '<path d="m17 1 4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="m7 23-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path>',
+            cold: '<path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1"></path><path d="m9 3 3 2 3-2M9 21l3-2 3 2"></path>',
+            hot: '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>'
         
 };
 

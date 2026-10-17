@@ -72,7 +72,7 @@
 </head>
 <body class="theme-deep-sea mode-right-hand">
     <!-- Onboarding Wizard Overlay -->
-    <div id="onboarding-overlay" class="onboarding-overlay" role="dialog" aria-modal="true" aria-label="Guía de bienvenida">
+    <div id="onboarding-overlay" class="onboarding-overlay" role="dialog" aria-modal="true" data-i18n-aria="onboarding.aria">
         <div class="onboarding-glass">
             <div class="onboarding-steps-dots">
                 <span class="onb-dot active" data-onb-step="0"></span>
@@ -219,7 +219,7 @@
     <div class="app-container lana-matrix-grid">
         
         <!-- LANA Powered By -->
-        <div class="lana-powered-by" aria-label="Powered by Lana Technologies">
+        <div class="lana-powered-by">
             <span>Powered by Lana Technologies</span>
         </div>
         
@@ -249,7 +249,7 @@
                 </svg>
                 <span data-i18n="face.header_label">Cara</span>
             </button>
-            <button id="quick-exit-btn" class="quick-exit-btn" aria-label="Salida rápida / Cerrar app">
+            <button id="quick-exit-btn" class="quick-exit-btn" data-i18n-aria="header.exit_aria">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                     <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -311,6 +311,10 @@
                     <!-- Response panel shown when a button is pressed -->
                     <div id="alz-response-panel" class="alz-response-panel hidden" aria-live="assertive">
                         <div id="alz-response-text" class="alz-response-text"></div>
+                        <div id="alz-call-row" class="alz-call-row hidden">
+                            <a class="btn-primary alz-call-btn" href="tel:112"><span data-i18n="safety.call_btn">Llamar</span>&nbsp;112</a>
+                            <a class="btn-secondary alz-call-btn" href="tel:911"><span data-i18n="safety.call_btn">Llamar</span>&nbsp;911</a>
+                        </div>
                         <div class="alz-response-actions">
                             <button id="alz-speak-btn" class="btn-primary alz-speak-btn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
@@ -374,6 +378,7 @@
                             <div class="tipp-container">
                                 <h3 data-i18n="tipp.title">Reinicio de Emergencia (Vago)</h3>
                                 <p data-i18n="tipp.description">Llenar un recipiente con agua muy fría o mojar un paño. Inclínate hacia adelante y pon tu cara en el agua (especialmente el área de los ojos) sosteniendo la respiración durante 30 segundos. Esto baja tu ritmo cardíaco drásticamente de forma física.</p>
+                                <p class="tipp-caution" role="note" data-i18n="tipp.caution">Si tienes problemas de corazón, tomas medicación que baja el pulso o te mareas con facilidad, consulta antes con tu médico. Detente si te sientes mal.</p>
                                 <div class="timer-display" id="tipp-timer">05:00</div>
                                 <div class="tipp-controls">
                                     <button id="btn-tipp-start" class="btn-primary" data-i18n="tipp.start">Iniciar 5 min</button>
@@ -405,28 +410,32 @@
             <!-- 3. VOZ DE MAREA (CAA / AAC) -->
             <section id="tab-voz" class="tab-panel active" role="tabpanel" aria-labelledby="nav-voz">
                 <div class="aac-layout">
-                    <!-- Text Pad for output -->
+                    <!-- Text pad: cards, keyboard and handwriting all write here; "Say" speaks it -->
                     <div class="aac-output-container">
-                        <textarea id="aac-speech-text" class="aac-speech-text" placeholder="Toca los botones para hablar o escribe aquí..." aria-label="Texto a decir en voz alta" data-i18n-placeholder="aac.output_placeholder"></textarea>
+                        <textarea id="aac-speech-text" class="aac-speech-text" placeholder="Toca los botones para hablar o escribe aquí..." data-i18n-aria="aac.pad_aria" data-i18n-placeholder="aac.output_placeholder" autocapitalize="sentences" spellcheck="true" enterkeyhint="done"></textarea>
                         <div class="aac-output-controls">
-                            <button id="btn-aac-clear" class="btn-secondary" aria-label="Borrar texto" data-i18n="aac.clear_btn">Borrar</button>
-                            <button id="eye-mode-btn" class="btn-secondary eye-mode-btn" data-i18n-aria="eye.btn_label" title="Teclado deslizante">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
-                                    <path d="M4 17c3-6 5-6 8 0s5 6 8 0"></path>
-                                    <circle cx="4" cy="17" r="1.6" fill="currentColor" stroke="none"></circle>
-                                </svg>
-                                <span data-i18n="eye.btn_text">Deslizar</span>
+                            <button id="btn-aac-clear" class="btn-secondary aac-tool">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+                                <span data-i18n="aac.clear_btn">Borrar</span>
                             </button>
-                            <button id="eye-gaze-btn" class="btn-secondary eye-mode-btn" data-i18n-aria="eye.gaze_btn" title="Teclado de escaneo">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+                            <button id="kb-open-btn" class="btn-secondary aac-tool" aria-expanded="false" aria-controls="kb-panel">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M9 15h6"></path></svg>
+                                <span data-i18n="kb.btn">Teclado</span>
+                            </button>
+                            <button id="hw-open-btn" class="btn-secondary aac-tool" aria-expanded="false" aria-controls="hw-panel">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                <span data-i18n="hw.btn">Escribir</span>
+                            </button>
+                            <button id="eye-gaze-btn" class="btn-secondary aac-tool eye-mode-btn" data-i18n-aria="eye.gaze_btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20">
                                     <circle cx="12" cy="12" r="3"></circle>
                                     <circle cx="12" cy="12" r="7" stroke-opacity="0.45"></circle>
                                     <circle cx="12" cy="12" r="11" stroke-opacity="0.2"></circle>
                                 </svg>
-                                <span data-i18n="eye.gaze_btn">Mirada</span>
+                                <span data-i18n="eye.gaze_btn">Escaneo</span>
                             </button>
-                            <button id="btn-aac-speak" class="btn-primary" aria-label="Hablar en voz alta">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+                            <button id="btn-aac-speak" class="btn-primary aac-speak">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="22" height="22">
                                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                                 </svg>
@@ -435,30 +444,43 @@
                         </div>
                     </div>
 
-                    <!-- AAC Interactive Board -->
+                    <!-- One board, one fixed order: most urgent first -->
                     <div class="aac-board-wrapper">
-                        <!-- Quick category selector -->
-                        <div class="aac-categories" role="tablist" aria-label="Categorías de comunicación">
-                            <button class="aac-cat-btn active" data-category="needs" role="tab" aria-selected="true" data-i18n="aac.cat_needs">Necesidades</button>
-                            <button class="aac-cat-btn" data-category="social" role="tab" aria-selected="false" data-i18n="aac.cat_social">Social</button>
-                            <button class="aac-cat-btn" data-category="emotions" role="tab" aria-selected="false" data-i18n="aac.cat_emotions">Sentir</button>
-                        </div>
-                        <!-- Grid content -->
                         <div class="aac-grid-container" id="aac-grid"></div>
                     </div>
 
-                    <!-- Swipe Keyboard (slide-to-type, replaces the board while open) -->
-                    <div id="swipe-keyboard" class="swipe-keyboard hidden" role="group" data-i18n-aria="eye.btn_label" aria-label="Teclado deslizante">
-                        <div class="swipe-kb-header">
-                            <div class="swipe-kb-display">
-                                <span id="swipe-kb-word" class="swipe-kb-word" aria-live="polite"></span>
-                                <span id="swipe-kb-hint" class="swipe-kb-hint" data-i18n="swipe.hint">Desliza el dedo por las letras para escribir palabras</span>
-                            </div>
-                            <button id="swipe-kb-close" class="swipe-kb-close-btn" data-i18n-aria="eye.btn_stop" aria-label="Cerrar teclado">✕</button>
+                    <!-- On-screen keyboard (replaces the board while open) -->
+                    <div id="kb-panel" class="input-panel hidden" role="group" data-i18n-aria="kb.panel_aria">
+                        <div class="input-panel-head">
+                            <div id="kb-suggest" class="kb-suggest" aria-live="polite"></div>
+                            <button id="kb-close-btn" class="panel-btn" type="button" data-i18n-aria="kb.close_aria">✕</button>
                         </div>
-                        <div id="swipe-kb-rows" class="swipe-kb-rows"></div>
+                        <div id="kb-rows" class="kb-rows"></div>
                     </div>
 
+                    <!-- Handwriting: write one capital letter at a time with finger, pencil or mouse -->
+                    <div id="hw-panel" class="input-panel hidden" role="group" data-i18n-aria="hw.panel_aria">
+                        <div class="input-panel-head">
+                            <div id="hw-suggest" class="kb-suggest" aria-live="polite"></div>
+                            <button id="hw-close-btn" class="panel-btn" type="button" data-i18n-aria="hw.close_aria">✕</button>
+                        </div>
+                        <div class="input-panel-head">
+                            <p id="hw-hint" class="hw-hint" data-i18n="hw.hint_letters">Escribe una letra mayúscula, una a una.</p>
+                            <button id="hw-mode-btn" class="panel-btn" type="button" aria-pressed="false">ABC</button>
+                        </div>
+                        <div class="hw-pad-wrap">
+                            <canvas id="hw-canvas" class="hw-canvas" data-i18n-aria="hw.canvas_aria"></canvas>
+                            <div id="hw-progress" class="hw-progress" aria-hidden="true"></div>
+                        </div>
+                        <div id="hw-candidates" class="hw-candidates" aria-live="polite"></div>
+                        <div class="hw-actions">
+                            <button id="hw-clear-btn" class="panel-btn" type="button" data-i18n-aria="hw.clear_aria">↺</button>
+                            <button id="hw-space-btn" class="panel-btn" type="button" data-i18n-aria="kb.space_aria">␣</button>
+                            <button id="hw-back-btn" class="panel-btn" type="button" data-i18n-aria="kb.back_aria">⌫</button>
+                            <button id="hw-ok-btn" class="panel-btn" type="button" data-i18n-aria="hw.ok_aria">✓</button>
+                        </div>
+                        <p class="hw-note" data-i18n="hw.system_hint">Con un lápiz (iPad, Samsung, Windows) también puedes escribir directamente en el cuadro de texto.</p>
+                    </div>
                 </div>
             </section>
 
@@ -476,15 +498,15 @@
                             <h3 data-i18n="safety.anchors_title">Qué me sujeta al mundo</h3>
                             <div class="anchor-field">
                                 <label for="input-anchor-person" data-i18n="safety.person_label">Persona segura (que no me juzga):</label>
-                                <input type="text" id="input-anchor-person" class="safe-input" placeholder="Nombre y contacto...">
+                                <input type="text" id="input-anchor-person" class="safe-input" placeholder="Nombre y contacto..." data-i18n-placeholder="safety.person_placeholder">
                             </div>
                             <div class="anchor-field">
                                 <label for="input-anchor-song" data-i18n="safety.song_label">Canción que me estabiliza:</label>
-                                <input type="text" id="input-anchor-song" class="safe-input" placeholder="Título y artista...">
+                                <input type="text" id="input-anchor-song" class="safe-input" placeholder="Título y artista..." data-i18n-placeholder="safety.song_placeholder">
                             </div>
                             <div class="anchor-field">
                                 <label for="input-anchor-memory" data-i18n="safety.memory_label">Un recuerdo o lugar que me transmite paz:</label>
-                                <textarea id="input-anchor-memory" class="safe-input" placeholder="Describe brevemente..."></textarea>
+                                <textarea id="input-anchor-memory" class="safe-input" placeholder="Describe brevemente..." data-i18n-placeholder="safety.memory_placeholder"></textarea>
                             </div>
                             <button id="btn-save-safety" class="btn-primary" data-i18n="safety.save_btn">Guardar Anclajes</button>
                         </div>
@@ -532,28 +554,53 @@
                                         <strong>112</strong>
                                         <span data-i18n="safety.emergency_eu">Emergencias generales (España y UE)</span>
                                     </div>
-                                    <a href="tel:112" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:112" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                                 <div class="helpline-item">
                                     <div class="helpline-info">
                                         <strong>911</strong>
                                         <span data-i18n="safety.emergency_us">Emergencias generales (EE.UU. y Canadá)</span>
                                     </div>
-                                    <a href="tel:911" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:911" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                                 <div class="helpline-item">
                                     <div class="helpline-info">
                                         <strong>911</strong>
                                         <span data-i18n="safety.emergency_mx">Emergencias generales (México)</span>
                                     </div>
-                                    <a href="tel:911" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:911" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                                 <div class="helpline-item">
                                     <div class="helpline-info">
                                         <strong>101</strong>
                                         <span data-i18n="safety.emergency_ps">Ambulancia — Media Luna Roja Palestina (Gaza y Cisjordania)</span>
                                     </div>
-                                    <a href="tel:101" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:101" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <!-- Local emergency numbers, shown only in the matching language (same verified sources as the crisis lines) -->
+                                <div class="helpline-item hidden" data-helpline-langs="en">
+                                    <div class="helpline-info"><strong>999</strong><span>Emergency — UK &amp; Ireland</span></div>
+                                    <a href="tel:999" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="fr">
+                                    <div class="helpline-info"><strong>15</strong><span>SAMU — urgence médicale (France)</span></div>
+                                    <a href="tel:15" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="it">
+                                    <div class="helpline-info"><strong>118</strong><span>Emergenza sanitaria — ambulanza (Italia)</span></div>
+                                    <a href="tel:118" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="pt">
+                                    <div class="helpline-info"><strong>192</strong><span>SAMU — emergência médica (Brasil)</span></div>
+                                    <a href="tel:192" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="zh">
+                                    <div class="helpline-info"><strong>120</strong><span>急救（中国）</span></div>
+                                    <a href="tel:120" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="ja">
+                                    <div class="helpline-info"><strong>119</strong><span>救急・消防（日本） ／ 警察 110</span></div>
+                                    <a href="tel:119" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                             </div>
 
@@ -561,31 +608,63 @@
                             <div class="helpline-list">
                                 <div class="helpline-item">
                                     <div class="helpline-info">
-                                        <strong>España: 024</strong>
-                                        <span data-i18n="safety.helpline_es">Atención a la conducta suicida</span>
+                                        <strong>024</strong>
+                                        <span><span data-i18n="safety.country_es">España</span> · <span data-i18n="safety.helpline_es">Atención a la conducta suicida</span></span>
                                     </div>
-                                    <a href="tel:024" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:024" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                                 <div class="helpline-item">
                                     <div class="helpline-info">
-                                        <strong>España: 717 003 717</strong>
-                                        <span data-i18n="safety.helpline_hope">Teléfono de la Esperanza</span>
+                                        <strong>717 003 717</strong>
+                                        <span><span data-i18n="safety.country_es">España</span> · <span data-i18n="safety.helpline_hope">Teléfono de la Esperanza</span></span>
                                     </div>
-                                    <a href="tel:717003717" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:717003717" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                                 <div class="helpline-item">
                                     <div class="helpline-info">
-                                        <strong>USA & LATAM: 988</strong>
-                                        <span data-i18n="safety.helpline_988">Línea de Crisis (Suicide & Crisis Lifeline)</span>
+                                        <strong>988</strong>
+                                        <span><span data-i18n="safety.country_us_ca">EE. UU. y Canadá</span> · <span data-i18n="safety.helpline_988">Línea de Crisis (Suicide &amp; Crisis Lifeline)</span></span>
                                     </div>
-                                    <a href="tel:988" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:988" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                                 <div class="helpline-item">
                                     <div class="helpline-info">
-                                        <strong>México: 800 911 2000</strong>
-                                        <span data-i18n="safety.helpline_mx">Línea de la Vida</span>
+                                        <strong>800 911 2000</strong>
+                                        <span><span data-i18n="safety.country_mx">México</span> · <span data-i18n="safety.helpline_mx">Línea de la Vida</span></span>
                                     </div>
-                                    <a href="tel:8009112000" class="btn-secondary call-btn">Llamar</a>
+                                    <a href="tel:8009112000" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="en">
+                                    <div class="helpline-info"><strong>116 123</strong><span>Samaritans — UK &amp; Ireland, free, 24 h</span></div>
+                                    <a href="tel:116123" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="fr">
+                                    <div class="helpline-info"><strong>3114</strong><span>Prévention du suicide — France, gratuit, 24 h/24</span></div>
+                                    <a href="tel:3114" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="de">
+                                    <div class="helpline-info"><strong>0800 111 0 111</strong><span>Telefonseelsorge — Deutschland, kostenlos, rund um die Uhr</span></div>
+                                    <a href="tel:08001110111" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="it">
+                                    <div class="helpline-info"><strong>02 2327 2327</strong><span>Telefono Amico — Italia, ascolto, 10:00–24:00</span></div>
+                                    <a href="tel:0223272327" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="pt">
+                                    <div class="helpline-info"><strong>188</strong><span>CVV — Brasil, apoio emocional, gratuito, 24 h</span></div>
+                                    <a href="tel:188" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="pt">
+                                    <div class="helpline-info"><strong>808 24 24 24</strong><span>SNS 24 — Portugal, opção 4: apoio psicológico</span></div>
+                                    <a href="tel:808242424" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="ja">
+                                    <div class="helpline-info"><strong>0120-279-338</strong><span>よりそいホットライン（無料・24時間）</span></div>
+                                    <a href="tel:0120279338" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
+                                </div>
+                                <div class="helpline-item hidden" data-helpline-langs="zh">
+                                    <div class="helpline-info"><strong>12356</strong><span>全国心理援助热线（各地开通情况不一）</span></div>
+                                    <a href="tel:12356" class="btn-secondary call-btn" data-i18n="safety.call_btn">Llamar</a>
                                 </div>
                             </div>
                         </div>
@@ -645,7 +724,7 @@
                         <div class="canvas-card">
                             <h3 data-i18n="journal.canvas_title">Tu Huella Sensorial</h3>
                             <div class="dynamic-canvas-container">
-                                <canvas id="sensor-canvas" width="300" height="300" aria-label="Visualización de tu estado sensorial"></canvas>
+                                <canvas id="sensor-canvas" width="300" height="300" data-i18n-aria="journal.canvas_aria"></canvas>
                             </div>
                             <p class="canvas-caption" data-i18n="journal.canvas_caption">Este patrón abstracto es tu estado actual. Guardado en tu dispositivo.</p>
                         </div>
@@ -658,7 +737,7 @@
                         <h3 data-i18n="journal.notebook_title">Notas Libres</h3>
                         <p class="canvas-caption" data-i18n="journal.notebook_subtitle">Escribe, dibuja o anota con tu dedo, pluma o teclado.</p>
                     </div>
-                    <div class="notebook-toolbar" role="toolbar" aria-label="Herramientas de dibujo">
+                    <div class="notebook-toolbar" role="toolbar" data-i18n-aria="journal.tools_aria">
                         <button class="notebook-tool-btn active" id="notebook-pen-btn" aria-pressed="true">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                             <span data-i18n="journal.notebook_pen">Pluma</span>
@@ -667,19 +746,19 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M20 20H7L3 16l11-11 6 6-3.5 3.5"/><path d="M6.5 17.5 3 14"/></svg>
                             <span data-i18n="journal.notebook_eraser">Borrador</span>
                         </button>
-                        <label class="notebook-color-label" aria-label="Color de pluma">
+                        <label class="notebook-color-label" data-i18n-aria="journal.color_aria">
                             <input type="color" id="notebook-color" value="#4db896" class="notebook-color-input">
                         </label>
                         <div class="notebook-size-wrap">
-                            <input type="range" id="notebook-size" min="2" max="24" value="4" class="notebook-size-slider" aria-label="Grosor">
+                            <input type="range" id="notebook-size" min="2" max="24" value="4" class="notebook-size-slider" data-i18n-aria="journal.size_aria">
                         </div>
                         <button class="notebook-tool-btn notebook-clear-btn" id="notebook-clear-btn">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                             <span data-i18n="journal.notebook_clear">Limpiar</span>
                         </button>
                     </div>
-                    <canvas id="notebook-draw-canvas" class="notebook-canvas" aria-label="Espacio de dibujo libre — soporta stylus, dedo y ratón"></canvas>
-                    <textarea id="notebook-text" class="notebook-text" placeholder="Escribe aquí con teclado..." aria-label="Notas de texto" rows="3"></textarea>
+                    <canvas id="notebook-draw-canvas" class="notebook-canvas" data-i18n-aria="journal.notebook_canvas_aria"></canvas>
+                    <textarea id="notebook-text" class="notebook-text" placeholder="Escribe aquí con teclado..." data-i18n-placeholder="journal.notebook_placeholder" data-i18n-aria="journal.notebook_text_aria" rows="3"></textarea>
                     <button id="notebook-save-btn" class="btn-primary notebook-save-btn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <span data-i18n="journal.notebook_save">Guardar en dispositivo</span>
@@ -738,6 +817,7 @@
                                 <option value="right" data-i18n="settings.hand_right">Mano Derecha (Predeterminado)</option>
                                 <option value="left" data-i18n="settings.hand_left">Mano Izquierda</option>
                                 <option value="center" data-i18n="settings.hand_center">Centrado (Pantalla Completa)</option>
+                                <option value="motor-center" data-i18n="settings.hand_motor_center">Motor Centrado (Botones Grandes)</option>
                                 <option value="motor-right" data-i18n="settings.hand_motor_right">Motor Derecha (Botones Grandes)</option>
                                 <option value="motor-left" data-i18n="settings.hand_motor_left">Motor Izquierda (Botones Grandes)</option>
                             </select>
@@ -798,6 +878,47 @@
                             </label>
                         </div>
 
+                        <!-- Voz: la mejor voz instalada, elegible, con velocidad -->
+                        <div class="settings-item settings-item--stack">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.voice_title">Voz</strong>
+                                <span data-i18n="settings.voice_desc">Marea usa la mejor voz instalada en tu dispositivo y funciona sin internet.</span>
+                                <span id="voice-note" class="voice-note hidden" aria-live="polite"></span>
+                            </div>
+                            <div class="voice-controls">
+                                <select id="setting-voice" class="settings-select" data-i18n-aria="settings.voice_title"></select>
+                                <select id="setting-voice-rate" class="settings-select" data-i18n-aria="settings.voice_rate_title">
+                                    <option value="0.75" data-i18n="settings.voice_rate_slow">Lenta</option>
+                                    <option value="0.92" data-i18n="settings.voice_rate_normal">Normal</option>
+                                    <option value="1.1" data-i18n="settings.voice_rate_fast">Rápida</option>
+                                </select>
+                                <button id="btn-voice-test" class="btn-secondary" type="button" data-i18n="settings.voice_test">Probar voz</button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.voice_online_title">Voces en línea (más naturales)</strong>
+                                <span data-i18n="settings.voice_online_desc">Algunas voces se generan en un servidor: el texto SALE de tu dispositivo. Apagado por defecto.</span>
+                            </div>
+                            <label class="settings-toggle">
+                                <input type="checkbox" id="setting-voice-online">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label" data-i18n="settings.voice_online_toggle">Permitir voces en línea</span>
+                            </label>
+                        </div>
+
+                        <!-- Teclado: el del dispositivo por defecto -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.kb_mode_title">Teclado para escribir</strong>
+                                <span data-i18n="settings.kb_mode_desc">Recomendado: el teclado de tu dispositivo.</span>
+                            </div>
+                            <select id="setting-kb-mode" class="settings-select" data-i18n-aria="settings.kb_mode_title">
+                                <option value="device" data-i18n="settings.kb_mode_device">Teclado de mi dispositivo (recomendado)</option>
+                                <option value="marea" data-i18n="settings.kb_mode_marea">Teclado grande de Marea</option>
+                            </select>
+                        </div>
+
                         <!-- Control Facial (KAI perception, 100% local) -->
                         <div class="settings-item">
                             <div class="setting-desc">
@@ -822,17 +943,33 @@
                             </select>
                         </div>
 
-                        <!-- Backup con Supabase -->
+                        <!-- Escritura a mano: pausa antes de aceptar la letra -->
                         <div class="settings-item">
                             <div class="setting-desc">
-                                <strong data-i18n="settings.sync_title">Copia de Seguridad en la Nube (Opcional)</strong>
-                                <span data-i18n="settings.sync_desc">Crea una cuenta en Supabase para sincronizar tus diarios y anclajes. Sin datos, esta app seguirá siendo 100% local.</span>
+                                <strong data-i18n="settings.hw_delay_title">Pausa al escribir a mano</strong>
+                                <span data-i18n="settings.hw_delay_desc">Cuánto espera Marea tras levantar el dedo o el lápiz antes de aceptar la letra. Si tu mano va despacio, elige más tiempo.</span>
                             </div>
-                            <button id="btn-sync-supabase" class="btn-secondary" data-i18n="settings.sync_btn">Conectar Cuenta</button>
+                            <select id="setting-hw-delay" class="settings-select">
+                                <option value="800">0,8 s</option>
+                                <option value="1200">1,2 s</option>
+                                <option value="2000">2 s</option>
+                                <option value="3000">3 s</option>
+                                <option value="4500">4,5 s</option>
+                            </select>
+                        </div>
+
+                        <!-- Control Facial sin conexión (~15 MB, descarga a propósito) -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.face_offline_title">Control Facial sin conexión</strong>
+                                <span data-i18n="settings.face_offline_desc">Guarda en este dispositivo el modelo facial (unos 15 MB) para usarlo sin internet. Mejor con wifi.</span>
+                                <span id="face-offline-status" class="face-offline-status" aria-live="polite"></span>
+                            </div>
+                            <button id="btn-face-offline" class="btn-secondary" data-i18n="settings.face_offline_btn">Descargar</button>
                         </div>
 
                         <!-- Instalar como App (PWA) -->
-                        <div class="settings-item" id="pwa-install-item" style="display:none">
+                        <div class="settings-item pwa-hidden" id="pwa-install-item">
                             <div class="setting-desc">
                                 <strong data-i18n="settings.pwa_title">Instalar en pantalla de inicio</strong>
                                 <span data-i18n="settings.pwa_desc">Añade Marea a tu pantalla de inicio para acceder sin conexión.</span>
@@ -901,7 +1038,7 @@
                     <div class="sintonia-section">
                         <h3 class="sintonia-section-title" data-i18n="sintonia.energy_title">Mi energía hoy</h3>
                         <p class="sintonia-hint" data-i18n="sintonia.energy_hint">Conocer tu nivel a tiempo previene el agotamiento. Sin juicio.</p>
-                        <div id="energy-battery" class="energy-battery" role="radiogroup" aria-label="Nivel de energía">
+                        <div id="energy-battery" class="energy-battery" role="radiogroup" data-i18n-aria="sintonia.energy_aria">
                             <button class="energy-seg" data-level="1" role="radio" aria-checked="false" aria-label="1/5"></button>
                             <button class="energy-seg" data-level="2" role="radio" aria-checked="false" aria-label="2/5"></button>
                             <button class="energy-seg" data-level="3" role="radio" aria-checked="false" aria-label="3/5"></button>
@@ -1009,7 +1146,7 @@
         </main>
 
         <!-- Bottom Tab Navigation Bar -->
-        <nav class="app-navbar" role="navigation" aria-label="Menú principal">
+        <nav class="app-navbar" role="navigation" data-i18n-aria="nav.aria">
             <button class="nav-item active" id="nav-voz" data-tab="voz" data-i18n-aria="nav.voz" aria-label="Hablar" aria-current="page">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
@@ -1068,7 +1205,7 @@
     <div id="eye-gaze-keyboard" class="eye-gaze-kb hidden" role="dialog" aria-modal="true" data-i18n-aria="eye.gaze_btn">
 
         <!-- Onboarding overlay (shown on first use only) -->
-        <div id="scan-onboard-overlay" class="scan-onboard-overlay hidden" role="region" aria-label="Tutorial de escaneo">
+        <div id="scan-onboard-overlay" class="scan-onboard-overlay hidden" role="region" data-i18n-aria="eye.onboard_aria">
             <div class="scan-onboard-card">
                 <h2 class="scan-onboard-title" data-i18n="eye.onboard_title">Cómo usar el escaneo</h2>
                 <div class="scan-onboard-steps">
@@ -1094,7 +1231,7 @@
             <div class="eye-type-header">
                 <div id="eye-word-display" class="eye-word-display" aria-live="polite"></div>
             </div>
-            <div id="eye-letter-grid" class="eye-letter-grid" role="group" aria-label="Teclado de escaneo"></div>
+            <div id="eye-letter-grid" class="eye-letter-grid" role="group" data-i18n-aria="eye.gaze_btn"></div>
         </div>
 
         <!-- Close -->
@@ -1105,7 +1242,7 @@
     <div id="sw-update-banner" class="sw-update-banner hidden" role="alert" aria-live="polite">
         <span data-i18n="update.available">Nueva versión disponible</span>
         <button id="sw-update-btn" class="sw-update-btn" data-i18n="update.action">Actualizar ahora</button>
-        <button id="sw-update-dismiss" class="sw-update-dismiss" aria-label="Más tarde">✕</button>
+        <button id="sw-update-dismiss" class="sw-update-dismiss" data-i18n-aria="update.later">✕</button>
     </div>
 
     <!-- iOS Install Banner -->
@@ -1113,14 +1250,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="M12 2C12 2 4 9 4 14a8 8 0 0 0 16 0c0-5-8-12-8-12z"/></svg>
         <span data-i18n="install.banner_text">Instala Marea en tu pantalla de inicio</span>
         <button id="ios-banner-how" class="ios-banner-how" data-i18n="install.how">Cómo</button>
-        <button id="ios-banner-close" class="ios-banner-close" aria-label="Cerrar">✕</button>
+        <button id="ios-banner-close" class="ios-banner-close" data-i18n-aria="common.close">✕</button>
     </div>
 
     <!-- iOS Install Instructions Modal -->
     <div id="ios-install-modal" class="ios-install-modal hidden" role="dialog" aria-modal="true" aria-labelledby="ios-modal-title">
         <div class="ios-modal-backdrop"></div>
         <div class="ios-modal-content">
-            <button class="ios-modal-close" aria-label="Cerrar">✕</button>
+            <button class="ios-modal-close" data-i18n-aria="common.close">✕</button>
             <div class="ios-modal-icon">
                 <svg viewBox="0 0 28 28" fill="none" stroke="#4db896" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
                     <circle cx="14" cy="14" r="12" stroke-width="1.4"/>
@@ -1137,7 +1274,7 @@
                 <li>
                     <span class="ios-step-num">1</span>
                     <span data-i18n="install.step1">Toca el botón <strong>Compartir</strong>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="vertical-align:middle;margin:0 3px"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" class="ios-share-icon"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                     en la barra de Safari</span>
                 </li>
                 <li>
