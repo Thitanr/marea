@@ -25,6 +25,13 @@ we will credit you in the fix unless you prefer otherwise.
 - Marea stores **all user data in `localStorage` on the device** and makes
   **no network requests to third parties** (the CSP allows `'self'` only).
   Reports proving any data leaving the device are the highest severity.
+  The only things that ever leave are those a person starts themselves: the
+  "Avisar" message (opened in their own WhatsApp / share sheet, location added
+  only if they allow it) and the optional PNG share of a notebook page. Text-to-speech
+  uses only voices installed on the device; voices that stream text to a server
+  are never used. This is enforced by `tests/unit/privacy.test.ts`.
+- The hosting provider (Cloudflare Pages) may inject its own page-analytics
+  script at the edge; the CSP blocks it from running or sending anything.
 - The camera (Face Control / Facial Calm) is processed entirely on-device
   with Google MediaPipe (bundled locally). Any finding that camera frames
   or derived data can leave the device is critical.

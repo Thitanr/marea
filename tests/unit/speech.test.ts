@@ -45,23 +45,24 @@ describe('voice selection', () => {
     expect(names.indexOf('eSpeak Spanish')).toBe(names.length - 1);
   });
 
-  it('never uses a voice that sends text to a server unless the person allows it', async () => {
+  it('never lists or picks a voice that sends text to a server', async () => {
     const { rankedVoices, pickVoice } = await load();
+    const names = rankedVoices('es').map(x => x.name);
     expect(rankedVoices('es').every(x => x.localService)).toBe(true);
+    expect(names).not.toContain('Microsoft Elvira Online (Natural) - Spanish (Spain)');
+    expect(names).not.toContain('Google español');
     expect(pickVoice('es')?.localService).toBe(true);
+    // not even if an old preference or a stored flag asks for it
     localStorage.setItem('marea_voice_online', '1');
-    const withOnline = rankedVoices('es').map(x => x.name);
-    expect(withOnline).toContain('Microsoft Elvira Online (Natural) - Spanish (Spain)');
-    // The typical Windows case: once allowed, the natural online voice beats the robotic built-in ones
-    expect(withOnline.indexOf('Microsoft Elvira Online (Natural) - Spanish (Spain)')).toBeLessThan(withOnline.indexOf('Microsoft Helena - Spanish (Spain)'));
+    localStorage.setItem('marea_voice_es', 'Microsoft Elvira Online (Natural) - Spanish (Spain)');
+    expect(rankedVoices('es').map(x => x.name)).not.toContain('Microsoft Elvira Online (Natural) - Spanish (Spain)');
+    expect(pickVoice('es')?.localService).toBe(true);
   });
 
-  it('honours the voice the person chose, but not an online one while online is off', async () => {
+  it('honours the on-device voice the person chose', async () => {
     const { pickVoice } = await load();
     localStorage.setItem('marea_voice_es', 'Microsoft Pablo - Spanish (Spain)');
     expect(pickVoice('es')?.name).toBe('Microsoft Pablo - Spanish (Spain)');
-    localStorage.setItem('marea_voice_es', 'Google español');
-    expect(pickVoice('es')?.localService).toBe(true);
   });
 
   it('only offers voices of the right language', async () => {

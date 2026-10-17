@@ -2,9 +2,8 @@
    MAREA — Speech: the best voice the device really has, never a surprise.
    - Prefers voices that run ON the device (private, work offline) and that
      sound natural (neural / premium / enhanced / Siri / known good names).
-   - Voices that send the text to a server ("online") are used only if the
-     person turns that on in Settings — Marea's promise is that nothing leaves
-     the device by default.
+   - Voices that send the text to a server ("online") are NEVER offered: Marea's
+     promise is that nothing the person says or writes leaves the device.
    - The person (or a carer) can pick any installed voice and the speed.
    ========================================================================== */
 
@@ -19,7 +18,6 @@ export const LOCALE: Record<Lang, string> = {
 
 const LS_VOICE = 'marea_voice_';        // + lang -> voiceURI
 const LS_RATE = 'marea_voice_rate';
-const LS_ONLINE = 'marea_voice_online';
 export const DEFAULT_RATE = 0.92;
 
 const lsGet = (k: string): string | null => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -41,7 +39,6 @@ export function warmVoices(): void {
   s.addEventListener?.('voiceschanged', () => { refreshCache(); refreshVoiceSettings(); });
 }
 
-export const allowsOnlineVoices = (): boolean => lsGet(LS_ONLINE) === '1';
 export const savedRate = (): number => {
   const v = Number(lsGet(LS_RATE));
   return Number.isFinite(v) && v >= 0.5 && v <= 1.6 ? v : DEFAULT_RATE;
@@ -68,12 +65,13 @@ export function scoreVoice(v: SpeechSynthesisVoice, lang: Lang): number {
   return s;
 }
 
-/** Voices for a language, best first. Online voices are included only when the person allows them. */
-export function rankedVoices(lang: Lang, includeOnline = allowsOnlineVoices()): SpeechSynthesisVoice[] {
+/** Voices for a language, best first. Only voices that run on the device: a voice with
+ *  `localService === false` streams the text to a server, so it is never listed or picked. */
+export function rankedVoices(lang: Lang): SpeechSynthesisVoice[] {
   const prefix = LOCALE[lang].slice(0, 2).toLowerCase();
   return cache
     .filter(v => v.lang.replace('_', '-').toLowerCase().startsWith(prefix))
-    .filter(v => includeOnline || v.localService)
+    .filter(v => v.localService)
     .sort((a, b) => scoreVoice(b, lang) - scoreVoice(a, lang) || a.name.localeCompare(b.name));
 }
 
@@ -129,7 +127,7 @@ export function refreshVoiceSettings(): void {
   const opts = list.slice(0, 12).map(v => {
     const o = document.createElement('option');
     o.value = v.voiceURI;
-    o.textContent = `${v.name} · ${v.localService ? t('settings.voice_local') : t('settings.voice_online')}`;
+    o.textContent = `${v.name} · ${t('settings.voice_local')}`;
     return o;
   });
   select.replaceChildren(auto, ...opts);
@@ -143,7 +141,6 @@ export function refreshVoiceSettings(): void {
 export function initVoiceSettings(): void {
   const select = $<HTMLSelectElement>('setting-voice');
   const rate = $<HTMLSelectElement>('setting-voice-rate');
-  const online = $<HTMLInputElement>('setting-voice-online');
   const test = $('btn-voice-test');
   if (!select) return;
 
@@ -152,13 +149,6 @@ export function initVoiceSettings(): void {
     const values = [...rate.options].map(o => Number(o.value));
     rate.value = String(values.reduce((best, v) => (Math.abs(v - r) < Math.abs(best - r) ? v : best), values[0] ?? DEFAULT_RATE));
     rate.addEventListener('change', () => { lsSet(LS_RATE, rate.value); });
-  }
-  if (online) {
-    online.checked = allowsOnlineVoices();
-    online.addEventListener('change', () => {
-      lsSet(LS_ONLINE, online.checked ? '1' : '0');
-      refreshVoiceSettings();
-    });
   }
   select.addEventListener('change', () => {
     lsSet(LS_VOICE + state.lang, select.value);
