@@ -10,9 +10,6 @@
   Permissions-Policy: camera=(self), microphone=(), geolocation=(self), payment=(), usb=(), interest-cohort=()
   Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;
 
-/
-  Cache-Control: no-transform, no-cache
-
 /service-worker.js
   Cache-Control: no-cache
 
