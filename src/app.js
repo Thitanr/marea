@@ -16,6 +16,7 @@ import { initNeuro, stopNeuroSession } from './face/face-neuro.js';
 import { initInputPanels } from './input/panels.js';
 import { learnWords } from './input/predict.js';
 import { warmVoices, speak, stopSpeaking, initVoiceSettings, refreshVoiceSettings } from './core/speech.js';
+import { tapGuardMs, scanStepMs, initTimingSettings } from './core/prefs.js';
 
 /* ----- Module-compatible init (Phase 1a) ----- */
 function boot() {
@@ -732,6 +733,7 @@ function boot() {
 
         // Voice (best installed, choosable) and which keyboard "Keyboard" opens
         initVoiceSettings();
+        initTimingSettings();
         const kbMode = document.getElementById("setting-kb-mode");
         if (kbMode) {
             kbMode.value = localStorage.getItem("marea_kb_mode") === "marea" ? "marea" : "device";
@@ -1656,8 +1658,8 @@ function boot() {
             lang === 'es' ? ['Z','Ñ','DEL','SPACE','SEND'] : ['Z','DEL','SPACE','SEND'],
         ];
         SCAN_ROWS = scanRowsFor(state.lang);
-        // Always slow: 1600ms per step — AAC users need time to react
-        const SCAN_SPEED = 1600;
+        // Slow by default (1600 ms per step — AAC users need time to react); the person can change it in Settings
+        const SCAN_BASE_MS = 1600;
 
         let builtText = '';
         let phase     = 'row'; // 'row' | 'key'
@@ -1730,7 +1732,7 @@ function boot() {
             scanTimer = setInterval(() => {
                 rowIdx = (rowIdx + 1) % SCAN_ROWS.length;
                 highlightRow(rowIdx);
-            }, SCAN_SPEED);
+            }, scanStepMs(SCAN_BASE_MS));
         }
 
         function startKeyPhase() {
@@ -1741,7 +1743,7 @@ function boot() {
             scanTimer = setInterval(() => {
                 keyIdx = (keyIdx + 1) % SCAN_ROWS[rowIdx].length;
                 highlightKey(rowIdx, keyIdx);
-            }, SCAN_SPEED);
+            }, scanStepMs(SCAN_BASE_MS));
         }
 
         // ── Key commit ────────────────────────────────────────────────────
@@ -1855,7 +1857,8 @@ function boot() {
         return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
     }
 
-    // Motor mode: ignore an accidental second tap on the same button within 400 ms
+    // Motor mode: ignore an accidental second tap on the same button within the chosen time
+    // (default 400 ms, adjustable or off in Settings)
     // (tremor/spasticity). Done in JS: a CSS `pointer-events: none` on :active used to
     // swallow every real click. Never blocks Face Control / assistive-tech clicks.
     function initMotorGuard() {
@@ -1866,7 +1869,8 @@ function boot() {
             const btn = e.target.closest ? e.target.closest('button') : null;
             if (!btn || btn.closest('.kb-rows') || btn.closest('.hw-actions')) return; // typing must repeat fast
             const now = performance.now();
-            if (btn === lastEl && now - lastAt < 400) {
+            const guardMs = tapGuardMs();
+            if (guardMs > 0 && btn === lastEl && now - lastAt < guardMs) {
                 e.stopImmediatePropagation();
                 e.preventDefault();
                 return;

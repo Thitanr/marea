@@ -32,6 +32,7 @@ Specifically designed for **stroke (ictus) survivors** with speech difficulties 
     *   **Write** (handwriting) — write one capital letter at a time with finger, pencil or mouse. Recognition is local (a $P point-cloud matcher with built-in stroke templates, no model and no network); it shows the 3 best guesses, and **learns from your corrections**. A palm-rejection mode ignores the hand when a pen is used, and the pause before a letter is accepted is adjustable in Settings. Chinese and Japanese use the device's own keyboard/IME.
     *   **Scan** — row/column switch scanning for people who can use a single switch or tap, including Face Control.
 *   **Voice**: speaks with the best voice actually installed on the device (natural/enhanced first), never a surprise. The person or a carer can pick another voice and the speed in *Settings → Voice*. Voices that stream text to a server (some Edge/Chrome "online" voices) are **never used**: nothing the person says or writes leaves the device.
+*   **Your own pace**: in *Settings* the person (or a carer) can set how long Marea ignores an accidental second tap (or switch it off), how fast the scanning keyboard and Face Control move, and the handwriting pause. Defaults are the previous fixed values.
 *   **Hand side**: *Right hand* puts the most urgent cards on the right edge (thumb side), *Left hand* on the left; *Motor* makes every button bigger. The Aphasia profile selects big buttons but never assumes which hand works.
 
 ### 👁️ 3b. Face Control & Facial Neurofeedback (KAI Perception)

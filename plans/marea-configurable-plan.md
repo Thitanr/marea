@@ -1,6 +1,8 @@
 # Plan: Marea configurable — "a tu manera"
 
-Estado: **propuesta para revisión de Humberto** (2026-10-25). Nada de esto está implementado.
+Estado: **propuesta** (2026-10-25). **Alcance acordado con Humberto: configurable "dentro de lo que tenemos", sin sistemas nuevos.**
+
+Hecho (2026-10-25): antitemblor y velocidad de escaneo (teclado + Control Facial) pasaron de fijos a ajustes, con los mismos valores por defecto (`src/core/prefs.ts`). El resto de este documento (módulo de configuración, personas, asistente, fotos) queda como **ideas en reserva**, no como compromiso.
 
 ## 1. Por qué (diagnóstico honesto)
 

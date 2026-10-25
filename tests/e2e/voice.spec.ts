@@ -44,6 +44,42 @@ test.describe('Motor mode (the Aphasia profile) — REAL clicks must work', () =
     await openApp(page, { hand: 'motor-center' });
     await page.locator('#aac-grid [data-id="yes"]').dblclick();
     await expect(pad(page)).toHaveValue('Sí');
+    expect(await spoken(page)).toHaveLength(1);
+  });
+
+  test('the tap guard can be switched off in Settings (and the choice is remembered)', async ({ page }) => {
+    await openApp(page, { hand: 'motor-center' });
+    await page.locator('#nav-settings').click();
+    await page.locator('#setting-tap-guard').selectOption('0');
+    await page.reload();
+    await expect(page.locator('#aac-grid .aac-card-btn')).toHaveCount(24);
+    await page.locator('#nav-settings').click();
+    await expect(page.locator('#setting-tap-guard')).toHaveValue('0');
+    await page.locator('#nav-voz').click();
+    await page.locator('#aac-grid [data-id="yes"]').dblclick();
+    expect((await spoken(page)).length).toBeGreaterThanOrEqual(2);
+  });
+
+  test('a longer tap guard also blocks a slower second tap', async ({ page }) => {
+    await openApp(page, { hand: 'motor-center' });
+    await page.locator('#nav-settings').click();
+    await page.locator('#setting-tap-guard').selectOption('1200');
+    await page.locator('#nav-voz').click();
+    const yes = page.locator('#aac-grid [data-id="yes"]');
+    await yes.click();
+    await page.waitForTimeout(700); // slower than the normal 0.4 s guard, inside 1.2 s
+    await yes.click();
+    expect(await spoken(page)).toHaveLength(1);
+  });
+
+  test('scanning speed is a setting that is remembered', async ({ page }) => {
+    await openApp(page, { hand: 'motor-center' });
+    await page.locator('#nav-settings').click();
+    await expect(page.locator('#setting-scan-speed')).toHaveValue('1'); // unchanged default
+    await page.locator('#setting-scan-speed').selectOption('2');
+    await page.reload();
+    await page.locator('#nav-settings').click();
+    await expect(page.locator('#setting-scan-speed')).toHaveValue('2');
   });
 });
 

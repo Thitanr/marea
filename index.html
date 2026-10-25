@@ -946,6 +946,32 @@
                             </select>
                         </div>
 
+                        <!-- Tiempos: lo que antes estaba fijo, ahora a tu ritmo -->
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.tap_guard_title">Protección contra toques repetidos</strong>
+                                <span data-i18n="settings.tap_guard_desc">En modo motor, ignora un segundo toque sobre el mismo botón si llega demasiado pronto (temblor o espasmos). Elige más tiempo si se activan botones sin querer.</span>
+                            </div>
+                            <select id="setting-tap-guard" class="settings-select" data-i18n-aria="settings.tap_guard_title">
+                                <option value="0" data-i18n="settings.tap_guard_off">Desactivada</option>
+                                <option value="400" data-i18n="settings.tap_guard_normal">Normal (0,4 s)</option>
+                                <option value="800" data-i18n="settings.tap_guard_long">Larga (0,8 s)</option>
+                                <option value="1200" data-i18n="settings.tap_guard_xlong">Muy larga (1,2 s)</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <div class="setting-desc">
+                                <strong data-i18n="settings.scan_speed_title">Velocidad del escaneo</strong>
+                                <span data-i18n="settings.scan_speed_desc">Cuánto tiempo se queda el foco en cada opción en el teclado de escaneo y en el Control Facial. Más lento da más tiempo para reaccionar.</span>
+                            </div>
+                            <select id="setting-scan-speed" class="settings-select" data-i18n-aria="settings.scan_speed_title">
+                                <option value="0.7" data-i18n="settings.scan_speed_fast">Rápido</option>
+                                <option value="1" data-i18n="settings.scan_speed_normal">Normal</option>
+                                <option value="1.5" data-i18n="settings.scan_speed_slow">Lento</option>
+                                <option value="2" data-i18n="settings.scan_speed_xslow">Muy lento</option>
+                            </select>
+                        </div>
+
                         <!-- Control Facial sin conexión (~15 MB, descarga a propósito) -->
                         <div class="settings-item">
                             <div class="setting-desc">

@@ -16,6 +16,7 @@ import { GestureDetector, type FaceGesture, type SignalFrame } from './face-sign
 import { ensureFaceConsent, hasFaceConsent } from './face-consent.js';
 import { t } from '../core/i18n.js';
 import { showToast } from '../core/toast.js';
+import { scanStepMs } from '../core/prefs.js';
 
 const KEY_ON = 'marea_face_on';
 const KEY_GESTURE = 'marea_face_gesture';
@@ -164,7 +165,7 @@ class FaceSwitch {
   private startScanning(): void {
     this.stopScanning();
     this.index = -1;
-    this.scanTimer = setInterval(() => this.advance(), SCAN_MS);
+    this.scanTimer = setInterval(() => this.advance(), scanStepMs(SCAN_MS));
     this.advance();
   }
 
