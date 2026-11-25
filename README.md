@@ -1,5 +1,7 @@
 # 🌊 Marea - Sostén & Dignidad (Holding & Dignity)
 
+[![DOI](https://zenodo.org/badge/1272106724.svg)](https://doi.org/10.5281/zenodo.24544877)
+
 Marea is an offline-first Progressive Web App (PWA) designed to function 100% without an internet connection. It serves as a **sensory anchor, conversational haven, and augmentative communication channel** for neurodivergent, disabled (such as stroke survivors with motor hemiplegia and aphasia), and neurotypical individuals in times of sensory overload or crisis.
 
 Created as a gift to the community by **Lana Technologies**.
