@@ -16,8 +16,7 @@ Original concepts, among others:
 
 ## Engineering
 
-Built with Claude (Anthropic) as pair programmer, under the direction of
-Humberto Gil Valera.
+Built under the direction and architecture of Humberto Gil Valera, with Claude (Anthropic) and Antigravity (Google DeepMind) as pair programming and systems orchestration engines.
 
 ## Third parties
 
